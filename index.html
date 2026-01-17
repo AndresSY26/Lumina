@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <meta name="description" content="Lumina: Omni-Tool Edition - Tactical Moon Tracker">
-    <title>Lumina: Omni-Tool Edition</title>
+    <meta name="description" content="Lumina: Omni-Tool Edition - Rastreador Lunar Táctico">
+    <title>Lumina: Edición Omni-Tool</title>
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
@@ -31,6 +31,7 @@
                             gold: '#fbbf24',
                             glass: 'rgba(20, 20, 30, 0.7)',
                             glassBorder: 'rgba(255, 255, 255, 0.1)',
+                            alert: '#ef4444',
                         },
                         fontFamily: {
                             tech: ['Orbitron', 'sans-serif'],
@@ -133,28 +134,15 @@
             scrollbar-width: none;
         }
 
-        /* Animations */
-        @keyframes scan {
-            0% {
-                transform: translateY(-100%);
-            }
-
-            100% {
-                transform: translateY(100vh);
-            }
+        /* AR HUD Overlay */
+        #ar-hud {
+            pointer-events: none;
         }
 
-        .scanner-beam {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: rgba(56, 189, 248, 0.5);
-            box-shadow: 0 0 10px rgba(56, 189, 248, 0.8);
-            animation: scan 4s linear infinite;
-            z-index: 5;
-            pointer-events: none;
+        .hud-line {
+            background: rgba(255, 255, 255, 0.3);
+            height: 1px;
+            width: 100%;
         }
     </style>
 </head>
@@ -166,9 +154,61 @@
         class="fixed top-0 left-0 w-full h-full object-cover -z-20 opacity-0 transition-opacity duration-1000"
         playsinline muted autoplay></video>
 
+    <!-- AR HUD Overlay (Hidden by default) -->
+    <div id="ar-hud"
+        class="fixed inset-0 z-0 opacity-0 transition-opacity duration-300 flex flex-col justify-between p-4">
+        <!-- Top HUD -->
+        <div class="flex justify-between items-start">
+            <div class="glass-panel px-3 py-1 border-l-4 border-lumina-cyber">
+                <span class="text-[9px] text-gray-400 font-tech uppercase block">Rumbo</span>
+                <span id="hud-heading" class="text-xl font-tech text-white">000°</span>
+            </div>
+
+            <!-- Artificial Horizon Line (Top Center visual aid) -->
+            <div class="flex-1 mx-4 mt-4 border-t border-white/20 flex justify-center relative">
+                <div class="absolute -top-1.5 w-[1px] h-3 bg-lumina-cyber"></div>
+                <span class="absolute -top-5 text-[9px] text-lumina-cyber font-mono bg-black/50 px-1">NIVEL</span>
+            </div>
+
+            <div class="glass-panel px-3 py-1 border-r-4 border-lumina-plasma text-right">
+                <span class="text-[9px] text-gray-400 font-tech uppercase block">Objetivo</span>
+                <span id="hud-target" class="text-xl font-tech text-lumina-plasma">---°</span>
+            </div>
+        </div>
+
+        <!-- Center Reticle (Dynamic) -->
+        <div
+            class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 flex items-center justify-center opacity-80">
+            <!-- Outer Ring -->
+            <div id="hud-reticle-ring"
+                class="absolute w-full h-full rounded-full border border-dashed border-white/30 animate-[spin_10s_linear_infinite]">
+            </div>
+            <!-- Inner Bracket -->
+            <div id="hud-reticle-bracket"
+                class="absolute w-32 h-32 border-2 border-white/50 border-t-0 border-b-0 rounded-lg transition-colors duration-300">
+            </div>
+            <!-- Center Crosshair -->
+            <div class="w-4 h-4 relative">
+                <div class="absolute top-1/2 left-0 w-full h-[1px] bg-white"></div>
+                <div class="absolute top-0 left-1/2 h-full w-[1px] bg-white"></div>
+            </div>
+        </div>
+
+        <!-- Bottom HUD -->
+        <div class="flex justify-between items-end">
+            <div class="glass-panel px-3 py-1">
+                <span class="text-[9px] text-gray-400 font-tech uppercase block">Alt Luna</span>
+                <span id="hud-alt" class="text-lg font-mono text-white">--°</span>
+            </div>
+            <div class="glass-panel px-3 py-1">
+                <span class="text-[9px] text-gray-400 font-tech uppercase block">Distancia</span>
+                <span id="hud-dist" class="text-lg font-mono text-white">-- km</span>
+            </div>
+        </div>
+    </div>
+
     <!-- Background Effects -->
     <div class="scanline-bg"></div>
-    <div class="scanner-beam"></div>
 
     <!-- Main Container -->
     <main class="min-h-screen w-full flex flex-col p-4 md:p-6 lg:p-8 pb-32 relative z-10">
@@ -190,7 +230,7 @@
                 class="flex items-center gap-2 bg-lumina-glass border border-lumina-gold/40 px-3 py-1.5 rounded hover:bg-lumina-gold/10 transition-colors group">
                 <i
                     class="ph ph-crown-simple text-lumina-gold group-hover:drop-shadow-[0_0_5px_rgba(251,191,36,0.8)]"></i>
-                <span class="text-xs font-bold text-lumina-gold font-tech hidden sm:inline">UPGRADE</span>
+                <span class="text-xs font-bold text-lumina-gold font-tech hidden sm:inline">PREMIUM</span>
             </button>
         </header>
 
@@ -202,7 +242,7 @@
                 <div class="glass-panel p-6 flex flex-col items-center justify-center relative min-h-[350px]">
                     <div class="absolute top-3 left-3 flex items-center gap-2">
                         <div class="w-1.5 h-1.5 bg-lumina-cyber rounded-full animate-pulse"></div>
-                        <span class="text-[10px] text-lumina-cyber/70 font-tech tracking-wider">TACTICAL COMPASS</span>
+                        <span class="text-[10px] text-lumina-cyber/70 font-tech tracking-wider">BRÚJULA TÁCTICA</span>
                     </div>
 
                     <!-- Compass Visual -->
@@ -214,7 +254,7 @@
                                 class="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[10px] border-b-lumina-cyber drop-shadow-[0_0_5px_rgba(56,189,248,0.8)]">
                             </div>
                             <span
-                                class="text-[9px] text-lumina-cyber font-tech uppercase tracking-widest mt-1">LOS</span>
+                                class="text-[9px] text-lumina-cyber font-tech uppercase tracking-widest mt-1">MIRA</span>
                         </div>
 
                         <!-- Rotating Compass Ring (North Oriented) -->
@@ -229,7 +269,7 @@
                             <span class="absolute bottom-6 text-gray-500 font-tech text-xs">S</span>
 
                             <div class="absolute left-1 w-3 h-0.5 bg-gray-600"></div>
-                            <span class="absolute left-6 text-gray-500 font-tech text-xs">W</span>
+                            <span class="absolute left-6 text-gray-500 font-tech text-xs">O</span>
 
                             <div class="absolute right-1 w-3 h-0.5 bg-gray-600"></div>
                             <span class="absolute right-6 text-gray-500 font-tech text-xs">E</span>
@@ -246,7 +286,7 @@
                                     <!-- Floating Label -->
                                     <div id="moon-float-label"
                                         class="mt-1 px-2 py-0.5 bg-lumina-plasma/20 border border-lumina-plasma/50 rounded text-[9px] text-lumina-plasma font-tech whitespace-nowrap shadow-lg backdrop-blur-md">
-                                        TARGET
+                                        OBJETIVO
                                     </div>
                                 </div>
                             </div>
@@ -264,14 +304,15 @@
                     <!-- Digital Readout -->
                     <div class="grid grid-cols-2 gap-x-8 gap-y-2 w-full text-center mt-2 max-w-xs mx-auto">
                         <div class="border-r border-gray-700 pr-4">
-                            <span class="block text-[9px] text-gray-500 uppercase tracking-widest">Device Heading</span>
+                            <span class="block text-[9px] text-gray-500 uppercase tracking-widest">Rumbo Actual</span>
                             <div class="flex items-baseline justify-center gap-1">
                                 <span id="heading-val" class="font-tech text-2xl text-white">000°</span>
                                 <span id="heading-cardinal" class="font-mono text-xs text-lumina-cyber">--</span>
                             </div>
                         </div>
                         <div class="pl-4">
-                            <span class="block text-[9px] text-gray-500 uppercase tracking-widest">Moon Target</span>
+                            <span class="block text-[9px] text-gray-500 uppercase tracking-widest">Azimut
+                                Objetivo</span>
                             <div class="flex items-baseline justify-center gap-1">
                                 <span id="azimuth-val" class="font-tech text-2xl text-lumina-plasma">---°</span>
                                 <span id="azimuth-cardinal" class="font-mono text-xs text-lumina-plasma">--</span>
@@ -281,8 +322,7 @@
 
                     <div class="w-full text-center mt-3">
                         <span id="lock-status"
-                            class="font-tech text-xs text-gray-400 block tracking-[0.2em] border-t border-gray-800 pt-2 mt-2">SCANNING
-                            HORIZON...</span>
+                            class="font-tech text-xs text-gray-400 block tracking-[0.2em] border-t border-gray-800 pt-2 mt-2">ESCANEANDO...</span>
                         <p id="target-feedback" class="text-[10px] text-lumina-cyber mt-1 h-4 font-mono"></p>
                     </div>
 
@@ -290,7 +330,7 @@
                     <button id="camera-btn"
                         class="mt-4 px-6 py-2 bg-lumina-cyber/10 border border-lumina-cyber/50 text-lumina-cyber font-tech text-xs uppercase tracking-widest hover:bg-lumina-cyber/20 transition-colors w-full flex items-center justify-center gap-2 rounded-sm group">
                         <i class="ph ph-camera text-lg group-hover:scale-110 transition-transform"></i> <span
-                            id="cam-btn-text">Initialize AR</span>
+                            id="cam-btn-text">Activar HUD Táctico</span>
                     </button>
                     <p id="sensor-msg" class="text-[9px] text-red-500 mt-2 text-center h-3"></p>
                 </div>
@@ -303,10 +343,10 @@
                 <div class="glass-panel p-4 flex items-center justify-between bg-gradient-to-r from-lumina-glass to-transparent border-l-4 border-l-gray-600 transition-colors duration-500"
                     id="verdict-panel">
                     <div>
-                        <h3 class="text-[10px] text-gray-400 font-tech uppercase tracking-widest mb-1">Observation
-                            Status</h3>
-                        <div id="visibility-verdict" class="text-xl md:text-2xl font-tech text-white">CALCULATING
-                            ALIGNMENT...</div>
+                        <h3 class="text-[10px] text-gray-400 font-tech uppercase tracking-widest mb-1">Estado de
+                            Observación</h3>
+                        <div id="visibility-verdict" class="text-xl md:text-2xl font-tech text-white">CALCULANDO...
+                        </div>
                     </div>
                     <div class="text-right">
                         <i id="verdict-icon" class="ph ph-circle-notch animate-spin text-4xl text-gray-500"></i>
@@ -319,39 +359,38 @@
                     <div
                         class="glass-panel p-4 flex flex-col relative group overflow-hidden hover:border-lumina-cyber/40 transition-colors">
                         <span
-                            class="text-[9px] text-lumina-cyber uppercase tracking-wider mb-2 border-l-2 border-lumina-cyber pl-2">Lunar
-                            Phase</span>
+                            class="text-[9px] text-lumina-cyber uppercase tracking-wider mb-2 border-l-2 border-lumina-cyber pl-2">Fase
+                            Lunar</span>
                         <span id="phase-name" class="font-tech text-lg text-white mb-1">---</span>
-                        <span id="illum-percent" class="font-mono text-sm text-gray-400">Illum: --%</span>
+                        <span id="illum-percent" class="font-mono text-sm text-gray-400">Ilum: --%</span>
                     </div>
 
                     <!-- Distance -->
                     <div
                         class="glass-panel p-4 flex flex-col relative group overflow-hidden hover:border-lumina-cyber/40 transition-colors">
                         <span
-                            class="text-[9px] text-lumina-cyber uppercase tracking-wider mb-2 border-l-2 border-lumina-cyber pl-2">Distance
-                            (Live)</span>
+                            class="text-[9px] text-lumina-cyber uppercase tracking-wider mb-2 border-l-2 border-lumina-cyber pl-2">Distancia</span>
                         <span id="distance-val" class="font-tech text-lg text-white mb-1">--- km</span>
-                        <span class="font-mono text-sm text-gray-400">Geocentric</span>
+                        <span class="font-mono text-sm text-gray-400">Tiempo Real</span>
                     </div>
 
                     <!-- Altitude -->
                     <div
                         class="glass-panel p-4 flex flex-col relative group overflow-hidden hover:border-lumina-cyber/40 transition-colors">
                         <span
-                            class="text-[9px] text-lumina-cyber uppercase tracking-wider mb-2 border-l-2 border-lumina-cyber pl-2">Altitude</span>
+                            class="text-[9px] text-lumina-cyber uppercase tracking-wider mb-2 border-l-2 border-lumina-cyber pl-2">Altitud</span>
                         <span id="altitude-val" class="font-tech text-lg text-white mb-1">---°</span>
-                        <span class="font-mono text-sm text-gray-400">Horizon Rel.</span>
+                        <span class="font-mono text-sm text-gray-400">Horizonte Rel.</span>
                     </div>
 
                     <!-- Meridian -->
                     <div
                         class="glass-panel p-4 flex flex-col relative group overflow-hidden hover:border-lumina-cyber/40 transition-colors">
                         <span
-                            class="text-[9px] text-lumina-gold uppercase tracking-wider mb-2 border-l-2 border-lumina-gold pl-2">Meridian
-                            Pass</span>
+                            class="text-[9px] text-lumina-gold uppercase tracking-wider mb-2 border-l-2 border-lumina-gold pl-2">Próximo
+                            Evento</span>
+                        <span id="event-type" class="text-[9px] text-gray-500 mb-0.5">---</span>
                         <span id="zenith-val" class="font-tech text-lg text-lumina-gold mb-1">--:--</span>
-                        <span class="font-mono text-sm text-gray-400">Next Zenith</span>
                     </div>
                 </div>
 
@@ -359,10 +398,10 @@
                 <div class="glass-panel w-full p-4 flex flex-col flex-1 min-h-[250px]">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-[10px] text-gray-400 font-tech uppercase tracking-widest"><i
-                                class="ph ph-chart-line-up mr-2"></i>Trajectory Prediction</h3>
+                                class="ph ph-chart-line-up mr-2"></i>Trayectoria Orbital</h3>
                         <div class="flex items-center gap-2">
                             <span class="w-1.5 h-1.5 bg-lumina-cyber rounded-full animate-pulse"></span>
-                            <span class="text-[9px] text-lumina-cyber tracking-wider">LIVE</span>
+                            <span class="text-[9px] text-lumina-cyber tracking-wider">EN VIVO</span>
                         </div>
                     </div>
                     <div
@@ -370,7 +409,7 @@
                         <canvas id="trajectory-canvas" class="w-full h-full block cursor-crosshair"></canvas>
                         <!-- Dynamic overlay info -->
                         <div class="absolute bottom-2 left-2 text-[9px] font-mono text-gray-500">
-                            X: Time / Y: Altitude
+                            Eje X: Tiempo / Eje Y: Altitud
                         </div>
                     </div>
                 </div>
@@ -384,28 +423,28 @@
                 class="paywall-lock glass-panel p-6 flex flex-col items-center justify-center opacity-60 hover:opacity-100 transition-opacity cursor-pointer border-dashed border-gray-600 hover:border-lumina-gold group">
                 <i
                     class="ph ph-map-trifold text-3xl text-lumina-gold mb-2 group-hover:scale-110 transition-transform"></i>
-                <h4 class="font-tech text-xs text-gray-300">Light Pollution Map</h4>
+                <h4 class="font-tech text-xs text-gray-300">Mapas Contaminación</h4>
                 <i class="ph ph-lock-key text-lumina-gold mt-2"></i>
             </div>
             <div
                 class="paywall-lock glass-panel p-6 flex flex-col items-center justify-center opacity-60 hover:opacity-100 transition-opacity cursor-pointer border-dashed border-gray-600 hover:border-lumina-gold group">
                 <i
                     class="ph ph-camera-rotate text-3xl text-lumina-gold mb-2 group-hover:scale-110 transition-transform"></i>
-                <h4 class="font-tech text-xs text-gray-300">Photo Planner</h4>
+                <h4 class="font-tech text-xs text-gray-300">Planificador Fotos</h4>
                 <i class="ph ph-lock-key text-lumina-gold mt-2"></i>
             </div>
             <div
                 class="paywall-lock glass-panel p-6 flex flex-col items-center justify-center opacity-60 hover:opacity-100 transition-opacity cursor-pointer border-dashed border-gray-600 hover:border-lumina-gold group">
                 <i
                     class="ph ph-mountains text-3xl text-lumina-gold mb-2 group-hover:scale-110 transition-transform"></i>
-                <h4 class="font-tech text-xs text-gray-300">3D Terrain</h4>
+                <h4 class="font-tech text-xs text-gray-300">Terreno 3D</h4>
                 <i class="ph ph-lock-key text-lumina-gold mt-2"></i>
             </div>
             <div
                 class="paywall-lock glass-panel p-6 flex flex-col items-center justify-center opacity-60 hover:opacity-100 transition-opacity cursor-pointer border-dashed border-gray-600 hover:border-lumina-gold group">
                 <i
                     class="ph ph-star-four text-3xl text-lumina-gold mb-2 group-hover:scale-110 transition-transform"></i>
-                <h4 class="font-tech text-xs text-gray-300">Constellation Overlay</h4>
+                <h4 class="font-tech text-xs text-gray-300">Constelaciones</h4>
                 <i class="ph ph-lock-key text-lumina-gold mt-2"></i>
             </div>
         </section>
@@ -418,11 +457,11 @@
             class="glass-panel mx-auto max-w-lg h-16 flex items-center justify-around px-2 shadow-[0_-5px_20px_rgba(0,0,0,0.5)] bg-black/80">
             <button class="flex flex-col items-center gap-1 text-lumina-cyber p-2">
                 <i class="ph ph-crosshair text-xl"></i>
-                <span class="text-[9px] font-tech uppercase">Track</span>
+                <span class="text-[9px] font-tech uppercase">Rastreo</span>
             </button>
             <button class="flex flex-col items-center gap-1 text-gray-500 hover:text-white transition-colors p-2">
                 <i class="ph ph-chart-bar text-xl"></i>
-                <span class="text-[9px] font-tech uppercase">Data</span>
+                <span class="text-[9px] font-tech uppercase">Datos</span>
             </button>
             <div
                 class="w-16 h-16 bg-lumina-cyber rounded-full -mt-10 flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.5)] border-4 border-[#050505] hover:scale-105 transition-transform cursor-pointer">
@@ -431,12 +470,12 @@
             <button
                 class="paywall-lock flex flex-col items-center gap-1 text-lumina-gold/70 hover:text-lumina-gold transition-colors p-2">
                 <i class="ph ph-images text-xl"></i>
-                <span class="text-[9px] font-tech uppercase relative">Gallery <i
+                <span class="text-[9px] font-tech uppercase relative">Galería <i
                         class="ph ph-lock-key text-[8px] absolute -top-1 -right-2"></i></span>
             </button>
             <button class="flex flex-col items-center gap-1 text-gray-500 hover:text-white transition-colors p-2">
                 <i class="ph ph-gear text-xl"></i>
-                <span class="text-[9px] font-tech uppercase">Sys</span>
+                <span class="text-[9px] font-tech uppercase">Sistema</span>
             </button>
         </div>
     </nav>
@@ -447,19 +486,19 @@
         <div
             class="glass-panel w-full sm:w-96 m-4 p-8 flex flex-col items-center text-center transform translate-y-10 transition-transform duration-300 border-lumina-gold/50 shadow-[0_0_40px_rgba(251,191,36,0.15)]">
             <i class="ph ph-crown text-5xl text-lumina-gold mb-4 animate-[bounce_2s_infinite]"></i>
-            <h2 class="font-tech text-2xl text-white mb-2">UNLOCK OMNI-TOOL</h2>
+            <h2 class="font-tech text-2xl text-white mb-2">DESBLOQUEAR OMNI-TOOL</h2>
             <div class="w-16 h-1 bg-lumina-gold/50 mb-4 rounded-full"></div>
             <p class="text-sm text-gray-300 mb-6 leading-relaxed">
-                Access military-grade features: <span class="text-lumina-gold">Light Pollution Maps</span>, <span
-                    class="text-lumina-gold">3D Terrain</span>, and precision <span
-                    class="text-lumina-gold">Astrophotography Planner</span>.
+                Acceso a funciones militares: <span class="text-lumina-gold">Mapas de Luz</span>, <span
+                    class="text-lumina-gold">Terreno 3D</span>, y el <span class="text-lumina-gold">Planificador de
+                    Astrofotografía</span>.
             </p>
             <button id="sim-pay-btn"
                 class="w-full py-4 bg-lumina-gold text-black font-bold font-tech text-lg uppercase tracking-widest hover:bg-yellow-400 transition-colors rounded-sm shadow-[0_0_20px_rgba(251,191,36,0.4)]">
-                Initialize ($4.99)
+                INICIALIZAR ($4.99)
             </button>
             <button id="close-paywall"
-                class="mt-4 text-xs text-gray-500 hover:text-white underline font-mono">Dismiss</button>
+                class="mt-4 text-xs text-gray-500 hover:text-white underline font-mono">Cancelar</button>
         </div>
     </div>
 
@@ -468,12 +507,12 @@
         class="fixed inset-0 z-[60] flex items-center justify-center bg-black transition-opacity duration-300 hidden">
         <div class="glass-panel max-w-xs p-6 text-center border-lumina-cyber/50">
             <i class="ph ph-compass text-4xl text-lumina-cyber mb-4"></i>
-            <h3 class="font-tech text-lg text-white mb-2">SENSOR CALIBRATION</h3>
-            <p class="text-xs text-gray-400 mb-6 font-mono">Lumina requires access to device gyroscope and orientation
-                sensors for tactical alignment.</p>
+            <h3 class="font-tech text-lg text-white mb-2">CALIBRACIÓN DE SENSOR</h3>
+            <p class="text-xs text-gray-400 mb-6 font-mono">Lumina requiere acceso al giroscopio para la alineación
+                táctica.</p>
             <button id="grant-perm-btn"
                 class="px-8 py-3 bg-lumina-cyber text-black font-bold font-tech uppercase tracking-widest rounded hover:bg-cyan-400 shadow-[0_0_15px_rgba(56,189,248,0.4)]">
-                GRANT ACCESS
+                CONCEDER ACCESO
             </button>
         </div>
     </div>
@@ -484,24 +523,25 @@
         const $ = (id) => document.getElementById(id);
         const $$ = (sel) => document.querySelectorAll(sel);
         const formatDeg = (d) => `${Math.round(d).toString().padStart(3, '0')}°`;
-        const formatTime = (d) => d ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--';
-        const formatDist = (d) => Math.round(d).toLocaleString(); // Add commas
+        const formatTime = (d) => d ? d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '--:--';
+        const formatDist = (d) => Math.round(d).toLocaleString('es-ES'); // Spanish thousands separator point
 
         const getCardinal = (deg) => {
-            // Normalize to 0-360 just in case
             const norm = ((deg % 360) + 360) % 360;
             const val = Math.floor((norm / 22.5) + 0.5);
-            const arr = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
+            // Spanish cardinals: N, NNE, NE, ENE, E, ESE, SE, SSE, S, SSO, SO (SW), OSO, O (W), ONO, NO (NW), NNO
+            const arr = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSO", "SO", "OSO", "O", "ONO", "NO", "NNO"];
             return arr[val % 16];
         };
 
         // --- APP STATE ---
         const State = {
             pos: { lat: 0, lon: 0 },
-            heading: 0,         // Visual smoothed heading (can exceed 360)
-            targetHeading: 0,   // Latest sensor data (0-360)
-            moonAz: 0,          // Moon Azimuth (0-360)
+            heading: 0,
+            targetHeading: 0,
+            moonAz: 0,
             moonAlt: 0,
+            dist: 0,
             isPro: false,
             sensorsActive: false,
             lastTick: 0,
@@ -516,38 +556,26 @@
                 this.startTelemetry();
                 this.requestLocation();
 
-                // Animation Loop
                 requestAnimationFrame((t) => this.loop(t));
-
-                console.log("Lumina Omni-Tool initialized v2.0.");
+                console.log("Lumina Omni-Tool inicializado v3.0 ES.");
             },
 
             bindUI() {
-                // AR Toggle
-                $('camera-btn').addEventListener('click', () => {
-                    this.toggleCamera();
-                });
+                $('camera-btn').addEventListener('click', () => this.toggleCamera());
 
-                // Paywall
                 $$('.paywall-lock, #paywall-btn-top').forEach(el => {
                     el.addEventListener('click', () => this.showPaywall());
                 });
                 $('close-paywall').addEventListener('click', () => this.hidePaywall());
                 $('sim-pay-btn').addEventListener('click', () => this.processUpgrade());
-
-                // Permissions
                 $('grant-perm-btn').addEventListener('click', () => this.requestSensors());
-
-                // Canvas Resize
                 window.addEventListener('resize', () => this.drawTrajectory());
             },
 
             checkPlatform() {
-                // If iOS 13+ we might need permission modal
                 if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                    $('sensor-msg').innerText = "CALIBRATION REQUIRED";
+                    $('sensor-msg').innerText = "REQUIERE CALIBRACIÓN";
                 } else {
-                    // Try auto-starting listeners
                     this.startSensorListeners();
                 }
             },
@@ -569,44 +597,25 @@
             },
 
             startSensorListeners() {
-                // Handle Device Orientation with Smoothing Logic
                 const handleOr = (e) => {
                     let alpha = e.alpha;
-
-                    // iOS formatting
                     if (e.webkitCompassHeading) {
                         alpha = e.webkitCompassHeading;
                     } else {
-                        // Android default (approximate)
+                        // Android default approx
                         alpha = 360 - alpha;
                     }
 
                     if (alpha === null || isNaN(alpha)) return;
 
-                    // Interpolation Logic: Shortest Path
-                    // 1. Get current visual heading phase (0-360)
+                    // Shortest Path Interpolation
                     let currentMod = ((State.heading % 360) + 360) % 360;
-
-                    // 2. Calculate raw delta
                     let delta = alpha - currentMod;
 
-                    // 3. Shortest path normalization
                     if (delta > 180) delta -= 360;
                     if (delta < -180) delta += 360;
 
-                    // 4. Update the stored continuous heading directly
-                    // Note: We update purely based on delta to avoid jump, 
-                    // but we can also use a target/Lerp approach for even more smoothness.
-                    // For now, the user requested the specific formula to Fix the Jump.
-                    // We apply it to the State.heading which drives the UI.
-
-                    // Option A: Direct Application (User Formula)
                     State.heading += delta;
-
-                    // Option B: If we wanted extra smoothing (lerp), we would set a target and lerp in loop().
-                    // But CSS transition on the element handles the animation smoothness if we update DOM frequently.
-                    // The key is avoiding the 360 jump in the style property.
-
                     State.sensorsActive = true;
                     $('sensor-msg').innerText = "";
                 };
@@ -624,7 +633,7 @@
                         (p) => {
                             State.pos.lat = p.coords.latitude;
                             State.pos.lon = p.coords.longitude;
-                            this.updateTelemetry(); // Immediate recalc
+                            this.updateTelemetry();
                         },
                         (err) => {
                             console.warn("GPS Fail", err);
@@ -638,6 +647,7 @@
 
             toggleCamera() {
                 const vid = $('ar-video');
+                const hud = $('ar-hud');
                 const btnText = $('cam-btn-text');
 
                 if (vid.srcObject) {
@@ -645,7 +655,8 @@
                     vid.srcObject.getTracks().forEach(t => t.stop());
                     vid.srcObject = null;
                     vid.style.opacity = '0';
-                    btnText.innerText = "Initialize AR";
+                    hud.style.opacity = '0'; // Hide HUD
+                    btnText.innerText = "Activar HUD Táctico";
                     $('camera-btn').classList.remove('bg-red-500/20', 'border-red-500/50', 'text-red-500');
                     $('camera-btn').classList.add('bg-lumina-cyber/10', 'border-lumina-cyber/50', 'text-lumina-cyber');
                 } else {
@@ -653,84 +664,100 @@
                     navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
                         .then(stream => {
                             vid.srcObject = stream;
-                            vid.style.opacity = '0.4'; // See-through
-                            btnText.innerText = "Terminate AR";
+                            vid.style.opacity = '1';
+                            hud.style.opacity = '1'; // Show HUD
+                            btnText.innerText = "Desactivar HUD";
                             $('camera-btn').classList.remove('bg-lumina-cyber/10', 'border-lumina-cyber/50', 'text-lumina-cyber');
                             $('camera-btn').classList.add('bg-red-500/20', 'border-red-500/50', 'text-red-500');
 
-                            // Check permission
                             if (!State.sensorsActive && typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
                                 $('perm-modal').classList.remove('hidden');
                             }
                         })
                         .catch(err => {
-                            alert("Camera access denied. Ensure HTTPS.");
+                            alert("Acceso a cámara denegado. Revise permisos o HTTPS.");
                         });
                 }
             },
 
             // --- LOGIC FRAMEWORK ---
             startTelemetry() {
-                // Update scientific data every 1s
                 setInterval(() => this.updateTelemetry(), 1000);
-                this.updateTelemetry(); // Initial
+                this.updateTelemetry();
             },
 
             updateTelemetry() {
                 const now = new Date();
-                // Ensure SunCalc is available
                 if (typeof SunCalc === 'undefined') return;
 
                 const moon = SunCalc.getMoonPosition(now, State.pos.lat, State.pos.lon);
-                console.log(moon);
+                // Get Sun Position for realistic check
+                const sun = SunCalc.getPosition(now, State.pos.lat, State.pos.lon);
                 const illum = SunCalc.getMoonIllumination(now);
                 const times = SunCalc.getMoonTimes(now, State.pos.lat, State.pos.lon);
 
                 if (!moon || isNaN(moon.altitude)) return;
 
-                // Normalize Azimuth to 0-360 (SunCalc returns radians, south=0, West=PI/2)
-                // Wait, SunCalc: azimuth: 0 is South, positive is West.
-                // Standard Compass: 0 is North, 90 East.
-                // Conversion: 
-                // SunCalc Az (radians) -> Degrees
-                // + 180 to make 0 North.
                 State.moonAz = (moon.azimuth * 180 / Math.PI) + 180;
                 State.moonAlt = moon.altitude * 180 / Math.PI;
+                State.dist = moon.distance;
+
+                const sunAlt = sun.altitude * 180 / Math.PI;
 
                 // Update UI Texts
                 $('azimuth-val').textContent = formatDeg(State.moonAz);
                 $('azimuth-cardinal').textContent = getCardinal(State.moonAz);
                 $('moon-float-label').textContent = `${getCardinal(State.moonAz)} ${Math.round(State.moonAz)}°`;
 
-                // Update Heading Text (Heading updates faster in loop, but here we enforce text sync)
-                // Actually heading text should update in loop for smoothness.
-                // But cardinal we can update here or loop. Let's move heading text to loop.
-
                 $('altitude-val').textContent = formatDeg(State.moonAlt);
                 $('distance-val').textContent = `${formatDist(moon.distance)} km`;
-                $('illum-percent').textContent = `Illum: ${Math.round(illum.fraction * 100)}%`;
+                $('illum-percent').textContent = `Ilum: ${Math.round(illum.fraction * 100)}%`;
 
-                // Phase Name
-                const phases = ["New Moon", "Waxing Crescent", "First Quarter", "Waxing Gibbous", "Full Moon", "Waning Gibbous", "Last Quarter", "Waning Crescent"];
+                // Phase Name Spanish
+                const phases = ["Luna Nueva", "Luna Creciente", "Cuarto Creciente", "Gibosa Creciente", "Luna Llena", "Gibosa Menguante", "Cuarto Menguante", "Luna Menguante"];
                 let phaseIdx = Math.round(illum.phase * 8) % 8;
                 $('phase-name').innerText = phases[phaseIdx];
 
                 // Zenith/Times
-                if (times.rise) $('zenith-val').textContent = formatTime(times.rise);
+                if (times.rise && times.rise > now) {
+                    $('event-type').innerText = "SALIDA";
+                    $('zenith-val').textContent = formatTime(times.rise);
+                } else if (times.set && times.set > now) {
+                    $('event-type').innerText = "PUESTA";
+                    $('zenith-val').textContent = formatTime(times.set);
+                } else {
+                    $('event-type').innerText = "CÉNIT";
+                    $('zenith-val').textContent = "--:--";
+                }
 
-                // Visibility Logic with Text Feedback
-                let visText = "OPTIMAL TRACKING";
+                // --- REALISTIC VISIBILITY VERDICT ---
+                let visText = "VISIBLE";
                 let visIcon = "ph-check-circle";
                 let visColor = "text-lumina-cyber";
                 let visBorder = "border-lumina-cyber";
 
                 if (State.moonAlt < 0) {
-                    visText = "BELOW HORIZON";
-                    visIcon = "ph-arrow-fat-down"; // ph-arrow-fat-down doesn't exist in some sets, stick to standard
+                    visText = "NO VISIBLE (BAJO HORIZONTE)";
+                    visIcon = "ph-arrow-down-right";
                     visColor = "text-gray-500";
                     visBorder = "border-gray-500";
-                } else if (State.moonAlt < 15) {
-                    visText = "LOW VISIBILITY";
+                }
+                else if (sunAlt > 10 && illum.fraction < 0.3) {
+                    // Sun is high, moon is thin 
+                    visText = "INVISIBLE (SOLAR)";
+                    visIcon = "ph-sun";
+                    visColor = "text-lumina-alert"; // Red/Warning
+                    visBorder = "border-lumina-alert";
+                }
+                else if (sunAlt > 0 && illum.fraction < 0.5) {
+                    // Sun is up but maybe visible if atmosphere is clear
+                    visText = "DIFÍCIL (LUZ DE DÍA)";
+                    visIcon = "ph-sun-horizon";
+                    visColor = "text-orange-400";
+                    visBorder = "border-orange-400";
+                }
+                else if (State.moonAlt < 15) {
+                    visText = "OBSTRUIDO (BAJA ALT.)";
                     visIcon = "ph-warning";
                     visColor = "text-lumina-gold";
                     visBorder = "border-lumina-gold";
@@ -743,84 +770,87 @@
                 $('verdict-icon').className = `ph ${visIcon} text-4xl ${visColor}`;
                 pEl.className = `glass-panel p-4 flex items-center justify-between bg-gradient-to-r from-lumina-glass to-transparent border-l-4 ${visBorder} transition-colors duration-500`;
 
-                // Calculate Feedback Direction
-                // "Moon is to the SOUTHWEST (225°)"
+                // Calculate Feedback
                 const cardinal = getCardinal(State.moonAz);
-                $('target-feedback').innerText = `MOON ALIGNMENT: ${cardinal} (${Math.round(State.moonAz)}°)`;
+                $('target-feedback').innerText = `ALINEACIÓN: ${cardinal} (${Math.round(State.moonAz)}°)`;
 
-                // Update "NOW" point on graph
                 this.drawTrajectory();
             },
 
             loop(t) {
-                // High-speed visual loop (60fps)
-
-                // 1. Compass Rotation
-                // Rotate ring opposite to heading to keep N at North.
-                // Using State.heading which is the continuous smoothed value.
+                // Visuals Loop
                 const ring = $('compass-ring');
-
-                // We use -Heading because if we face East (90), North (0) is 90 deg to our Left (-90).
                 ring.style.transform = `rotate(${-State.heading}deg)`;
 
-                // 2. Moon Pointer
-                // Points to absolute Moon Azimuth.
-                // The container (Compass Ring) is rotated by -Heading.
-                // So inside the container, 0 is North.
-                // We just rotate the pointer to the absolute Moon Azimuth.
-                // Example: We face East (90). Ring rotates -90. North is at Left.
-                // Moon is South (180). Pointer rotates 180 relative to ring.
-                // Visually: -90 + 180 = +90 (Right). Correct, South is to our Right when facing East.
                 $('moon-pointer').style.transform = `rotate(${State.moonAz}deg)`;
-                // Keep the floating label upright using counter-rotation
-                // If moon pointer is rotated by X, label should be rotated by -X relative to pointer?
-                // Pointer rotates with MoonAz.
-                // Ring rotates with -Heading.
-                // Total rotation on screen = MoonAz - Heading.
-                // To keep label upright on screen (0 rotation), we need to cancel (MoonAz - Heading).
-                // So label transform = rotate(-(MoonAz - Heading)).
-                // Wait, logic check:
-                // Pointer is child of Ring. Ring is child of Div.
-                // Div -> Ring (-H) -> Pointer (Maz) -> Label (?).
-                // Global Rotation of Label = -H + Maz + L_rot.
-                // We want Global = 0.
-                // L_rot = -Maz + H.
-                // So: `rotate(${State.heading - State.moonAz}deg)`
+
                 const label = $('moon-float-label');
                 if (label) {
+                    // Keep text upright
                     label.style.transform = `rotate(${State.heading - State.moonAz}deg)`;
                 }
 
-                // 3. Text Updates (60fps for smoothness if heading changes fast)
-                $('heading-val').textContent = formatDeg(State.heading % 360 < 0 ? 360 + (State.heading % 360) : State.heading % 360);
+                // Valid heading 0-360
+                let disHead = (State.heading % 360 + 360) % 360;
+                $('heading-val').textContent = formatDeg(disHead);
                 $('heading-cardinal').textContent = getCardinal(State.heading);
 
-                // 4. Target Lock Logic
-                // Diff calculation (Shortest path difference)
-                // Normalize headings to 0-360 for comparison
-                let hNorm = (State.heading % 360 + 360) % 360;
-                let mNorm = State.moonAz;
+                // --- HUD DATA UPDATES ---
+                const hud = $('ar-hud');
+                if (hud.style.opacity !== '0') {
+                    $('hud-heading').innerText = `${formatDeg(disHead)} ${getCardinal(State.heading)}`;
+                    $('hud-target').innerText = `${formatDeg(State.moonAz)} ${getCardinal(State.moonAz)}`;
+                    $('hud-alt').innerText = formatDeg(State.moonAlt);
+                    $('hud-dist').innerText = formatDist(State.dist) + " km";
+                }
 
-                let diff = Math.abs(hNorm - mNorm);
+                // Target Lock Logic
+                let diff = Math.abs(disHead - State.moonAz);
                 if (diff > 180) diff = 360 - diff;
 
                 const reticle = $('reticle');
+                const hudBracket = $('hud-reticle-bracket');
                 const azVal = $('azimuth-val');
                 const status = $('lock-status');
 
-                if (diff < 3 && State.moonAlt > 0) {
+                if (diff < 4 && State.moonAlt > 0) {
+                    // LOCKED
                     reticle.classList.add('target-locked');
                     azVal.classList.add('text-locked');
-                    status.innerText = "TARGET LOCKED";
+                    status.innerText = "OBJETIVO FIJADO";
                     status.classList.add('text-lumina-plasma', 'animate-pulse');
                     status.classList.remove('text-gray-400');
-                    if (navigator.vibrate) navigator.vibrate(50); // Haptic tick
-                } else {
+                    if (navigator.vibrate) navigator.vibrate(50);
+
+                    // HUD Color Logic
+                    if (hudBracket) {
+                        hudBracket.classList.remove('border-white/50', 'border-lumina-cyber');
+                        hudBracket.classList.add('border-lumina-plasma', 'drop-shadow-[0_0_10px_#d946ef]');
+                    }
+                } else if (diff < 20) {
+                    // NEAR
                     reticle.classList.remove('target-locked');
                     azVal.classList.remove('text-locked');
-                    status.innerText = "SCANNING...";
+                    status.innerText = "ACERCANDO...";
+                    status.classList.add('text-lumina-cyber');
+                    status.classList.remove('text-gray-400', 'text-lumina-plasma', 'animate-pulse');
+
+                    if (hudBracket) {
+                        hudBracket.classList.remove('border-white/50', 'border-lumina-plasma', 'drop-shadow-[0_0_10px_#d946ef]');
+                        hudBracket.classList.add('border-lumina-cyber');
+                    }
+                } else {
+                    // SCANNING
+                    reticle.classList.remove('target-locked');
+                    azVal.classList.remove('text-locked');
+                    status.innerText = "ESCANEANDO...";
                     status.classList.add('text-gray-400');
-                    status.classList.remove('text-lumina-plasma', 'animate-pulse');
+                    status.classList.remove('text-lumina-plasma', 'text-lumina-cyber', 'animate-pulse');
+
+                    if (hudBracket) {
+                        hudBracket.classList.remove('border-lumina-plasma', 'border-lumina-cyber', 'drop-shadow-[0_0_10px_#d946ef]');
+                        hudBracket.classList.add('border-white/50');
+                    }
                 }
 
                 requestAnimationFrame((timestamp) => this.loop(timestamp));
@@ -839,10 +869,9 @@
 
                 ctx.clearRect(0, 0, w, h);
 
-                // Peak Shape (Trajectory)
+                // Trajectory Curve
                 ctx.beginPath();
                 ctx.moveTo(0, h);
-                // Simple Parabola: h -> h-150 -> h
                 ctx.quadraticCurveTo(w / 2, h - 180, w, h);
 
                 const grad = ctx.createLinearGradient(0, 0, 0, h);
@@ -863,22 +892,18 @@
                     let start = times.rise;
                     let end = times.set;
 
-                    // Handle edge case where set is tomorrow/rise was yesterday
                     if (end < start) end = new Date(end.getTime() + 24 * 60 * 60 * 1000);
 
                     const totalWin = end - start;
                     const elapsed = now - start;
                     let pct = elapsed / totalWin;
 
-                    // Clamp for display if out of range
                     if (pct < 0) pct = 0; if (pct > 1) pct = 1;
 
-                    // Bezier math for quadratic (p0=0,h  p1=w/2,h-180  p2=w,h)
                     const inv = 1 - pct;
                     const x = (inv * inv * 0) + (2 * inv * pct * (w / 2)) + (pct * pct * w);
                     const y = (inv * inv * h) + (2 * inv * pct * (h - 180)) + (pct * pct * h);
 
-                    // Draw Dot
                     ctx.beginPath();
                     ctx.arc(x, y, 6, 0, Math.PI * 2);
                     ctx.fillStyle = "#fbbf24";
@@ -886,7 +911,6 @@
                     ctx.shadowColor = "#fbbf24";
                     ctx.fill();
 
-                    // Drop line
                     ctx.beginPath();
                     ctx.moveTo(x, y);
                     ctx.lineTo(x, h);
@@ -896,15 +920,13 @@
                     ctx.stroke();
                     ctx.setLineDash([]);
 
-                    // Time Label
                     ctx.fillStyle = "#fbbf24";
                     ctx.font = "10px Orbitron";
                     ctx.textAlign = "center";
-                    ctx.fillText("NOW", x, y - 10);
+                    ctx.fillText("AHORA", x, y - 10);
                 }
             },
 
-            // --- PAYWALL ---
             showPaywall() {
                 if (State.isPro) return;
                 const modal = $('paywall-modal');
@@ -920,29 +942,26 @@
 
             processUpgrade() {
                 const btn = $('sim-pay-btn');
-                btn.innerHTML = "<i class='ph ph-spinner animate-spin'></i> AUTHENTICATING...";
+                btn.innerHTML = "<i class='ph ph-spinner animate-spin'></i> AUTENTICANDO...";
                 setTimeout(() => {
                     btn.classList.replace('bg-lumina-gold', 'bg-green-500');
-                    btn.innerHTML = "ACCESS GRANTED";
+                    btn.innerHTML = "ACCESO CONCEDIDO";
                     State.isPro = true;
                     setTimeout(() => {
                         this.hidePaywall();
-                        // Unlock UI
                         $$('.paywall-lock').forEach(el => {
                             el.classList.remove('opacity-60', 'cursor-pointer');
                             el.classList.add('border-lumina-gold');
-                            // remove lock icon
                             const icon = el.querySelector('.ph-lock-key');
                             if (icon) icon.className = "ph ph-check-circle text-green-500 mt-2";
                         });
                         $('paywall-btn-top').classList.add('bg-lumina-gold/20');
-                        $('paywall-btn-top').innerHTML = '<span class="text-xs font-bold text-lumina-gold">PRO ACTIVE</span>';
+                        $('paywall-btn-top').innerHTML = '<span class="text-xs font-bold text-lumina-gold">PRO ACTIVO</span>';
                     }, 1000);
                 }, 1500);
             }
         };
 
-        // Bootstrap
         window.addEventListener('DOMContentLoaded', () => App.init());
 
     </script>
