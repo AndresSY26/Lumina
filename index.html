@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="description" content="Lumina: Omni-Tool Edition - Tactical Moon Tracker">
+    <title>Lumina: Omni-Tool Edition</title>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        lumina: {
+                            bg: '#050505',
+                            cyber: '#38bdf8',
+                            plasma: '#d946ef',
+                            gold: '#fbbf24',
+                            glass: 'rgba(20, 20, 30, 0.7)',
+                            glassBorder: 'rgba(255, 255, 255, 0.1)',
+                        },
+                        fontFamily: {
+                            tech: ['Orbitron', 'sans-serif'],
+                            mono: ['Rajdhani', 'monospace'],
+                        }
+                    },
+                    animation: {
+                        'spin-slow': 'spin 12s linear infinite',
+                        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        /* Global Reset & Base */
+        :root {
+            --color-bg: #050505;
+            --color-cyber: #38bdf8;
+            --color-plasma: #d946ef;
+        }
+
+        body {
+            background-color: var(--color-bg);
+            color: white;
+            font-family: 'Rajdhani', sans-serif;
+            /* Allow scrolling, prevent bounce on iOS if needed, but min-h-screen handles layout */
+            min-height: 100vh;
+        }
+
+        /* Glassmorphism Classes */
+        .glass-panel {
+            background: var(--lumina-glass, rgba(20, 20, 30, 0.7));
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            /* Slightly softer tactical look */
+            transition: all 0.3s ease;
+        }
+
+        .glass-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.4), transparent);
+            opacity: 0.5;
+        }
+
+        .glass-panel:hover {
+            border-color: rgba(56, 189, 248, 0.3);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.15);
+        }
+
+        /* Scanline Background */
+        .scanline-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.3) 50%, rgba(0, 0, 0, 0.3));
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        /* Target Lock Styles */
+        .target-locked {
+            border-color: var(--color-plasma) !important;
+            box-shadow: 0 0 30px var(--color-plasma) !important;
+        }
+
+        .text-locked {
+            color: var(--color-plasma) !important;
+            text-shadow: 0 0 10px var(--color-plasma);
+        }
+
+        /* Custom Scrollbar prevention for canvas container */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Animations */
+        @keyframes scan {
+            0% {
+                transform: translateY(-100%);
+            }
+
+            100% {
+                transform: translateY(100vh);
+            }
+        }
+
+        .scanner-beam {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: rgba(56, 189, 248, 0.5);
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.8);
+            animation: scan 4s linear infinite;
+            z-index: 5;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body class="relative">
+
+    <!-- AR Background Video -->
+    <video id="ar-video"
+        class="fixed top-0 left-0 w-full h-full object-cover -z-20 opacity-0 transition-opacity duration-1000"
+        playsinline muted autoplay></video>
+
+    <!-- Background Effects -->
+    <div class="scanline-bg"></div>
+    <div class="scanner-beam"></div>
+
+    <!-- Main Container: min-h-screen allows scroll. pb-32 prevents nav overlap. -->
+    <main class="min-h-screen w-full flex flex-col p-4 md:p-6 lg:p-8 pb-32 relative z-10">
+
+        <!-- Header -->
+        <header
+            class="flex justify-between items-center mb-6 border-b border-lumina-cyber/20 pb-4 backdrop-blur-sm sticky top-0 z-30 pt-2">
+            <div class="flex items-center gap-3">
+                <i class="ph ph-planet text-3xl text-lumina-cyber animate-pulse-fast"></i>
+                <div class="flex flex-col">
+                    <h1
+                        class="font-tech text-xl md:text-2xl text-lumina-cyber tracking-widest uppercase font-bold text-shadow-glow">
+                        Lumina</h1>
+                    <span class="text-[10px] text-gray-400 tracking-[0.3em] font-tech uppercase">Omni-Tool
+                        Edition</span>
+                </div>
+            </div>
+            <button id="paywall-btn-top"
+                class="flex items-center gap-2 bg-lumina-glass border border-lumina-gold/40 px-3 py-1.5 rounded hover:bg-lumina-gold/10 transition-colors group">
+                <i
+                    class="ph ph-crown-simple text-lumina-gold group-hover:drop-shadow-[0_0_5px_rgba(251,191,36,0.8)]"></i>
+                <span class="text-xs font-bold text-lumina-gold font-tech hidden sm:inline">UPGRADE</span>
+            </button>
+        </header>
+
+        <!-- Dynamic Grid Layout -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 w-full max-w-7xl mx-auto">
+
+            <!-- 1. COMPASS & AR MODULE (Mobile: Top, Desktop: Left Col) -->
+            <section class="col-span-1 md:col-span-1 lg:col-span-4 flex flex-col gap-4">
+                <div class="glass-panel p-6 flex flex-col items-center justify-center relative min-h-[350px]">
+                    <div class="absolute top-3 left-3 flex items-center gap-2">
+                        <div class="w-1.5 h-1.5 bg-lumina-cyber rounded-full animate-pulse"></div>
+                        <span class="text-[10px] text-lumina-cyber/70 font-tech tracking-wider">TACTICAL COMPASS</span>
+                    </div>
+
+                    <!-- Compass Visual -->
+                    <div class="relative w-64 h-64 md:w-72 md:h-72 flex items-center justify-center my-4">
+                        <div id="compass-ring"
+                            class="absolute inset-0 border border-lumina-cyber/30 rounded-full flex items-center justify-center transition-transform duration-200 ease-out will-change-transform">
+                            <!-- Ticks -->
+                            <div class="absolute top-0 w-0.5 h-3 bg-lumina-cyber"></div>
+                            <div class="absolute bottom-0 w-0.5 h-3 bg-lumina-cyber/50"></div>
+                            <div class="absolute left-0 w-3 h-0.5 bg-lumina-cyber/50"></div>
+                            <div class="absolute right-0 w-3 h-0.5 bg-lumina-cyber/50"></div>
+                            <span class="absolute -top-6 text-lumina-cyber font-tech font-bold">N</span>
+
+                            <!-- Moon Pointer (Relative to North) -->
+                            <div id="moon-pointer"
+                                class="absolute h-1/2 w-0.5 origin-bottom transition-transform duration-500 will-change-transform">
+                                <div
+                                    class="absolute -top-2 -left-1.5 w-4 h-4 rounded-full border-2 border-lumina-plasma bg-black flex items-center justify-center shadow-[0_0_10px_#d946ef]">
+                                    <div class="w-1 h-1 bg-white rounded-full"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fixed HUD Reticle -->
+                        <div id="reticle"
+                            class="w-20 h-20 border border-white/20 rounded-full flex items-center justify-center relative transition-all duration-300">
+                            <div class="absolute w-full h-[1px] bg-white/20"></div>
+                            <div class="absolute h-full w-[1px] bg-white/20"></div>
+                            <div class="w-2 h-2 bg-white rounded-full z-10"></div>
+                        </div>
+                    </div>
+
+                    <!-- Digital Readout -->
+                    <div class="grid grid-cols-3 gap-4 w-full text-center mt-2">
+                        <div>
+                            <span class="block text-[9px] text-gray-500 uppercase tracking-widest">Head</span>
+                            <span id="heading-val" class="font-tech text-xl text-white">000°</span>
+                        </div>
+                        <div>
+                            <span class="block text-[9px] text-gray-500 uppercase tracking-widest">Moon</span>
+                            <span id="azimuth-val" class="font-tech text-xl text-lumina-cyber">---°</span>
+                        </div>
+                        <div>
+                            <span class="block text-[9px] text-gray-500 uppercase tracking-widest">Lock</span>
+                            <span id="lock-status" class="font-tech text-xs text-gray-400 mt-1 block">SCANNING</span>
+                        </div>
+                    </div>
+
+                    <!-- AR Toggle -->
+                    <button id="camera-btn"
+                        class="mt-4 px-6 py-2 bg-lumina-cyber/10 border border-lumina-cyber/50 text-lumina-cyber font-tech text-xs uppercase tracking-widest hover:bg-lumina-cyber/20 transition-colors w-full flex items-center justify-center gap-2">
+                        <i class="ph ph-camera"></i> Toggle AR View
+                    </button>
+                    <p id="sensor-msg" class="text-[9px] text-red-500 mt-2 text-center h-3"></p>
+                </div>
+            </section>
+
+            <!-- 2. DATA CENTER (Responsive Grid) -->
+            <section class="col-span-1 md:col-span-1 lg:col-span-8 flex flex-col gap-6">
+
+                <!-- Visibility Verdict Panel -->
+                <div
+                    class="glass-panel p-4 flex items-center justify-between bg-gradient-to-r from-lumina-glass to-transparent">
+                    <div>
+                        <h3 class="text-[10px] text-gray-400 font-tech uppercase tracking-widest mb-1">Observation
+                            Constraints</h3>
+                        <div id="visibility-verdict" class="text-xl md:text-2xl font-tech text-white">CALCULATING...
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <i id="verdict-icon" class="ph ph-cloud-moon text-4xl text-gray-500"></i>
+                    </div>
+                </div>
+
+                <!-- Telemetry Grid (1 col Mobile, 2 Col Tablet, 4 Col Desktop) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Card 1 -->
+                    <div class="glass-panel p-4 flex flex-col relative group overflow-hidden">
+                        <div
+                            class="absolute -right-4 -top-4 w-16 h-16 bg-lumina-cyber/10 rounded-full blur-xl group-hover:bg-lumina-cyber/20 transition-all">
+                        </div>
+                        <span
+                            class="text-[9px] text-lumina-cyber uppercase tracking-wider mb-2 border-l-2 border-lumina-cyber pl-2">Lunar
+                            Phase</span>
+                        <span id="phase-name" class="font-tech text-lg text-white mb-1">---</span>
+                        <span id="illum-percent" class="font-mono text-sm text-gray-400">Illumination: --%</span>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="glass-panel p-4 flex flex-col relative group overflow-hidden">
+                        <span
+                            class="text-[9px] text-lumina-cyber uppercase tracking-wider mb-2 border-l-2 border-lumina-cyber pl-2">Orbital
+                            Dist</span>
+                        <span id="distance-val" class="font-tech text-lg text-white mb-1">--- km</span>
+                        <span class="font-mono text-sm text-gray-400">V. Parallax: -0.9°</span>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div class="glass-panel p-4 flex flex-col relative group overflow-hidden">
+                        <span
+                            class="text-[9px] text-lumina-cyber uppercase tracking-wider mb-2 border-l-2 border-lumina-cyber pl-2">Altitude</span>
+                        <span id="altitude-val" class="font-tech text-lg text-white mb-1">---°</span>
+                        <span class="font-mono text-sm text-gray-400">Horizon Rel.</span>
+                    </div>
+
+                    <!-- Card 4 -->
+                    <div class="glass-panel p-4 flex flex-col relative group overflow-hidden">
+                        <span
+                            class="text-[9px] text-lumina-cyber uppercase tracking-wider mb-2 border-l-2 border-lumina-cyber pl-2">Peak
+                            Time</span>
+                        <span id="zenith-val" class="font-tech text-lg text-lumina-gold mb-1">--:--</span>
+                        <span class="font-mono text-sm text-gray-400">Zenith</span>
+                    </div>
+                </div>
+
+                <!-- Trajectory Graph -->
+                <div class="glass-panel w-full p-4 flex flex-col flex-1 min-h-[250px]">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-[10px] text-gray-400 font-tech uppercase tracking-widest"><i
+                                class="ph ph-chart-line-up mr-2"></i>Trajectory Prediction</h3>
+                        <span
+                            class="text-[9px] text-lumina-gold border border-lumina-gold/30 px-2 py-0.5 rounded bg-lumina-gold/5">REALTIME</span>
+                    </div>
+                    <div
+                        class="relative w-full h-full flex-1 rounded border border-white/5 bg-black/20 overflow-hidden">
+                        <canvas id="trajectory-canvas" class="w-full h-full block cursor-crosshair"></canvas>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+
+        <!-- Extra Tools (Locked) -->
+        <section class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-7xl mx-auto">
+            <div
+                class="paywall-lock glass-panel p-6 flex flex-col items-center justify-center opacity-60 hover:opacity-100 transition-opacity cursor-pointer border-dashed border-gray-600 hover:border-lumina-gold">
+                <i class="ph ph-map-trifold text-3xl text-lumina-gold mb-2"></i>
+                <h4 class="font-tech text-xs text-gray-300">Light Pollution Map</h4>
+                <i class="ph ph-lock-key text-lumina-gold mt-2"></i>
+            </div>
+            <div
+                class="paywall-lock glass-panel p-6 flex flex-col items-center justify-center opacity-60 hover:opacity-100 transition-opacity cursor-pointer border-dashed border-gray-600 hover:border-lumina-gold">
+                <i class="ph ph-camera-rotate text-3xl text-lumina-gold mb-2"></i>
+                <h4 class="font-tech text-xs text-gray-300">Photo Planner</h4>
+                <i class="ph ph-lock-key text-lumina-gold mt-2"></i>
+            </div>
+            <div
+                class="paywall-lock glass-panel p-6 flex flex-col items-center justify-center opacity-60 hover:opacity-100 transition-opacity cursor-pointer border-dashed border-gray-600 hover:border-lumina-gold">
+                <i class="ph ph-mountains text-3xl text-lumina-gold mb-2"></i>
+                <h4 class="font-tech text-xs text-gray-300">3D Terrain</h4>
+                <i class="ph ph-lock-key text-lumina-gold mt-2"></i>
+            </div>
+            <div
+                class="paywall-lock glass-panel p-6 flex flex-col items-center justify-center opacity-60 hover:opacity-100 transition-opacity cursor-pointer border-dashed border-gray-600 hover:border-lumina-gold">
+                <i class="ph ph-star-four text-3xl text-lumina-gold mb-2"></i>
+                <h4 class="font-tech text-xs text-gray-300">Constellation Overlay</h4>
+                <i class="ph ph-lock-key text-lumina-gold mt-2"></i>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Navigation Dock (Fixed Bottom) -->
+    <nav class="fixed bottom-0 left-0 w-full z-40 px-4 pb-4 pt-2">
+        <div
+            class="glass-panel mx-auto max-w-lg h-16 flex items-center justify-around px-2 shadow-[0_-5px_20px_rgba(0,0,0,0.5)] bg-black/80">
+            <button class="flex flex-col items-center gap-1 text-lumina-cyber p-2">
+                <i class="ph ph-crosshair text-xl"></i>
+                <span class="text-[9px] font-tech uppercase">Track</span>
+            </button>
+            <button class="flex flex-col items-center gap-1 text-gray-500 hover:text-white transition-colors p-2">
+                <i class="ph ph-chart-bar text-xl"></i>
+                <span class="text-[9px] font-tech uppercase">Data</span>
+            </button>
+            <div
+                class="w-16 h-16 bg-lumina-cyber rounded-full -mt-10 flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.5)] border-4 border-[#050505]">
+                <i class="ph ph-moon-stars text-2xl text-black"></i>
+            </div>
+            <button
+                class="paywall-lock flex flex-col items-center gap-1 text-lumina-gold/70 hover:text-lumina-gold transition-colors p-2">
+                <i class="ph ph-images text-xl"></i>
+                <span class="text-[9px] font-tech uppercase relative">Gallery <i
+                        class="ph ph-lock-key text-[8px] absolute -top-1 -right-2"></i></span>
+            </button>
+            <button class="flex flex-col items-center gap-1 text-gray-500 hover:text-white transition-colors p-2">
+                <i class="ph ph-gear text-xl"></i>
+                <span class="text-[9px] font-tech uppercase">Sys</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Paywall Modal -->
+    <div id="paywall-modal"
+        class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/90 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300">
+        <div
+            class="glass-panel w-full sm:w-96 m-4 p-8 flex flex-col items-center text-center transform translate-y-10 transition-transform duration-300 border-lumina-gold/50 shadow-[0_0_40px_rgba(251,191,36,0.15)]">
+            <i class="ph ph-crown text-5xl text-lumina-gold mb-4 animate-[bounce_2s_infinite]"></i>
+            <h2 class="font-tech text-2xl text-white mb-2">UNLOCK OMNI-TOOL</h2>
+            <div class="w-16 h-1 bg-lumina-gold/50 mb-4 rounded-full"></div>
+            <p class="text-sm text-gray-300 mb-6 leading-relaxed">
+                Access military-grade features: <span class="text-lumina-gold">Light Pollution Maps</span>, <span
+                    class="text-lumina-gold">3D Terrain</span>, and precision <span
+                    class="text-lumina-gold">Astrophotography Planner</span>.
+            </p>
+            <button id="sim-pay-btn"
+                class="w-full py-4 bg-lumina-gold text-black font-bold font-tech text-lg uppercase tracking-widest hover:bg-yellow-400 transition-colors rounded-sm shadow-[0_0_20px_rgba(251,191,36,0.4)]">
+                Initialize ($4.99)
+            </button>
+            <button id="close-paywall"
+                class="mt-4 text-xs text-gray-500 hover:text-white underline font-mono">Dismiss</button>
+        </div>
+    </div>
+
+    <!-- Permission Modal (iOS) -->
+    <div id="perm-modal"
+        class="fixed inset-0 z-[60] flex items-center justify-center bg-black transition-opacity duration-300 hidden">
+        <div class="glass-panel max-w-xs p-6 text-center border-lumina-cyber/50">
+            <i class="ph ph-compass text-4xl text-lumina-cyber mb-4"></i>
+            <h3 class="font-tech text-lg text-white mb-2">SENSOR CALIBRATION</h3>
+            <p class="text-xs text-gray-400 mb-6 font-mono">Lumina requires access to device gyroscope and orientation
+                sensors for tactical alignment.</p>
+            <button id="grant-perm-btn"
+                class="px-8 py-3 bg-lumina-cyber text-black font-bold font-tech uppercase tracking-widest rounded hover:bg-cyan-400 shadow-[0_0_15px_rgba(56,189,248,0.4)]">
+                GRANT ACCESS
+            </button>
+        </div>
+    </div>
+
+    <!-- Core Logic -->
+    <script>
+        // --- UTILS ---
+        const $ = (id) => document.getElementById(id);
+        const $$ = (sel) => document.querySelectorAll(sel);
+        const formatDeg = (d) => `${Math.round(d)}°`;
+        const formatTime = (d) => d ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--';
+
+        // --- APP STATE ---
+        const State = {
+            pos: { lat: 0, lon: 0 },
+            heading: 0, // 0 = North
+            moonAz: 0,
+            moonAlt: 0,
+            isPro: false,
+            sensorsActive: false,
+            lastTick: 0
+        };
+
+        // --- MAIN APP ---
+        const App = {
+            init() {
+                this.bindUI();
+                this.checkPlatform();
+                this.startTelemetry();
+                this.requestLocation();
+
+                // Animation Loop
+                requestAnimationFrame((t) => this.loop(t));
+
+                console.log("Lumina Omni-Tool initialized.");
+            },
+
+            bindUI() {
+                // AR Toggle
+                $('camera-btn').addEventListener('click', () => {
+                    this.toggleCamera();
+                });
+
+                // Paywall
+                $$('.paywall-lock, #paywall-btn-top').forEach(el => {
+                    el.addEventListener('click', () => this.showPaywall());
+                });
+                $('close-paywall').addEventListener('click', () => this.hidePaywall());
+                $('sim-pay-btn').addEventListener('click', () => this.processUpgrade());
+
+                // Permissions
+                $('grant-perm-btn').addEventListener('click', () => this.requestSensors());
+
+                // Canvas Resize
+                window.addEventListener('resize', () => this.drawTrajectory());
+            },
+
+            checkPlatform() {
+                // If iOS 13+ we might need permission modal
+                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    $('sensor-msg').innerText = "CALIBRATION REQUIRED";
+                } else {
+                    // Try auto-starting listeners
+                    this.startSensorListeners();
+                }
+            },
+
+            requestSensors() {
+                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    DeviceOrientationEvent.requestPermission()
+                        .then(resp => {
+                            if (resp === 'granted') {
+                                $('perm-modal').classList.add('hidden');
+                                this.startSensorListeners();
+                            }
+                        })
+                        .catch(console.error);
+                } else {
+                    $('perm-modal').classList.add('hidden');
+                    this.startSensorListeners();
+                }
+            },
+
+            startSensorListeners() {
+                // Handle Device Orientation
+                const handleOr = (e) => {
+                    let alpha = e.alpha; // Z-axis rotation [0,360)
+
+                    // iOS formatting
+                    if (e.webkitCompassHeading) {
+                        alpha = e.webkitCompassHeading;
+                    } else {
+                        // Android simple fallback (not true north comp without complex math)
+                        // For this concept, we assume alpha is enough, but typically needs absolute
+                        alpha = 360 - alpha;
+                    }
+
+                    if (alpha) State.heading = alpha;
+
+                    State.sensorsActive = true;
+                    $('sensor-msg').innerText = "";
+                };
+
+                if ('ondeviceorientationabsolute' in window) {
+                    window.addEventListener("deviceorientationabsolute", handleOr, true);
+                } else {
+                    window.addEventListener("deviceorientation", handleOr, true);
+                }
+            },
+
+            requestLocation() {
+                if ("geolocation" in navigator) {
+                    navigator.geolocation.watchPosition(
+                        (p) => {
+                            State.pos.lat = p.coords.latitude;
+                            State.pos.lon = p.coords.longitude;
+                            this.updateTelemetry(); // Immediate recalc
+                        },
+                        (err) => {
+                            console.warn("GPS Fail", err);
+                            $('visibility-verdict').innerText = "GPS OFFLINE";
+                            $('visibility-verdict').classList.add('text-red-500');
+                        },
+                        { enableHighAccuracy: true }
+                    );
+                }
+            },
+
+            toggleCamera() {
+                const vid = $('ar-video');
+                if (vid.srcObject) {
+                    // Stop
+                    vid.srcObject.getTracks().forEach(t => t.stop());
+                    vid.srcObject = null;
+                    vid.style.opacity = '0';
+                    $('camera-btn').innerHTML = '<i class="ph ph-camera"></i> Activate AR View';
+                } else {
+                    // Start
+                    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                        .then(stream => {
+                            vid.srcObject = stream;
+                            vid.style.opacity = '0.4'; // See-through
+                            $('camera-btn').innerHTML = '<i class="ph ph-stop"></i> Stop AR';
+
+                            // Check if we need permission for sensors again (just in case)
+                            if (!State.sensorsActive && typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                                $('perm-modal').classList.remove('hidden');
+                            }
+                        })
+                        .catch(err => {
+                            alert("Camera access denied or unavailable (HTTPS required).");
+                        });
+                }
+            },
+
+            // --- LOGIC FRAMEWORK ---
+            startTelemetry() {
+                setInterval(() => this.updateTelemetry(), 1000);
+                this.updateTelemetry(); // Initial
+            },
+
+            updateTelemetry() {
+                const now = new Date();
+                const moon = SunCalc.getMoonPosition(now, State.pos.lat, State.pos.lon);
+                const illum = SunCalc.getMoonIllumination(now);
+                const times = SunCalc.getMoonTimes(now, State.pos.lat, State.pos.lon);
+
+                // Safe fallback if SunCalc fails (NaNs)
+                if (!moon || isNaN(moon.altitude)) return;
+
+                State.moonAz = (moon.azimuth * 180 / Math.PI) + 180; // Normalize
+                State.moonAlt = moon.altitude * 180 / Math.PI;
+
+                // UI Updates
+                $('heading-val').textContent = formatDeg(State.heading);
+                $('azimuth-val').textContent = formatDeg(State.moonAz); // Corrected
+                $('altitude-val').textContent = formatDeg(State.moonAlt);
+                $('distance-val').textContent = `${Math.round(moon.distance).toLocaleString()} km`;
+                $('illum-percent').textContent = `Illumination: ${Math.round(illum.fraction * 100)}%`;
+
+                // Phase Name
+                const phases = ["New Moon", "Waxing Crescent", "First Quarter", "Waxing Gibbous", "Full Moon", "Waning Gibbous", "Last Quarter", "Waning Crescent"];
+                // illum.phase is 0..1 (New -> Full(0.5) -> New)
+                // Simplified index mapping
+                let phaseIdx = Math.round(illum.phase * 8) % 8;
+                $('phase-name').innerText = phases[phaseIdx];
+
+                // Zenith/Times
+                if (times.rise) $('zenith-val').textContent = formatTime(times.rise); // Using Rise for now as "Next Event" if simpler
+
+                // Visibility Logic
+                let visText = "OPTIMAL";
+                let visIcon = "ph-check-circle";
+                let visColor = "text-green-400";
+
+                if (State.moonAlt < 5) {
+                    visText = "BELOW HORIZON";
+                    visIcon = "ph-arrow-fat-down";
+                    visColor = "text-gray-500";
+                } else if (State.moonAlt < 15) {
+                    visText = "OBSTRUCTED (LOW)";
+                    visIcon = "ph-warning";
+                    visColor = "text-yellow-500";
+                }
+
+                // Set DOM
+                const vEl = $('visibility-verdict');
+                vEl.innerText = visText;
+                vEl.className = `text-xl md:text-2xl font-tech ${visColor}`;
+                $('verdict-icon').className = `ph ${visIcon} text-4xl ${visColor}`;
+
+                this.drawTrajectory(); // Update canvas dot
+            },
+
+            loop(t) {
+                // High-speed visual loop (60fps)
+
+                // 1. Compass Rotation
+                // Rotate ring opposite to heading to keep N at North
+                const ring = $('compass-ring');
+                ring.style.transform = `rotate(${-State.heading}deg)`;
+
+                // 2. Moon Pointer
+                // Points to absolute Moon Azimuth.
+                // Since Ring is at -Heading, we essentially need absolute rotation.
+                // Pointer is child of ring? No, let's verify HTML structure.
+                // HTML: Pointer is INSIDE Compass Ring. 
+                // IF Pointer is inside Ring, and Ring is rotated by -Heading.
+                // Then Pointer should be rotated by MoonAzimuth.
+                // Result visual rotation = (-Heading) + (MoonAzimuth) = MoonAzimuth - Heading. Correct.
+                $('moon-pointer').style.transform = `rotate(${State.moonAz}deg)`;
+
+                // 3. Target Lock
+                // Diff calculation
+                let diff = Math.abs(State.heading - State.moonAz);
+                if (diff > 180) diff = 360 - diff;
+
+                const reticle = $('reticle');
+                const azVal = $('azimuth-val');
+                const status = $('lock-status');
+
+                if (diff < 5 && State.moonAlt > -5) {
+                    reticle.classList.add('target-locked');
+                    azVal.classList.add('text-locked');
+                    status.innerText = "TARGET LOCKED";
+                    status.classList.add('text-lumina-plasma', 'animate-pulse');
+                    status.classList.remove('text-gray-400');
+                } else {
+                    reticle.classList.remove('target-locked');
+                    azVal.classList.remove('text-locked');
+                    status.innerText = "SCANNING...";
+                    status.classList.add('text-gray-400');
+                    status.classList.remove('text-lumina-plasma', 'animate-pulse');
+                }
+
+                requestAnimationFrame((timestamp) => this.loop(timestamp));
+            },
+
+            drawTrajectory() {
+                const cvs = $('trajectory-canvas');
+                const ctx = cvs.getContext('2d');
+                const w = cvs.clientWidth;
+                const h = cvs.clientHeight;
+
+                if (cvs.width !== w) {
+                    cvs.width = w;
+                    cvs.height = h;
+                }
+
+                ctx.clearRect(0, 0, w, h);
+
+                // Peak Shape
+                ctx.beginPath();
+                ctx.moveTo(0, h);
+                ctx.quadraticCurveTo(w / 2, h - 150, w, h); // Simplified mountain curve
+
+                const grad = ctx.createLinearGradient(0, 0, 0, h);
+                grad.addColorStop(0, "rgba(56, 189, 248, 0.4)");
+                grad.addColorStop(1, "rgba(56, 189, 248, 0)");
+
+                ctx.fillStyle = grad;
+                ctx.fill();
+                ctx.strokeStyle = "#38bdf8";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // "Now" Dot
+                // Calculate position based on time between Rise/Set
+                // For demo, we use a mock sin wave pos based on current time
+                const now = new Date();
+                const times = SunCalc.getMoonTimes(now, State.pos.lat, State.pos.lon);
+
+                if (times.rise && times.set) {
+                    const totalWin = times.set - times.rise;
+                    const elapsed = now - times.rise;
+                    let pct = elapsed / totalWin;
+                    if (pct < 0) pct = 0; if (pct > 1) pct = 1;
+
+                    // Bezier math for quadratic (p0=0,h  p1=w/2,h-150  p2=w,h)
+                    const inv = 1 - pct;
+                    const x = (inv * inv * 0) + (2 * inv * pct * (w / 2)) + (pct * pct * w);
+                    const y = (inv * inv * h) + (2 * inv * pct * (h - 150)) + (pct * pct * h);
+
+                    ctx.beginPath();
+                    ctx.arc(x, y, 6, 0, Math.PI * 2);
+                    ctx.fillStyle = "#fbbf24";
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = "#fbbf24";
+                    ctx.fill();
+
+                    // Drop line
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x, h);
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = "rgba(251, 191, 36, 0.5)";
+                    ctx.setLineDash([4, 4]);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+            },
+
+            // --- PAYWALL ---
+            showPaywall() {
+                if (State.isPro) return;
+                const modal = $('paywall-modal');
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                modal.querySelector('div').classList.remove('translate-y-10');
+            },
+
+            hidePaywall() {
+                const modal = $('paywall-modal');
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                modal.querySelector('div').classList.add('translate-y-10');
+            },
+
+            processUpgrade() {
+                const btn = $('sim-pay-btn');
+                btn.innerText = "AUTHENTICATING...";
+                setTimeout(() => {
+                    btn.classList.replace('bg-lumina-gold', 'bg-green-500');
+                    btn.innerText = "ACCESS GRANTED";
+                    State.isPro = true;
+                    setTimeout(() => {
+                        this.hidePaywall();
+                        // Unlock UI
+                        $$('.paywall-lock').forEach(el => {
+                            el.classList.remove('opacity-60', 'cursor-pointer');
+                            el.classList.add('border-lumina-gold');
+                            el.innerHTML = el.innerHTML.replace('ph-lock-key', 'ph-check-circle');
+                        });
+                        $('paywall-btn-top').classList.add('bg-lumina-gold/20');
+                        $('paywall-btn-top').innerHTML = '<span class="text-xs font-bold text-lumina-gold">PRO ACTIVE</span>';
+                    }, 1000);
+                }, 1500);
+            }
+        };
+
+        // Bootstrap
+        window.addEventListener('DOMContentLoaded', () => App.init());
+
+    </script>
+</body>
+
+</html>

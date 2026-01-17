@@ -1,0 +1,21 @@
+{
+  "name": "Lumina: Omni-Tool Edition",
+  "short_name": "Lumina",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192/38bdf8/ffffff?text=Lumina",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512/38bdf8/ffffff?text=Lumina",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
