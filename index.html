@@ -1,56 +1,75 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
+    <meta name="theme-color" content="#050505" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <title>Lumina: Orbital Command</title>
 
     <!-- PWA Manifest Simulation -->
     <link
       rel="manifest"
       href="data:application/json;base64,eyJuYW1lIjoiTHVtaW5hIFBybyIsInNob3J0X25hbWUiOiJMdW1pbmEiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzA1MDUwNSIsInRoZW1lX2NvbG9yIjoiIzM4YmRmOCIsImljb25zIjpbeyJzcmMiOiJodHRwczovL2ltZy5pY29uczhjb20vY29sb3IvOTYvMDAwMDAwL21vb24tc2F0ZWxsaXRlLnBuZyIsInNpemVzIjoiOTZ4OTYiLCJ0eXBlIjoiaW1hZ2UvcG5nIn1dfQ=="
     />
-    <meta name="theme-color" content="#050505" />
 
     <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link
-      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
 
     <script>
       tailwind.config = {
+        darkMode: "class",
         theme: {
           extend: {
             colors: {
               void: "#050505",
-              primary: "#38bdf8",
-              accent: "#d946ef",
+              deep: "#0a0a10",
+              glass: "rgba(20, 20, 25, 0.7)",
+              primary: "#38bdf8", // Sky Blue
+              accent: "#d946ef", // Fuchsia
               gold: "#fbbf24",
               success: "#10b981",
               warning: "#f59e0b",
               danger: "#f43f5e",
-              panel: "rgba(10, 10, 16, 0.85)",
             },
             fontFamily: {
               mono: ['"Orbitron"', "sans-serif"],
               sans: ['"Rajdhani"', "sans-serif"],
             },
             boxShadow: {
-              "glow-primary": "0 0 15px rgba(56, 189, 248, 0.3)",
-              "glow-accent": "0 0 20px rgba(217, 70, 239, 0.4)",
+              "glow-sm": "0 0 10px rgba(56, 189, 248, 0.2)",
+              "glow-primary": "0 0 20px rgba(56, 189, 248, 0.3)",
+              "glow-accent": "0 0 25px rgba(217, 70, 239, 0.3)",
+              panel: "0 8px 32px 0 rgba(0, 0, 0, 0.3)",
             },
             backgroundImage: {
               "tech-grid":
-                "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)",
+                "radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px)",
+              scanline:
+                "linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2))",
             },
             animation: {
               "spin-slow": "spin 120s linear infinite",
+              float: "float 6s ease-in-out infinite",
+            },
+            keyframes: {
+              float: {
+                "0%, 100%": { transform: "translateY(0)" },
+                "50%": { transform: "translateY(-10px)" },
+              },
             },
           },
         },
@@ -58,49 +77,61 @@
     </script>
 
     <style>
+      :root {
+        --panel-bg: rgba(15, 15, 20, 0.65);
+      }
       body {
         background-color: #050505;
         color: #e2e8f0;
         overflow: hidden;
-        touch-action: none;
         font-family: "Rajdhani", sans-serif;
+        -webkit-font-smoothing: antialiased;
       }
 
-      .hud-module {
-        background: var(--panel);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 12px;
-        position: relative;
-        overflow: hidden;
-        transition: all 0.3s ease;
-      }
-      .hud-module::after {
-        content: "";
-        position: absolute;
+      /* Grain Texture */
+      .noise-overlay {
+        position: fixed;
         top: 0;
         left: 0;
         width: 100%;
-        height: 2px;
-        background: linear-gradient(
-          90deg,
-          transparent,
-          rgba(255, 255, 255, 0.1),
-          transparent
-        );
+        height: 100%;
+        background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+        pointer-events: none;
+        z-index: 5;
+        opacity: 0.4;
       }
 
+      /* Premium Panels */
+      .hud-module {
+        background: var(--panel-bg);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06),
+          inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        border-radius: 16px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .hud-module:hover {
+        border-color: rgba(56, 189, 248, 0.2);
+        box-shadow: 0 0 15px rgba(56, 189, 248, 0.1);
+      }
+
+      /* Typography */
       .label-tech {
         font-weight: 700;
         font-size: 0.65rem;
         letter-spacing: 0.15em;
-        color: #64748b;
+        color: #94a3b8;
         text-transform: uppercase;
       }
       .value-tech {
         font-family: "Orbitron", sans-serif;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.02em;
       }
 
       /* Compass */
@@ -108,12 +139,12 @@
         border-radius: 50%;
         background: radial-gradient(
           circle at 50% 50%,
-          rgba(255, 255, 255, 0.01) 0%,
-          rgba(0, 0, 0, 0.6) 80%
+          rgba(255, 255, 255, 0.02) 0%,
+          rgba(0, 0, 0, 0.8) 90%
         );
         box-shadow:
-          0 0 0 1px rgba(255, 255, 255, 0.1),
-          inset 0 0 40px rgba(0, 0, 0, 0.8);
+          0 0 0 1px rgba(255, 255, 255, 0.05),
+          inset 0 0 50px rgba(0, 0, 0, 0.9);
         position: relative;
       }
       .dial-ring {
@@ -121,86 +152,132 @@
         will-change: transform;
       }
       .smooth-move {
-        transition: transform 0.3s ease-out;
-      }
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      } /* Bouncy */
+
       .tick-mark {
         position: absolute;
         left: 50%;
         transform-origin: bottom center;
-        background: rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.3);
       }
       .tick-major {
-        height: 8px;
+        height: 10px;
         width: 2px;
         background: #38bdf8;
-        box-shadow: 0 0 5px #38bdf8;
+        box-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
       }
       .tick-minor {
-        height: 4px;
+        height: 5px;
         width: 1px;
-        opacity: 0.4;
+        opacity: 0.3;
       }
+
       .locked .compass-lens {
-        border-color: #d946ef;
+        border-color: rgba(217, 70, 239, 0.5);
         box-shadow:
-          inset 0 0 30px rgba(217, 70, 239, 0.2),
-          0 0 20px rgba(217, 70, 239, 0.3);
-      }
-      .locked .center-reticle {
-        background: #d946ef;
-        box-shadow: 0 0 15px #d946ef;
+          inset 0 0 40px rgba(217, 70, 239, 0.2),
+          0 0 30px rgba(217, 70, 239, 0.15);
       }
 
       /* Navigation */
       .nav-dock {
-        background: rgba(5, 5, 5, 0.95);
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(10, 10, 12, 0.85);
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
         backdrop-filter: blur(20px);
         padding-bottom: env(safe-area-inset-bottom);
+        z-index: 50;
       }
       .nav-item {
         color: #64748b;
         transition: all 0.3s ease;
         position: relative;
       }
+      .nav-item:hover {
+        color: #e2e8f0;
+      }
       .nav-item.active {
         color: #38bdf8;
       }
+      .nav-item.active::after {
+        content: "";
+        position: absolute;
+        bottom: -4px;
+        width: 4px;
+        height: 4px;
+        background: #38bdf8;
+        border-radius: 50%;
+        box-shadow: 0 0 8px #38bdf8;
+      }
 
-      /* AR Overlay */
+      /* Desktop Sidebar Transition */
+      @media (min-width: 1024px) {
+        .nav-dock {
+          top: 50%;
+          left: 1.5rem;
+          transform: translateY(-50%);
+          width: 4rem;
+          height: auto;
+          flex-direction: column;
+          border-top: 1px solid rgba(255, 255, 255, 0.08); /* Reset */
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 20px;
+          padding-bottom: 1rem;
+          padding-top: 1rem;
+          gap: 1.5rem;
+        }
+        .nav-item.active::after {
+          right: -8px;
+          bottom: 50%;
+          transform: translateY(50%);
+        }
+
+        /* Main Content Scroll Adjustment */
+        #views-container {
+          padding-left: 6rem;
+          padding-bottom: 2rem;
+        }
+      }
+
+      /* Elements */
       #ar-video {
         object-fit: cover;
         width: 100%;
         height: 100%;
         position: absolute;
-        top: 0;
-        left: 0;
+        inset: 0;
         z-index: 0;
       }
-      .ar-hud-corner {
-        position: absolute;
-        width: 40px;
-        height: 40px;
-        border-color: rgba(56, 189, 248, 0.6);
-        pointer-events: none;
-      }
-
       canvas {
         image-rendering: pixelated;
       }
+
+      /* Scrollbar */
       ::-webkit-scrollbar {
-        width: 0px;
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.2);
       }
     </style>
   </head>
   <body
     class="bg-void h-screen w-screen flex flex-col relative selection:bg-accent selection:text-white"
   >
+    <div class="noise-overlay"></div>
     <div
-      class="absolute inset-0 bg-tech-grid bg-[length:30px_30px] opacity-10 pointer-events-none"
+      class="absolute inset-0 bg-tech-grid bg-[length:40px_40px] opacity-20 pointer-events-none"
     ></div>
+    <div class="absolute inset-0 bg-scanline pointer-events-none z-[2]"></div>
 
-    <!-- BOOT SEQUENCE -->
+    <!-- BOOT SEQUENCE (Unchanged logic) -->
     <div
       id="boot-sequence"
       class="fixed inset-0 z-[100] bg-void flex flex-col items-center justify-center p-8 transition-opacity duration-700"
@@ -222,372 +299,440 @@
         </div>
       </div>
       <h1
-        class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-white to-purple-500 font-mono tracking-tighter mb-2"
+        class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-white to-purple-500 font-mono tracking-tighter mb-4 drop-shadow-2xl"
       >
         LUMINA
       </h1>
       <button
         id="system-start-btn"
-        class="group relative px-10 py-4 overflow-hidden bg-transparent border border-white/20 hover:border-purple-500/50 transition-all duration-500"
+        class="group relative px-12 py-4 overflow-hidden bg-white/5 border border-white/10 hover:border-purple-500/50 hover:bg-purple-500/10 rounded transition-all duration-500"
       >
         <span
-          class="relative text-sm font-mono font-bold text-white group-hover:text-purple-400 transition-colors tracking-widest flex items-center gap-3"
-          >INICIAR SISTEMA <i class="ph-bold ph-caret-right"></i
-        ></span>
+          class="relative text-sm font-mono font-bold text-white group-hover:text-purple-400 transition-colors tracking-[0.2em] flex items-center gap-3"
+        >
+          INICIAR SISTEMA <i class="ph-bold ph-caret-right"></i>
+        </span>
       </button>
     </div>
 
-    <!-- MAIN APP -->
+    <!-- MAIN APP STRUCTURE -->
     <div
       id="main-app"
       class="flex-1 flex flex-col h-full opacity-0 transition-opacity duration-1000 relative overflow-hidden"
     >
-      <!-- GLOBAL HEADER -->
+      <!-- HEADER: Sticky Top w/ Glass -->
       <header
-        class="flex justify-between items-start px-5 pt-5 z-20 mb-2 absolute w-full top-0 pointer-events-none"
+        class="flex justify-between items-start px-6 pt-6 pb-2 z-30 absolute w-full top-0 pointer-events-none lg:px-10 lg:pt-8"
       >
-        <div class="pointer-events-auto">
-          <div class="flex items-center gap-2 mb-0.5">
-            <span class="relative flex h-2 w-2"
-              ><span
+        <div class="pointer-events-auto flex flex-col gap-1">
+          <div class="flex items-center gap-3">
+            <span class="relative flex h-2 w-2">
+              <span
                 class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"
-              ></span
-              ><span
+              ></span>
+              <span
                 class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"
-              ></span
-            ></span>
+              ></span>
+            </span>
             <span
               id="user-tier"
-              class="text-[10px] font-mono font-bold text-emerald-500 tracking-widest"
-              >GRATUITO</span
+              class="text-[10px] font-mono font-bold text-emerald-500 tracking-[0.2em]"
+              >ONLINE</span
             >
           </div>
-          <div class="text-[9px] font-mono text-gray-500" id="gps-coords">
-            GPS: BUSCANDO...
+          <div
+            class="text-[10px] font-mono text-gray-400 flex items-center gap-1"
+            id="gps-coords"
+          >
+            <i class="ph-bold ph-crosshair-simple"></i> GPS: BUSCANDO...
           </div>
         </div>
         <div class="text-right pointer-events-auto">
-          <button
-            id="upgrade-btn"
-            class="mb-1 bg-gradient-to-r from-amber-500 to-yellow-600 text-black text-[10px] font-bold px-3 py-1 rounded-full shadow-[0_0_15px_rgba(251,191,36,0.4)] animate-pulse hover:scale-105 transition-transform"
-          >
-            <i class="ph-fill ph-crown"></i> PRO
-          </button>
+          <div class="flex items-center justify-end gap-3 mb-1">
+            <button
+              id="upgrade-btn"
+              class="bg-gradient-to-r from-amber-500 to-orange-600 text-black text-[9px] font-bold px-3 py-1 rounded-full shadow-glow-sm hover:scale-105 transition-transform"
+            >
+              <i class="ph-fill ph-crown"></i> PRO
+            </button>
+          </div>
           <div
             id="clock"
-            class="text-xl font-mono font-bold text-white leading-none"
+            class="text-2xl font-mono font-bold text-white leading-none drop-shadow-md"
           >
             00:00
           </div>
           <div
             id="date"
-            class="text-[10px] font-sans font-bold text-cyan-400 tracking-widest mt-0.5"
+            class="text-[10px] font-sans font-bold text-primary tracking-widest mt-0.5 opacity-80"
           >
             -- ---
           </div>
         </div>
       </header>
 
-      <!-- VIEWS -->
+      <!-- VIEW CONTAINER -->
       <div
-        class="flex-1 relative overflow-y-auto pb-20 pt-16 scroll-smooth"
+        class="flex-1 relative overflow-y-auto overflow-x-hidden pt-24 pb-28 lg:pb-8 lg:pt-28 lg:pl-32 scroll-smooth"
         id="views-container"
       >
-        <!-- [VIEW 1] COMMAND CENTER -->
-        <section id="view-home" class="view-section flex flex-col min-h-full">
-          <!-- COMPASS -->
-          <div
-            class="flex-shrink-0 relative flex flex-col items-center justify-center py-2 min-h-[260px]"
-          >
+        <!-- [VIEW 1] COMMAND DASHBOARD (Responsive Grid) -->
+        <section
+          id="view-home"
+          class="view-section min-h-full px-4 lg:px-10 max-w-[1920px] mx-auto"
+        >
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
+            <!-- LEFT COL: COMPASS (Desktop: Col 1-4) -->
             <div
-              class="absolute w-[240px] h-[240px] border border-white/5 rounded-full pointer-events-none"
-            ></div>
-            <div
-              class="absolute w-[260px] h-[260px] border border-dashed border-white/5 rounded-full pointer-events-none animate-[spin_60s_linear_infinite]"
-            ></div>
-            <div
-              class="relative w-64 h-64 flex items-center justify-center compass-lens transition-all duration-300"
-              id="compass-unit"
+              class="lg:col-span-4 flex flex-col items-center justify-center"
             >
+              <!-- Compass Module -->
               <div
-                class="absolute top-0 z-50 w-1 h-5 bg-cyan-400 rounded-full shadow-[0_0_15px_#38bdf8]"
-              ></div>
-              <div
-                id="compass-dial"
-                class="dial-ring w-full h-full rounded-full relative"
+                class="relative w-full aspect-square max-w-[400px] flex items-center justify-center group"
               >
+                <!-- Decor Rings -->
                 <div
-                  id="ticks-layer"
-                  class="w-full h-full absolute inset-0 opacity-70"
+                  class="absolute w-[90%] h-[90%] border border-white/5 rounded-full pointer-events-none group-hover:border-white/10 transition-colors duration-700"
                 ></div>
-                <div class="absolute inset-0 z-30 pointer-events-none">
-                  <span
-                    class="absolute top-3 left-1/2 -translate-x-1/2 text-lg font-mono font-black text-white"
-                    >N</span
-                  >
-                  <span
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono font-bold text-gray-600"
-                    >E</span
-                  >
-                  <span
-                    class="absolute bottom-3 left-1/2 -translate-x-1/2 text-xs font-mono font-bold text-gray-600"
-                    >S</span
-                  >
-                  <span
-                    class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-mono font-bold text-gray-600"
-                    >O</span
-                  >
-                </div>
-                <!-- Moon Pointer: rotated independently or within the dial -->
                 <div
-                  id="moon-pointer"
-                  class="absolute inset-0 z-20 smooth-move"
+                  class="absolute w-[98%] h-[98%] border border-dashed border-white/5 rounded-full pointer-events-none animate-[spin_60s_linear_infinite] opacity-50"
+                ></div>
+
+                <!-- Main Lens -->
+                <div
+                  class="relative w-[80%] h-[80%] flex items-center justify-center compass-lens transition-all duration-300 backdrop-blur-sm"
+                  id="compass-unit"
                 >
                   <div
-                    class="absolute top-8 left-1/2 -translate-x-1/2 flex flex-col items-center"
+                    class="absolute top-0 z-50 w-1 h-6 bg-primary rounded-full shadow-glow-primary"
+                  ></div>
+
+                  <div
+                    id="compass-dial"
+                    class="dial-ring w-full h-full rounded-full relative"
                   >
-                    <i
-                      id="moon-icon"
-                      class="ph-fill ph-moon-stars text-3xl text-gray-400 drop-shadow-md"
-                    ></i>
                     <div
-                      id="azimuth-pill"
-                      class="mt-1 bg-black/60 px-1.5 rounded text-[8px] font-mono text-gray-400 border border-white/10"
+                      id="ticks-layer"
+                      class="w-full h-full absolute inset-0 opacity-80"
+                    ></div>
+                    <!-- Cardinals -->
+                    <div class="absolute inset-0 z-30 pointer-events-none">
+                      <span
+                        class="absolute top-4 left-1/2 -translate-x-1/2 text-xl font-mono font-black text-white drop-shadow-md"
+                        >N</span
+                      >
+                      <span
+                        class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-mono font-bold text-gray-500"
+                        >E</span
+                      >
+                      <span
+                        class="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs font-mono font-bold text-gray-500"
+                        >S</span
+                      >
+                      <span
+                        class="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-mono font-bold text-gray-500"
+                        >O</span
+                      >
+                    </div>
+                    <!-- Moon Pointer -->
+                    <div
+                      id="moon-pointer"
+                      class="absolute inset-0 z-20 smooth-move"
                     >
-                      ---
+                      <div
+                        class="absolute top-10 left-1/2 -translate-x-1/2 flex flex-col items-center group-hover:scale-110 transition-transform"
+                      >
+                        <i
+                          id="moon-icon"
+                          class="ph-fill ph-moon-stars text-4xl text-gray-300 drop-shadow-lg"
+                        ></i>
+                        <div
+                          id="azimuth-pill"
+                          class="mt-2 bg-deep/80 backdrop-blur px-2 py-0.5 rounded text-[9px] font-mono text-gray-400 border border-white/10"
+                        >
+                          ---
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    id="lock-alert"
+                    class="absolute inset-0 flex items-center justify-center opacity-0 scale-75 transition-all duration-300 pointer-events-none active-layer"
+                  >
+                    <div
+                      class="bg-black/90 border border-accent text-accent px-4 py-1 rounded text-xs font-mono font-bold tracking-[0.3em] shadow-glow-accent animate-pulse"
+                    >
+                      LOCKED
                     </div>
                   </div>
                 </div>
               </div>
+
+              <!-- Readouts -->
               <div
-                id="lock-alert"
-                class="absolute inset-0 flex items-center justify-center opacity-0 scale-75 transition-all duration-300 pointer-events-none"
+                class="w-full flex justify-between px-4 lg:px-10 mt-4 pointer-events-none max-w-[400px]"
               >
-                <div
-                  class="bg-black/90 border border-purple-500 text-purple-500 px-3 py-1 rounded text-[10px] font-mono font-bold tracking-[0.2em] shadow-[0_0_20px_#d946ef] animate-pulse"
-                >
-                  LOCKED
+                <div class="text-left">
+                  <div class="label-tech text-primary mb-1">RUMBO ACTUAL</div>
+                  <div
+                    id="heading-val"
+                    class="text-3xl font-mono font-bold text-white tracking-tighter"
+                  >
+                    000°
+                  </div>
                 </div>
-              </div>
-            </div>
-            <div
-              class="absolute bottom-0 w-full flex justify-between px-8 pointer-events-none"
-            >
-              <div class="text-left">
-                <div class="label-tech text-cyan-400">RUMBO</div>
-                <div
-                  id="heading-val"
-                  class="text-xl font-mono font-bold text-white"
-                >
-                  000°
-                </div>
-              </div>
-              <div class="text-right">
-                <div class="label-tech text-purple-500">OBJETIVO</div>
-                <div
-                  id="target-val"
-                  class="text-xl font-mono font-bold text-gray-400"
-                >
-                  ---°
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- DASHBOARD -->
-          <div class="px-4 mt-2 space-y-3">
-            <div
-              class="hud-module p-3 flex items-center justify-between border-l-4 border-gray-600 transition-colors duration-500"
-              id="status-bar"
-            >
-              <div class="flex flex-col">
-                <span class="label-tech">ESTADO VISUAL</span>
-                <div
-                  id="vis-verdict"
-                  class="text-xl font-sans font-bold text-white leading-none mt-1"
-                >
-                  ANALIZANDO...
-                </div>
-              </div>
-              <div class="text-right">
-                <div
-                  id="vis-icon-container"
-                  class="bg-white/5 p-2 rounded-lg border border-white/5"
-                >
-                  <i
-                    id="vis-icon"
-                    class="ph-fill ph-broadcast text-xl text-gray-500"
-                  ></i>
+                <div class="text-right">
+                  <div class="label-tech text-accent mb-1">OBJETIVO</div>
+                  <div
+                    id="target-val"
+                    class="text-3xl font-mono font-bold text-gray-500 tracking-tighter"
+                  >
+                    ---°
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
-              <div class="hud-module p-3 flex flex-col gap-2">
-                <div
-                  class="flex justify-between items-center border-b border-white/5 pb-1"
-                >
-                  <span class="label-tech text-purple-500"
-                    ><i class="ph-bold ph-planet"></i> LUNA</span
-                  ><span id="phase-val" class="text-[10px] font-mono text-white"
-                    >--%</span
+            <!-- MID COL: TELEMETRY (Desktop: Col 5-8) -->
+            <div class="lg:col-span-4 flex flex-col justify-center gap-4">
+              <!-- Status Panel -->
+              <div
+                class="hud-module p-5 flex items-center justify-between border-l-4 border-gray-600 transition-colors duration-500 group"
+                id="status-bar"
+              >
+                <div class="flex flex-col">
+                  <span
+                    class="label-tech group-hover:text-white transition-colors"
+                    >ESTADO DE OBSERVACIÓN</span
                   >
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                  <div>
-                    <span class="label-tech block">ILUM</span
-                    ><span
-                      id="illum-val"
-                      class="value-tech text-sm font-bold text-white"
-                      >--%</span
-                    >
-                  </div>
-                  <div class="text-right">
-                    <span class="label-tech block">DIST</span
-                    ><span
-                      id="dist-val"
-                      class="value-tech text-sm font-bold text-cyan-400"
-                      >--K</span
-                    >
-                  </div>
-                </div>
-              </div>
-              <div class="hud-module p-3 flex flex-col gap-2">
-                <div
-                  class="flex justify-between items-center border-b border-white/5 pb-1"
-                >
-                  <span class="label-tech text-cyan-400"
-                    ><i class="ph-bold ph-crosshair"></i> POSICIÓN</span
-                  ><span id="alt-val" class="text-[10px] font-mono text-white"
-                    >ALT: --°</span
+                  <div
+                    id="vis-verdict"
+                    class="text-2xl font-sans font-bold text-white leading-none mt-2 tracking-wide"
                   >
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                  <div>
-                    <span class="label-tech block">PICO</span
-                    ><span
-                      id="peak-val"
-                      class="value-tech text-sm font-bold text-yellow-500"
-                      >--:--</span
-                    >
-                  </div>
-                  <div class="text-right">
-                    <span class="label-tech block">AZIMUT</span
-                    ><span
-                      id="az-grid-val"
-                      class="value-tech text-sm font-bold text-white"
-                      >--</span
-                    >
+                    ANALIZANDO...
                   </div>
                 </div>
-              </div>
-              <div class="hud-module p-3">
-                <span class="label-tech block mb-1">CICLO DIARIO</span>
-                <div
-                  class="flex justify-between items-center bg-black/20 rounded p-1.5 border border-white/5"
-                >
-                  <div class="text-center">
-                    <i class="ph-bold ph-arrow-up text-cyan-400 text-xs"></i>
-                    <div
-                      id="rise-val"
-                      class="text-xs font-mono font-bold text-white"
-                    >
-                      --:--
-                    </div>
-                  </div>
-                  <div class="h-6 w-[1px] bg-white/10"></div>
-                  <div class="text-center">
+                <div class="text-right">
+                  <div
+                    id="vis-icon-container"
+                    class="bg-white/5 p-3 rounded-xl border border-white/5 group-hover:bg-white/10 transition-colors"
+                  >
                     <i
-                      class="ph-bold ph-arrow-down text-purple-500 text-xs"
+                      id="vis-icon"
+                      class="ph-fill ph-broadcast text-2xl text-gray-500"
                     ></i>
-                    <div
-                      id="set-val"
-                      class="text-xs font-mono font-bold text-white"
+                  </div>
+                </div>
+              </div>
+
+              <!-- Grid Data -->
+              <div class="grid grid-cols-2 gap-4">
+                <!-- Moon Card -->
+                <div
+                  class="hud-module p-4 flex flex-col gap-3 hover:-translate-y-1 transition-transform"
+                >
+                  <div
+                    class="flex justify-between items-center border-b border-white/5 pb-2"
+                  >
+                    <span class="label-tech text-accent"
+                      ><i class="ph-bold ph-planet"></i> LUNA</span
                     >
-                      --:--
+                    <span
+                      id="phase-val"
+                      class="text-[10px] font-mono text-white opacity-80"
+                      >--%</span
+                    >
+                  </div>
+                  <div class="grid grid-cols-2 gap-2">
+                    <div>
+                      <span class="label-tech block mb-0.5">ILUM</span
+                      ><span
+                        id="illum-val"
+                        class="value-tech text-lg font-bold text-white"
+                        >--%</span
+                      >
+                    </div>
+                    <div class="text-right">
+                      <span class="label-tech block mb-0.5">DIST</span
+                      ><span
+                        id="dist-val"
+                        class="value-tech text-lg font-bold text-primary"
+                        >--K</span
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Pos Card -->
+                <div
+                  class="hud-module p-4 flex flex-col gap-3 hover:-translate-y-1 transition-transform"
+                >
+                  <div
+                    class="flex justify-between items-center border-b border-white/5 pb-2"
+                  >
+                    <span class="label-tech text-primary"
+                      ><i class="ph-bold ph-crosshair"></i> POSICIÓN</span
+                    >
+                    <span
+                      id="alt-val"
+                      class="text-[10px] font-mono text-white opacity-80"
+                      >ALT: --°</span
+                    >
+                  </div>
+                  <div class="grid grid-cols-2 gap-2">
+                    <div>
+                      <span class="label-tech block mb-0.5">PICO</span
+                      ><span
+                        id="peak-val"
+                        class="value-tech text-lg font-bold text-warning"
+                        >--:--</span
+                      >
+                    </div>
+                    <div class="text-right">
+                      <span class="label-tech block mb-0.5">AZIMUT</span
+                      ><span
+                        id="az-grid-val"
+                        class="value-tech text-lg font-bold text-white"
+                        >--</span
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Cycle -->
+                <div
+                  class="hud-module p-4 hover:-translate-y-1 transition-transform"
+                >
+                  <span class="label-tech block mb-3">CICLO DIARIO</span>
+                  <div
+                    class="flex justify-between items-center bg-black/30 rounded-lg p-2 border border-white/5"
+                  >
+                    <div class="text-center">
+                      <i
+                        class="ph-bold ph-arrow-up text-primary text-xs mb-1 block"
+                      ></i>
+                      <div
+                        id="rise-val"
+                        class="text-sm font-mono font-bold text-white"
+                      >
+                        --:--
+                      </div>
+                    </div>
+                    <div class="h-8 w-[1px] bg-white/10"></div>
+                    <div class="text-center">
+                      <i
+                        class="ph-bold ph-arrow-down text-accent text-xs mb-1 block"
+                      ></i>
+                      <div
+                        id="set-val"
+                        class="text-sm font-mono font-bold text-white"
+                      >
+                        --:--
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Atmosphere -->
+                <div
+                  class="hud-module p-4 hover:-translate-y-1 transition-transform"
+                >
+                  <span class="label-tech block mb-3">ATMÓSFERA</span>
+                  <div class="grid grid-cols-2 gap-2">
+                    <div class="flex flex-col">
+                      <span class="text-[9px] text-gray-500 font-mono mb-1"
+                        >NUBES</span
+                      >
+                      <span
+                        id="cloud-val"
+                        class="text-lg font-mono font-bold text-white"
+                        >--%</span
+                      >
+                    </div>
+                    <div class="flex flex-col text-right">
+                      <span class="text-[9px] text-gray-500 font-mono mb-1"
+                        >HUM</span
+                      >
+                      <span
+                        id="humid-val"
+                        class="text-lg font-mono font-bold text-primary"
+                        >--%</span
+                      >
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="hud-module p-3">
-                <span class="label-tech block mb-1">ATMÓSFERA</span>
-                <div class="grid grid-cols-2 gap-2">
-                  <div class="flex flex-col">
-                    <span class="text-[9px] text-gray-500 font-mono">NUBES</span
-                    ><span
-                      id="cloud-val"
-                      class="text-sm font-mono font-bold text-white"
-                      >--%</span
-                    >
-                  </div>
-                  <div class="flex flex-col text-right">
-                    <span class="text-[9px] text-gray-500 font-mono">HUM</span
-                    ><span
-                      id="humid-val"
-                      class="text-sm font-mono font-bold text-cyan-400"
-                      >--%</span
-                    >
-                  </div>
-                </div>
-              </div>
             </div>
 
-            <div
-              class="hud-module p-0 relative h-40 flex items-center justify-center"
-            >
-              <div class="absolute top-3 left-4 z-10">
-                <span class="label-tech text-purple-500 block tracking-widest"
-                  >TRAYECTORIA PICO</span
-                >
-              </div>
-              <canvas
-                id="graph-canvas"
-                class="w-full h-full absolute inset-0"
-              ></canvas>
-              <button
-                id="future-btn"
-                class="absolute top-3 right-4 bg-white/5 hover:bg-purple-500 hover:text-white border border-white/10 text-gray-400 px-2 py-1 rounded text-[9px] font-mono font-bold transition-colors z-10"
+            <!-- RIGHT COL: GRAPH / TOOLS (Desktop: Col 9-12) -->
+            <div class="lg:col-span-4 flex flex-col gap-4">
+              <!-- Graph -->
+              <div
+                class="hud-module p-0 relative h-64 lg:h-auto lg:flex-1 flex flex-col"
               >
-                SIMULAR
-              </button>
-            </div>
+                <div class="absolute top-4 left-5 z-10 pointer-events-none">
+                  <span class="label-tech text-accent block tracking-widest"
+                    >TRAYECTORIA PICO</span
+                  >
+                  <span class="text-[9px] text-gray-500 font-mono"
+                    >ELEVACIÓN 24 HORAS</span
+                  >
+                </div>
 
-            <div
-              id="future-panel"
-              class="hidden hud-module p-4 border-t border-purple-500 animate-[fadeIn_0.3s_ease]"
-            >
-              <div class="flex justify-between items-center mb-3">
-                <span class="label-tech text-purple-500">SIMULADOR</span
-                ><button
-                  id="close-future"
-                  class="text-gray-400 hover:text-white"
+                <canvas
+                  id="graph-canvas"
+                  class="w-full h-full absolute inset-0"
+                ></canvas>
+
+                <!-- Sim Button -->
+                <button
+                  id="future-btn"
+                  class="absolute top-4 right-4 bg-white/5 hover:bg-accent hover:text-white border border-white/10 text-gray-400 text-[10px] font-mono font-bold px-3 py-1.5 rounded transition-all z-10 backdrop-blur-md"
                 >
-                  <i class="ph-bold ph-x"></i>
+                  <i class="ph-bold ph-clock"></i> SIMULAR
                 </button>
               </div>
-              <div class="flex gap-2 mb-3">
-                <input
-                  type="datetime-local"
-                  id="f-input"
-                  class="w-full bg-black/40 border border-white/20 rounded px-3 py-2 text-xs text-white font-mono outline-none focus:border-purple-500"
-                />
-              </div>
-              <button
-                id="f-calc"
-                class="w-full bg-purple-500/20 border border-purple-500/50 text-purple-500 hover:bg-purple-500 hover:text-white py-2 rounded font-mono font-bold text-xs transition-colors"
+
+              <!-- Sim Panel (Collapsible) -->
+              <div
+                id="future-panel"
+                class="hidden hud-module p-5 border-t-2 border-accent animate-[fadeIn_0.3s_ease]"
               >
-                CALCULAR
-              </button>
-              <div id="f-result" class="mt-3 text-center hidden"></div>
+                <div class="flex justify-between items-center mb-4">
+                  <span class="label-tech text-accent">SIMULADOR ORBITAL</span
+                  ><button
+                    id="close-future"
+                    class="text-gray-400 hover:text-white"
+                  >
+                    <i class="ph-bold ph-x"></i>
+                  </button>
+                </div>
+                <div class="flex gap-2 mb-4">
+                  <input
+                    type="datetime-local"
+                    id="f-input"
+                    class="w-full bg-deep border border-white/10 rounded-lg px-3 py-2 text-xs text-white font-mono outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all"
+                  />
+                </div>
+                <button
+                  id="f-calc"
+                  class="w-full bg-accent/10 border border-accent/50 text-accent hover:bg-accent hover:text-white py-2 rounded-lg font-mono font-bold text-xs tracking-widest transition-all"
+                >
+                  CALCULAR VIABILIDAD
+                </button>
+                <div id="f-result" class="mt-4 text-center hidden"></div>
+              </div>
             </div>
           </div>
         </section>
 
-        <!-- [VIEW 2] AR (HUD MEJORADO) -->
+        <!-- [VIEW 2] AR -->
         <section
           id="view-ar"
-          class="view-section hidden h-full relative bg-black"
+          class="view-section hidden h-full w-full relative bg-black"
         >
+          <!-- Copied logic from source, kept clean -->
           <div
             id="ar-container"
             class="absolute inset-0 flex flex-col items-center justify-center overflow-hidden"
@@ -599,100 +744,87 @@
               muted
               class="opacity-70"
             ></video>
-
-            <!-- HUD OVERLAY -->
+            <!-- HUD Elements -->
             <div class="absolute inset-0 z-10 pointer-events-none">
-              <!-- Esquinas -->
               <div
-                class="absolute top-8 left-8 w-16 h-16 border-t-2 border-l-2 border-cyan-500/50 rounded-tl-xl"
+                class="absolute top-8 left-8 w-16 h-16 border-t-2 border-l-2 border-primary/50 rounded-tl-2xl"
               ></div>
               <div
-                class="absolute top-8 right-8 w-16 h-16 border-t-2 border-r-2 border-cyan-500/50 rounded-tr-xl"
+                class="absolute top-8 right-8 w-16 h-16 border-t-2 border-r-2 border-primary/50 rounded-tr-2xl"
               ></div>
               <div
-                class="absolute bottom-24 left-8 w-16 h-16 border-b-2 border-l-2 border-cyan-500/50 rounded-bl-xl"
+                class="absolute bottom-32 left-8 w-16 h-16 border-b-2 border-l-2 border-primary/50 rounded-bl-2xl"
               ></div>
               <div
-                class="absolute bottom-24 right-8 w-16 h-16 border-b-2 border-r-2 border-cyan-500/50 rounded-br-xl"
+                class="absolute bottom-32 right-8 w-16 h-16 border-b-2 border-r-2 border-primary/50 rounded-br-2xl"
               ></div>
 
-              <!-- Reticula Central -->
               <div
-                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 border border-white/10 rounded-full flex items-center justify-center"
+                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 border border-white/10 rounded-full flex items-center justify-center"
               >
-                <div class="w-1 h-4 bg-cyan-500 absolute top-0"></div>
-                <div class="w-1 h-4 bg-cyan-500 absolute bottom-0"></div>
-                <div class="w-4 h-1 bg-cyan-500 absolute left-0"></div>
-                <div class="w-4 h-1 bg-cyan-500 absolute right-0"></div>
                 <div
-                  class="w-2 h-2 bg-purple-500 rounded-full animate-pulse"
+                  class="w-1 h-5 bg-primary absolute top-0 shadow-glow-primary"
+                ></div>
+                <div class="w-1 h-5 bg-primary absolute bottom-0"></div>
+                <div class="w-5 h-1 bg-primary absolute left-0"></div>
+                <div class="w-5 h-1 bg-primary absolute right-0"></div>
+                <div
+                  class="w-2 h-2 bg-accent rounded-full animate-pulse shadow-glow-accent"
                 ></div>
               </div>
-
-              <!-- Datos Flotantes -->
               <div
-                class="absolute top-10 left-1/2 -translate-x-1/2 bg-black/60 px-4 py-1 rounded-full border border-white/10"
+                class="absolute top-12 left-1/2 -translate-x-1/2 bg-deep/80 backdrop-blur px-6 py-2 rounded-full border border-white/10"
               >
-                <span class="text-xs font-mono text-cyan-400" id="ar-heading"
+                <span
+                  class="text-xs font-mono text-primary font-bold"
+                  id="ar-heading"
                   >RUMBO: ---°</span
                 >
-              </div>
-            </div>
-
-            <div
-              class="absolute bottom-24 bg-black/80 px-6 py-2 rounded-xl border-l-4 border-purple-500 text-center backdrop-blur-md z-20"
-            >
-              <span class="label-tech text-white block">SISTEMA AR ACTIVO</span>
-              <div class="text-xs text-gray-400 font-mono">
-                APUNTE AL CIELO PARA LOCALIZAR
               </div>
             </div>
           </div>
         </section>
 
-        <!-- [VIEW 3] MAP (PRO) -->
+        <!-- [VIEW 3] MAP -->
         <section
           id="view-map"
-          class="view-section hidden h-full relative p-4 flex flex-col gap-4"
+          class="view-section hidden h-full p-4 lg:p-10 flex flex-col gap-6 max-w-5xl mx-auto"
         >
           <h2
-            class="text-xl font-bold font-mono text-yellow-500 mb-2 flex items-center gap-2"
+            class="text-2xl font-bold font-mono text-gold mb-2 flex items-center gap-3"
           >
-            <i class="ph-fill ph-map-trifold"></i> MAPA DE OSCURIDAD
-            <span class="bg-yellow-500 text-black text-[10px] px-1 rounded"
+            <i class="ph-fill ph-map-trifold"></i> MAPA DE CONTAMINACIÓN
+            <span
+              class="bg-gold text-black text-[10px] px-2 py-0.5 rounded font-bold"
               >PRO</span
             >
           </h2>
           <div
-            class="hud-module h-96 relative flex items-center justify-center overflow-hidden group border-yellow-500/30"
+            class="hud-module h-[60vh] relative flex items-center justify-center overflow-hidden group border-gold/20 hover:border-gold/50 transition-colors"
           >
             <div
-              class="absolute inset-0 bg-[url('https://upload.wikimedia.org/wikipedia/commons/8/86/Earth_lights_vs_population_density.png')] bg-cover bg-center opacity-30 grayscale group-hover:grayscale-0 transition-all duration-700"
+              class="absolute inset-0 bg-[url('https://upload.wikimedia.org/wikipedia/commons/8/86/Earth_lights_vs_population_density.png')] bg-cover bg-center opacity-40 grayscale group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"
             ></div>
             <div
-              class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-center p-6 backdrop-blur-sm"
+              class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-center p-6 backdrop-blur-sm transition-opacity"
               id="map-lock-overlay"
             >
-              <i class="ph-fill ph-lock-key text-4xl text-yellow-500 mb-2"></i>
-              <h3 class="text-lg font-bold text-white mb-1">
-                FUNCIÓN BLOQUEADA
+              <i
+                class="ph-fill ph-lock-key text-5xl text-gold mb-4 drop-shadow-lg"
+              ></i>
+              <h3 class="text-xl font-bold text-white mb-2 font-mono">
+                ACCESO RESTRINGIDO
               </h3>
+              <p class="text-xs text-gray-400 mb-6 max-w-xs">
+                Los mapas de alta resolución requieren credenciales de nivel
+                PRO.
+              </p>
               <button
                 onclick="openPaywall()"
-                class="bg-yellow-500 text-black font-bold px-6 py-2 rounded-full hover:scale-105 transition-transform shadow-[0_0_15px_#fbbf24] mt-2"
+                class="bg-gold text-black font-bold px-8 py-3 rounded-lg hover:scale-105 transition-transform shadow-[0_0_20px_#fbbf24] tracking-widest text-xs font-mono"
               >
                 DESBLOQUEAR
               </button>
-            </div>
-            <div
-              id="map-unlocked"
-              class="hidden absolute inset-0 bg-black flex flex-col"
-            >
-              <div
-                class="bg-gray-800 h-full w-full flex items-center justify-center text-gray-500 font-mono"
-              >
-                [MAPA INTERACTIVO CARGADO]
-              </div>
             </div>
           </div>
         </section>
@@ -700,155 +832,164 @@
         <!-- [VIEW 4] TOOLS -->
         <section
           id="view-tools"
-          class="view-section hidden h-full p-4 pb-20 overflow-y-auto"
+          class="view-section hidden h-full p-4 lg:p-10 pb-32 max-w-4xl mx-auto"
         >
           <h2
-            class="text-xl font-bold font-mono text-white mb-4 flex items-center gap-2"
+            class="text-2xl font-bold font-mono text-white mb-6 flex items-center gap-3"
           >
-            <i class="ph-fill ph-toolbox"></i> EQUIPAMIENTO
+            <i class="ph-fill ph-toolbox"></i> EQUIPAJE TÁCTICO
           </h2>
-          <!-- Photo Kit -->
+
           <div
-            class="hud-module p-4 mb-4 border-l-4 border-yellow-500 bg-gradient-to-r from-yellow-500/5 to-transparent"
+            class="hud-module p-6 mb-6 border-l-4 border-gold bg-gradient-to-r from-gold/5 to-transparent"
           >
-            <div class="flex justify-between items-start mb-2">
-              <h3 class="text-sm font-bold text-yellow-500">
-                KIT FOTÓGRAFO PRO
+            <div class="flex justify-between items-start mb-4">
+              <h3 class="text-base font-bold text-gold tracking-widest">
+                CALCULADORA DE EXPOSICIÓN
               </h3>
-              <i class="ph-fill ph-camera text-yellow-500"></i>
+              <i class="ph-fill ph-camera text-gold text-xl"></i>
             </div>
-            <div class="relative">
+            <div class="relative py-4">
               <div
-                class="grid grid-cols-2 gap-3 blur-sm select-none"
-                id="photo-kit-blur"
+                class="grid grid-cols-2 lg:grid-cols-4 gap-4 blur-sm select-none opacity-50"
               >
-                <div class="bg-black/40 p-2 rounded">
-                  <span class="label-tech">ISO</span>
-                  <div class="text-white font-mono">100</div>
+                <div class="bg-black/40 p-3 rounded border border-white/5">
+                  <span class="label-tech block">ISO</span>
+                  <div class="text-white font-mono text-lg">100</div>
                 </div>
-                <div class="bg-black/40 p-2 rounded">
-                  <span class="label-tech">OBTURADOR</span>
-                  <div class="text-white font-mono">1/125</div>
+                <div class="bg-black/40 p-3 rounded border border-white/5">
+                  <span class="label-tech block">f/STOP</span>
+                  <div class="text-white font-mono text-lg">f/2.8</div>
+                </div>
+                <div class="bg-black/40 p-3 rounded border border-white/5">
+                  <span class="label-tech block">REGLA 500</span>
+                  <div class="text-white font-mono text-lg">12s</div>
+                </div>
+                <div class="bg-black/40 p-3 rounded border border-white/5">
+                  <span class="label-tech block">LENTE</span>
+                  <div class="text-white font-mono text-lg">24mm</div>
                 </div>
               </div>
-              <div
-                class="absolute inset-0 flex items-center justify-center"
-                id="photo-lock-btn"
-              >
+              <div class="absolute inset-0 flex items-center justify-center">
                 <button
                   onclick="openPaywall()"
-                  class="bg-yellow-500 text-black text-xs font-bold px-4 py-2 rounded-full shadow-[0_0_10px_#fbbf24] flex items-center gap-2"
+                  class="bg-gold text-black text-xs font-bold px-6 py-2 rounded-full shadow-[0_0_15px_#fbbf24] flex items-center gap-2 hover:bg-white transition-colors"
                 >
-                  <i class="ph-bold ph-lock-key"></i> DESBLOQUEAR
+                  <i class="ph-bold ph-lock-key"></i> ACCEDER AL KIT
                 </button>
-              </div>
-            </div>
-          </div>
-          <!-- Affiliates -->
-          <h3
-            class="label-tech text-white mb-3 mt-6 border-b border-white/10 pb-1"
-          >
-            RECOMENDADO
-          </h3>
-          <div class="grid grid-cols-1 gap-4">
-            <div
-              class="hud-module p-3 flex gap-4 items-center group cursor-pointer hover:border-cyan-500/50 transition-colors"
-            >
-              <div
-                class="w-16 h-16 bg-white/10 rounded flex items-center justify-center"
-              >
-                <i
-                  class="ph-duotone ph-telescope text-3xl text-gray-400 group-hover:text-cyan-400"
-                ></i>
-              </div>
-              <div class="flex-1">
-                <h4
-                  class="font-bold text-sm text-white group-hover:text-cyan-400"
-                >
-                  Celestron AstroMaster
-                </h4>
-                <span class="text-xs font-mono text-yellow-500 mt-2 block"
-                  >$149.99</span
-                >
               </div>
             </div>
           </div>
         </section>
       </div>
 
-      <!-- NAV -->
+      <!-- NAV DOCK (Responsive: Bottom Mobile, Side Desktop) -->
       <nav
-        class="nav-dock fixed bottom-0 w-full flex justify-around items-center px-2 py-3 z-40"
+        class="nav-dock fixed bottom-0 w-full flex justify-around items-center px-2 py-3 lg:flex-col lg:justify-start lg:w-20 lg:h-auto lg:top-1/2 lg:left-6 lg:rounded-2xl lg:border lg:py-6 lg:bg-deep/90"
       >
         <button
-          class="nav-item active flex flex-col items-center gap-1 w-16"
+          class="nav-item active flex flex-col items-center gap-1 w-16 lg:w-full group"
           onclick="switchView('view-home', this)"
         >
-          <i class="ph-fill ph-crosshair text-xl"></i
-          ><span class="text-[9px] font-bold tracking-widest">CMD</span>
+          <i
+            class="ph-fill ph-crosshair text-2xl group-hover:scale-110 transition-transform"
+          ></i>
+          <span class="text-[8px] font-bold tracking-widest mt-1 opacity-70"
+            >CMD</span
+          >
         </button>
         <button
-          class="nav-item flex flex-col items-center gap-1 w-16 text-gray-500"
+          class="nav-item flex flex-col items-center gap-1 w-16 lg:w-full group text-gray-500"
           onclick="switchView('view-ar', this)"
         >
-          <i class="ph-fill ph-camera text-xl"></i
-          ><span class="text-[9px] font-bold tracking-widest">AR</span>
+          <i
+            class="ph-fill ph-camera text-2xl group-hover:scale-110 transition-transform"
+          ></i>
+          <span class="text-[8px] font-bold tracking-widest mt-1 opacity-70"
+            >AR</span
+          >
         </button>
         <button
-          class="nav-item flex flex-col items-center gap-1 w-16 text-gray-500"
+          class="nav-item flex flex-col items-center gap-1 w-16 lg:w-full group text-gray-500"
           onclick="switchView('view-map', this)"
         >
-          <i class="ph-fill ph-map-trifold text-xl"></i
-          ><span class="text-[9px] font-bold tracking-widest">MAPA</span>
+          <i
+            class="ph-fill ph-map-trifold text-2xl group-hover:scale-110 transition-transform"
+          ></i>
+          <span class="text-[8px] font-bold tracking-widest mt-1 opacity-70"
+            >MAPA</span
+          >
         </button>
         <button
-          class="nav-item flex flex-col items-center gap-1 w-16 text-gray-500"
+          class="nav-item flex flex-col items-center gap-1 w-16 lg:w-full group text-gray-500"
           onclick="switchView('view-tools', this)"
         >
-          <i class="ph-fill ph-toolbox text-xl"></i
-          ><span class="text-[9px] font-bold tracking-widest">KIT</span>
+          <i
+            class="ph-fill ph-toolbox text-2xl group-hover:scale-110 transition-transform"
+          ></i>
+          <span class="text-[8px] font-bold tracking-widest mt-1 opacity-70"
+            >KIT</span
+          >
         </button>
       </nav>
     </div>
 
-    <!-- PAYWALL -->
+    <!-- PAYWALL MODAL -->
     <div
       id="paywall-modal"
       class="fixed inset-0 z-[200] bg-black/90 backdrop-blur-xl flex items-center justify-center p-6 hidden opacity-0 transition-opacity duration-300"
     >
       <div
-        class="bg-gray-900 border border-yellow-500 rounded-2xl p-6 max-w-sm w-full relative shadow-[0_0_30px_#fbbf24]"
+        class="bg-gray-900 border border-gold rounded-2xl p-8 max-w-sm w-full relative shadow-[0_0_50px_rgba(251,191,36,0.2)] transform transition-transform scale-95"
+        id="paywall-content"
       >
+        <div
+          class="absolute -top-10 left-1/2 -translate-x-1/2 w-20 h-20 bg-gray-900 rounded-full border border-gold flex items-center justify-center shadow-lg"
+        >
+          <i class="ph-fill ph-crown text-4xl text-gold"></i>
+        </div>
         <button
           onclick="closePaywall()"
-          class="absolute top-4 right-4 text-gray-400 hover:text-white"
+          class="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"
         >
           <i class="ph-bold ph-x text-xl"></i>
         </button>
-        <div class="text-center mb-6">
-          <i class="ph-fill ph-crown text-4xl text-yellow-500 mb-2"></i>
-          <h2 class="text-2xl font-bold text-white font-mono">
-            LUMINA <span class="text-yellow-500">PRO</span>
+
+        <div class="text-center mt-8 mb-6">
+          <h2 class="text-3xl font-bold text-white font-mono tracking-tighter">
+            LUMINA <span class="text-gold">PRO</span>
           </h2>
-          <p class="text-gray-400 text-xs mt-2">
-            Desbloquea el poder del cosmos.
+          <div class="h-0.5 w-12 bg-gold mx-auto my-3"></div>
+          <p class="text-gray-400 text-sm leading-relaxed">
+            Acceso a Mapas de Contaminación Lumínica, Calculadora de
+            Astrofotografía y Telemetría Extendida.
           </p>
         </div>
+
+        <ul class="space-y-3 mb-8 text-left text-sm text-gray-300">
+          <li class="flex items-center gap-3">
+            <i class="ph-bold ph-check text-success"></i>
+            <span>Mapas de Satélite HD</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <i class="ph-bold ph-check text-success"></i>
+            <span>Sin Anuncios</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <i class="ph-bold ph-check text-success"></i>
+            <span>Soporte Prioritario</span>
+          </li>
+        </ul>
+
         <button
           onclick="processPayment()"
-          class="w-full bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-bold py-3 rounded-xl hover:scale-105 transition-transform shadow-lg mb-3"
+          class="w-full bg-gradient-to-r from-gold to-orange-500 text-black font-bold py-4 rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-glow-sm tracking-widest text-sm font-mono"
           id="pay-btn"
         >
-          SUSCRIBIRSE - $2.99
+          SUSCRIBIRSE - $2.99 / MES
         </button>
       </div>
     </div>
-
-    <!-- TOAST -->
-    <div
-      id="toast"
-      class="fixed top-4 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur border border-white/20 px-4 py-2 rounded-full text-xs font-bold text-white shadow-lg pointer-events-none transform -translate-y-20 transition-transform duration-500 z-[300]"
-    ></div>
 
     <script>
       // --- UTILS ---
@@ -878,7 +1019,6 @@
           "NO",
           "NNO",
         ];
-        // Normalize angle
         const normalized = ((angle % 360) + 360) % 360;
         const index = Math.round(normalized / 22.5) % 16;
         return directions[index];
@@ -900,17 +1040,21 @@
         isPro: false,
       };
 
-      // --- TICKS ---
+      // --- TICKS & SETUP ---
       const ticksLayer = $("ticks-layer");
       if (ticksLayer) {
         for (let i = 0; i < 360; i += 2) {
           if (i % 90 === 0) continue;
           const el = document.createElement("div");
           el.className = `tick-mark ${i % 10 === 0 ? "tick-major" : "tick-minor"}`;
-          el.style.top = "6px";
-          el.style.left = "50%";
+          // Ticks positioning
           el.style.top = "50%";
-          el.style.transform = `translate(-50%, -50%) rotate(${i}deg) translateY(-110px)`;
+          el.style.left = "50%";
+          // The radius needs to match 80% of compass container roughly.
+          // Container is ~400px max on desktop, smaller on mobile.
+          // We use % translation to be responsive inside the lens.
+          el.style.transform = `translate(-50%, -50%) rotate(${i}deg) translateY(-40%)`;
+          // translateY -40% pushes it to the edge of the lens (which is 100% height)
           ticksLayer.appendChild(el);
         }
       }
@@ -931,15 +1075,12 @@
           });
         }
 
-        // Modern event listener logic
-        if ("ondeviceorientationabsolute" in window) {
+        if ("ondeviceorientationabsolute" in window)
           window.addEventListener(
             "deviceorientationabsolute",
             handleOrientation,
           );
-        } else {
-          window.addEventListener("deviceorientation", handleOrientation);
-        }
+        else window.addEventListener("deviceorientation", handleOrientation);
 
         $("boot-sequence").style.opacity = "0";
         setTimeout(() => {
@@ -968,16 +1109,15 @@
 
         setInterval(() => {
           if (sys.lat) updateTelemetry();
-        }, 1000); // 1s is enough
-
+        }, 1000);
         const now = new Date();
         const pad = (n) => n.toString().padStart(2, "0");
         const fi = $("f-input");
         if (fi)
           fi.value = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
 
-        // Initial render
-        drawConeGraph(now);
+        setTimeout(() => drawConeGraph(now), 100); // Wait for layout
+        window.addEventListener("resize", () => drawConeGraph(new Date()));
       }
 
       function handleGPS(pos) {
@@ -1006,28 +1146,12 @@
 
       function handleOrientation(e) {
         let alpha = e.alpha;
-        // Handle iOS vs Android differences
-        if (e.webkitCompassHeading) {
-          // iOS: webkitCompassHeading is already "Degree from North"
-          alpha = e.webkitCompassHeading;
-        } else {
-          // Android: alpha is usually "Degree from North" but inverted or offset
-          // deviceorientationabsolute is best, but standard fallback:
-          alpha = 360 - alpha;
-        }
+        if (e.webkitCompassHeading) alpha = e.webkitCompassHeading;
+        else alpha = 360 - alpha;
 
         if (alpha === null || isNaN(alpha)) return;
 
-        // Screen Orientation Correction (Landscape/Portrait)
-        // let screenAngle = window.screen.orientation ? window.screen.orientation.angle : 0;
-        // Actually, for compass UI, we often just want the heading.
-        // If the user rotates the phone to landscape, the heading value might need adjustment relative to the "top" of the phone.
-        // But usually browsers handle this via the event or we just use phone's top.
-        // We will stick to raw heading but ensure 0-360 range.
-
         let heading = alpha;
-
-        // Smoothing filter
         let delta = heading - sys.lastRawHeading;
         if (delta < -180) delta += 360;
         else if (delta > 180) delta -= 360;
@@ -1036,7 +1160,6 @@
         sys.lastRawHeading = heading;
         sys.heading = heading;
 
-        // Normalized heading for display
         let displayHeading = ((heading % 360) + 360) % 360;
 
         safeText("heading-val", `${Math.round(displayHeading)}°`);
@@ -1045,30 +1168,13 @@
           `RUMBO: ${Math.round(displayHeading)}° ${getCardinal(displayHeading)}`,
         );
 
-        // Rotate the Dial
-        // The dial ticks should rotate counter to the heading so "North" always points to real North
         const cd = $("compass-dial");
         if (cd) cd.style.transform = `rotate(${-displayHeading}deg)`;
-
-        // Rotate the Moon Pointer
-        // The pointer is inside the dial.
-        // The dial is already rotated by -Heading.
-        // If we rotate the pointer by Azimuth, it will point to (Azimuth - Heading) visually relative to the phone top?
-        // Wait:
-        // Container (0deg) -> Dial (-H deg).
-        // If we put Pointer inside Dial and rotate Pointer by (A deg),
-        // Total transform = -H + A = A - H.
-        // If Moon is at 90 (East) and Heading is 0 (North), Result = 90 (Right). Correct.
-        // If Moon is at 90 (East) and Heading is 90 (East), Result = 0 (Top). Correct.
-        // So we just rotate by Azimuth.
-
         const mp = $("moon-pointer");
         if (mp) mp.style.transform = `rotate(${sys.moonAz}deg)`;
 
-        // Lock Logic
         let diff = Math.abs(displayHeading - sys.moonAz);
         if (diff > 180) diff = 360 - diff;
-
         if (diff < 5 && sys.moonAlt > -5) engageLock();
         else disengageLock();
       }
@@ -1077,45 +1183,38 @@
         if (sys.isLocked) return;
         sys.isLocked = true;
         if (navigator.vibrate) navigator.vibrate(50);
-        const cu = $("compass-unit");
-        if (cu) cu.classList.add("locked");
+        // Visual feedback handled by CSS classes on #lock-alert
         const la = $("lock-alert");
         if (la) {
           la.style.opacity = "1";
           la.style.transform = "scale(1)";
         }
+        const cu = $("compass-unit");
+        if (cu) cu.classList.add("locked");
+
         const mi = $("moon-icon");
-        if (mi)
-          mi.className =
-            "ph-fill ph-crosshair text-3xl text-purple-500 drop-shadow-[0_0_15px_#d946ef]";
-        const tv = $("target-val");
-        if (tv) tv.classList.replace("text-gray-400", "text-purple-500");
-        const ap = $("azimuth-pill");
-        if (ap)
-          ap.className =
-            "mt-1 bg-purple-500 text-white px-1.5 rounded text-[8px] font-mono font-bold shadow-glow-accent";
+        if (mi) mi.classList.replace("text-gray-300", "text-accent");
+        $("target-val").classList.replace("text-gray-500", "text-accent");
+        $("azimuth-pill").classList.replace("text-gray-400", "text-accent");
+        $("azimuth-pill").classList.replace("border-white/10", "border-accent");
       }
 
       function disengageLock() {
         if (!sys.isLocked) return;
         sys.isLocked = false;
-        const cu = $("compass-unit");
-        if (cu) cu.classList.remove("locked");
         const la = $("lock-alert");
         if (la) {
           la.style.opacity = "0";
           la.style.transform = "scale(0.75)";
         }
+        const cu = $("compass-unit");
+        if (cu) cu.classList.remove("locked");
+
         const mi = $("moon-icon");
-        if (mi)
-          mi.className =
-            "ph-fill ph-moon-stars text-3xl text-gray-400 drop-shadow-md";
-        const tv = $("target-val");
-        if (tv) tv.classList.replace("text-purple-500", "text-gray-400");
-        const ap = $("azimuth-pill");
-        if (ap)
-          ap.className =
-            "mt-1 bg-black/60 border border-white/10 px-1.5 rounded text-[8px] font-mono text-gray-400";
+        if (mi) mi.classList.replace("text-accent", "text-gray-300");
+        $("target-val").classList.replace("text-accent", "text-gray-500");
+        $("azimuth-pill").classList.replace("text-accent", "text-gray-400");
+        $("azimuth-pill").classList.replace("border-accent", "border-white/10");
       }
 
       function updateTelemetry() {
@@ -1125,26 +1224,17 @@
         const mp = SunCalc.getMoonPosition(now, sys.lat, sys.lon);
         const mi = SunCalc.getMoonIllumination(now);
 
-        // Correct Azimuth/Altitude
-        // SunCalc returns radians. Azimuth is 0=South, increasing westward? No, check docs.
-        // SunCalc: azimuth: 0 is South and Math.PI * 3/4 is Northwest.
-        // Standard Compass: 0 is North, 90 East.
-        // Formula: (azimuth * 180/PI) + 180.
-        // If SunCalc returns 0 (South), +180 = 180 (South). Correct.
         sys.moonAz = (mp.azimuth * (180 / Math.PI) + 180) % 360;
         sys.moonAlt = mp.altitude * (180 / Math.PI);
         sys.moonDist = mp.distance;
 
-        // Cardinal direction text
         const moonDir = getCardinal(sys.moonAz);
-        // Format degrees properly
         const degTxt = `${Math.round(sys.moonAz)}° ${moonDir}`;
         safeText("target-val", degTxt);
         safeText("azimuth-pill", degTxt);
         safeText("az-grid-val", degTxt);
-
         safeText("alt-val", `ALT: ${Math.round(sys.moonAlt)}°`);
-        safeText("phase-val", Math.round(mi.fraction * 100) + "%"); // Fraction is illuminated area
+        safeText("phase-val", Math.round(mi.fraction * 100) + "%");
         safeText("illum-val", Math.round(mi.fraction * 100) + "%");
         safeText("dist-val", (sys.moonDist / 1000).toFixed(1) + "K");
         safeText("cloud-val", sys.clouds + "%");
@@ -1157,20 +1247,13 @@
                 minute: "2-digit",
               })
             : "--:--";
-
-        // Rise/Set logic can be tricky if the event happened "yesterday" relative to today
-        // But SunCalc returns events for the given date.
-        // If rise is undefined, it might not rise today.
         safeText("rise-val", fmt(times.rise));
         safeText("set-val", fmt(times.set));
 
-        // Determine Peak (highest altitude)
-        // We just iterate to find max.
         let peakAlt = -90;
         let peakTime = null;
         const startDay = new Date(now);
         startDay.setHours(0, 0, 0, 0);
-        // Use 15m intervals for better precision
         for (let i = 0; i <= 24 * 4; i++) {
           const t = new Date(startDay.getTime() + i * 15 * 60000);
           const p = SunCalc.getMoonPosition(t, sys.lat, sys.lon);
@@ -1181,87 +1264,81 @@
         }
         safeText("peak-val", peakTime ? fmt(peakTime) : "N/A");
 
-        const bar = $("status-bar");
+        // Vis Verdict
         const title = $("vis-verdict");
         const icon = $("vis-icon");
+        const bar = $("status-bar");
         if (bar && title && icon) {
           if (sys.moonAlt < 0) {
-            bar.className =
-              "hud-module p-3 flex items-center justify-between border-l-4 border-danger transition-colors duration-500";
-            title.innerText = "NO VISIBLE";
-            title.className =
-              "text-xl font-sans font-bold text-danger leading-none mt-1";
-            icon.className = "ph-fill ph-eye-closed text-xl text-danger";
+            title.innerText = "BAJO HORIZONTE";
+            title.classList.value =
+              "text-2xl font-sans font-bold text-gray-500 leading-none mt-2 tracking-wide";
+            icon.classList.value =
+              "ph-fill ph-eye-closed text-2xl text-gray-500";
+            bar.style.borderLeftColor = "#64748b";
           } else if (sys.clouds > 70) {
-            bar.className =
-              "hud-module p-3 flex items-center justify-between border-l-4 border-warning transition-colors duration-500";
             title.innerText = "OBSTRUIDO";
-            title.className =
-              "text-xl font-sans font-bold text-warning leading-none mt-1";
-            icon.className = "ph-fill ph-cloud text-xl text-warning";
+            title.classList.value =
+              "text-2xl font-sans font-bold text-warning leading-none mt-2 tracking-wide";
+            icon.classList.value =
+              "ph-fill ph-cloud-slash text-2xl text-warning";
+            bar.style.borderLeftColor = "#f59e0b";
           } else {
-            bar.className =
-              "hud-module p-3 flex items-center justify-between border-l-4 border-success transition-colors duration-500";
-            title.innerText = "ÓPTIMO";
-            title.className =
-              "text-xl font-sans font-bold text-success leading-none mt-1 shadow-glow-primary";
-            icon.className =
-              "ph-fill ph-eye text-xl text-success animate-pulse";
+            title.innerText = "VISIBILIDAD ÓPTIMA";
+            title.classList.value =
+              "text-2xl font-sans font-bold text-success leading-none mt-2 tracking-wide shadow-glow-primary";
+            icon.classList.value =
+              "ph-fill ph-eye text-2xl text-success animate-pulse";
+            bar.style.borderLeftColor = "#10b981";
           }
         }
 
-        // Also redraw graph occasionally to keep "NOW" dot updated
-        drawConeGraph(now);
+        // Re-draw graph occasionally for "Now" dot
+        if (now.getSeconds() % 10 === 0) drawConeGraph(now);
       }
 
+      // --- GRAPH ---
       function drawConeGraph(now) {
         const cvs = $("graph-canvas");
         if (!cvs) return;
         const ctx = cvs.getContext("2d");
-        // Scale by pixel ratio for sharpness if desired, but kept simple here
-        const w = cvs.parentElement.offsetWidth;
-        const h = cvs.parentElement.offsetHeight;
-        cvs.width = w;
-        cvs.height = h;
+        const parent = cvs.parentElement;
+        // Handle resizing
+        cvs.width = parent.offsetWidth;
+        cvs.height = parent.offsetHeight;
+        const w = cvs.width;
+        const h = cvs.height;
 
         const start = new Date(now);
         start.setHours(0, 0, 0, 0);
 
         ctx.clearRect(0, 0, w, h);
 
-        // Horizon Line
-        const horizonY = h * 0.85;
+        // Horizon
+        const horizonY = h * 0.8;
         ctx.beginPath();
-        ctx.strokeStyle = "rgba(255,255,255,0.2)";
+        ctx.strokeStyle = "rgba(255,255,255,0.1)";
         ctx.lineWidth = 1;
-        ctx.setLineDash([3, 3]);
+        ctx.setLineDash([4, 4]);
         ctx.moveTo(0, horizonY);
         ctx.lineTo(w, horizonY);
         ctx.stroke();
         ctx.setLineDash([]);
 
-        // Plot Trajectory (0 to 24h)
-        ctx.beginPath();
-        let first = true;
-
-        // Gradient fill setup
+        // Gradient
         const grad = ctx.createLinearGradient(0, 0, 0, h);
-        grad.addColorStop(0, "rgba(56, 189, 248, 0.4)");
+        grad.addColorStop(0, "rgba(56, 189, 248, 0.2)");
         grad.addColorStop(1, "rgba(0, 0, 0, 0)");
 
         let points = [];
+        const pxPerDeg = (horizonY - 20) / 90; // Scale 90deg to fit above horizon
 
+        ctx.beginPath();
+        let first = true;
         for (let i = 0; i <= 24; i += 0.5) {
-          // 30 min steps
           const t = new Date(start.getTime() + i * 3600000);
           const pos = SunCalc.getMoonPosition(t, sys.lat, sys.lon);
-          // Map Altitude (-90 to 90) to Y
-          // 90deg (Zenith) -> slightly below top
-          // 0deg (Horizon) -> horizonY
-          // -90deg -> below
-
-          // Scale factor: 90 degrees = horizonY - some_padding
-          const pxPerDeg = (horizonY - 20) / 90;
+          // Simple Y mapping
           const y = horizonY - pos.altitude * (180 / Math.PI) * pxPerDeg;
           const x = (i / 24) * w;
 
@@ -1274,14 +1351,13 @@
           }
         }
 
-        // Close path for fill
         ctx.lineTo(w, h);
         ctx.lineTo(0, h);
         ctx.closePath();
         ctx.fillStyle = grad;
         ctx.fill();
 
-        // Stroke the line
+        // Line
         ctx.beginPath();
         first = true;
         for (let p of points) {
@@ -1293,36 +1369,32 @@
           }
         }
         ctx.strokeStyle = "#38bdf8";
-        ctx.lineWidth = 2;
-        ctx.stroke();
+        ctx.lineWidth = 3;
+        ctx.stroke(); // Thicker line
 
-        // Draw "NOW" dot
+        // Now Dot
         const currHours = now.getHours() + now.getMinutes() / 60;
         const currPos = SunCalc.getMoonPosition(now, sys.lat, sys.lon);
-        const pxPerDeg = (horizonY - 20) / 90;
         const nowY = horizonY - currPos.altitude * (180 / Math.PI) * pxPerDeg;
         const nowX = (currHours / 24) * w;
 
-        // Only draw if within bounds (roughly)
         if (nowX >= 0 && nowX <= w) {
           const isVisible = currPos.altitude > 0;
-
+          // Line down
           ctx.beginPath();
-          ctx.strokeStyle = "rgba(255,255,255,0.5)";
+          ctx.strokeStyle = "rgba(255,255,255,0.3)";
           ctx.lineWidth = 1;
           ctx.moveTo(nowX, nowY);
           ctx.lineTo(nowX, horizonY);
           ctx.stroke();
-
+          // Dot
           ctx.beginPath();
           ctx.arc(nowX, nowY, 6, 0, Math.PI * 2);
-          ctx.fillStyle = isVisible ? "#ffffff" : "#64748b";
+          ctx.fillStyle = isVisible ? "#d946ef" : "#64748b"; // Accent color for current time
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = isVisible ? "#d946ef" : "transparent";
           ctx.fill();
-
-          ctx.fillStyle = isVisible ? "#38bdf8" : "#64748b";
-          ctx.font = "bold 10px Orbitron";
-          ctx.textAlign = "center";
-          ctx.fillText("AHORA", nowX, nowY - 10);
+          ctx.shadowBlur = 0;
         }
       }
 
@@ -1348,7 +1420,7 @@
           const res = $("f-result");
           res.classList.remove("hidden");
           res.innerHTML =
-            "<span class='text-primary animate-pulse'>CALCULANDO...</span>";
+            "<span class='text-primary animate-pulse'>PROCESANDO DATOS ORBITALES...</span>";
           const mp = SunCalc.getMoonPosition(t, sys.lat, sys.lon);
           const alt = Math.round(mp.altitude * (180 / Math.PI));
           let c = "--";
@@ -1361,14 +1433,14 @@
             c = d.hourly.cloud_cover[t.getHours()] || "--";
           } catch (e) {}
           let status =
-            alt > 0 ? (c < 50 ? "VISIBLE" : "RIESGO NUBES") : "NO VISIBLE";
+            alt > 0 ? (c < 50 ? "VIABLE" : "OBSTRUIDO") : "BAJO HORIZONTE";
           let color =
             alt > 0
               ? c < 50
                 ? "text-success"
                 : "text-warning"
               : "text-danger";
-          res.innerHTML = `<div class="grid grid-cols-2 gap-2 mt-2 bg-black/40 p-2 rounded"><div><span class="label-tech block">ALT</span><b class="text-white">${alt}°</b></div><div><span class="label-tech block">NUBES</span><b class="text-white">${c}%</b></div></div><div class="${color} font-bold font-mono text-center mt-2 border border-current rounded py-1 text-xs tracking-widest">${status}</div>`;
+          res.innerHTML = `<div class="grid grid-cols-2 gap-2 mt-4 bg-black/40 p-3 rounded-lg border border-white/5"><div><span class="label-tech block">ELEVACIÓN</span><b class="text-white text-lg">${alt}°</b></div><div><span class="label-tech block">COBERTURA</span><b class="text-white text-lg">${c}%</b></div></div><div class="${color} font-bold font-mono text-center mt-3 border border-current rounded py-2 text-sm tracking-widest bg-white/5">${status}</div>`;
         });
       }
 
@@ -1376,14 +1448,9 @@
       function switchView(viewId, btn) {
         document.querySelectorAll(".nav-item").forEach((el) => {
           el.classList.remove("active");
-          if (
-            el.classList.contains("text-gray-500") === false &&
-            !el.classList.contains("active")
-          ) {
+          if (el.classList.contains("text-gray-500") === false)
             el.classList.add("text-gray-500");
-          }
         });
-
         if (btn) {
           btn.classList.add("active");
           btn.classList.remove("text-gray-500");
@@ -1399,7 +1466,6 @@
         else stopAR();
       }
 
-      // AR Mock functions
       function startAR() {
         const v = $("ar-video");
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -1408,8 +1474,7 @@
             .then((s) => {
               v.srcObject = s;
               v.play();
-            })
-            .catch((e) => console.log("AR Error", e));
+            });
         }
       }
       function stopAR() {
@@ -1417,20 +1482,30 @@
         if (v.srcObject) v.srcObject.getTracks().forEach((t) => t.stop());
       }
 
-      // Paywall Mocks
+      // Paywall Logic
       window.openPaywall = () => {
         $("paywall-modal").classList.remove("hidden");
-        setTimeout(() => $("paywall-modal").classList.remove("opacity-0"), 10);
+        setTimeout(() => {
+          $("paywall-modal").classList.remove("opacity-0");
+          const content = $("paywall-content");
+          content.classList.remove("scale-95");
+          content.classList.add("scale-100");
+        }, 10);
       };
       window.closePaywall = () => {
+        const content = $("paywall-content");
+        content.classList.remove("scale-100");
+        content.classList.add("scale-95");
         $("paywall-modal").classList.add("opacity-0");
         setTimeout(() => $("paywall-modal").classList.add("hidden"), 300);
       };
       window.processPayment = () => {
         const b = $("pay-btn");
-        b.innerText = "PROCESANDO...";
+        b.innerText = "VERIFICANDO BIOMETRÍA...";
         setTimeout(() => {
-          b.innerText = "¡ÉXITO!";
+          b.innerText = "SUSCRIPCIÓN ACTIVA";
+          b.className =
+            "w-full bg-success text-white font-bold py-4 rounded-xl shadow-glow-primary tracking-widest text-sm font-mono";
           setTimeout(closePaywall, 1000);
           sys.isPro = true;
         }, 1500);
