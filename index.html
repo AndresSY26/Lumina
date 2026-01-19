@@ -1,970 +1,1440 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <meta name="description" content="Lumina: Omni-Tool Edition - Rastreador Lunar Táctico">
-    <title>Lumina: Edición Omni-Tool</title>
-
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json">
-
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- PWA Manifest Simulation -->
     <link
-        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;500;600;700&display=swap"
-        rel="stylesheet">
-
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        lumina: {
-                            bg: '#050505',
-                            cyber: '#38bdf8',
-                            plasma: '#d946ef',
-                            gold: '#fbbf24',
-                            glass: 'rgba(20, 20, 30, 0.7)',
-                            glassBorder: 'rgba(255, 255, 255, 0.1)',
-                            alert: '#ef4444',
-                        },
-                        fontFamily: {
-                            tech: ['Orbitron', 'sans-serif'],
-                            mono: ['Rajdhani', 'monospace'],
-                        }
-                    },
-                    animation: {
-                        'spin-slow': 'spin 12s linear infinite',
-                        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                    }
-                }
-            }
-        }
-    </script>
+      rel="manifest"
+      href="data:application/json;base64,eyJuYW1lIjoiTHVtaW5hIFBybyIsInNob3J0X25hbWUiOiJMdW1pbmEiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzA1MDUwNSIsInRoZW1lX2NvbG9yIjoiIzM4YmRmOCIsImljb25zIjpbeyJzcmMiOiJodHRwczovL2ltZy5pY29uczhjb20vY29sb3IvOTYvMDAwMDAwL21vb24tc2F0ZWxsaXRlLnBuZyIsInNpemVzIjoiOTZ4OTYiLCJ0eXBlIjoiaW1hZ2UvcG5nIn1dfQ=="
+    />
+    <meta name="theme-color" content="#050505" />
 
     <!-- Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              void: "#050505",
+              primary: "#38bdf8",
+              accent: "#d946ef",
+              gold: "#fbbf24",
+              success: "#10b981",
+              warning: "#f59e0b",
+              danger: "#f43f5e",
+              panel: "rgba(10, 10, 16, 0.85)",
+            },
+            fontFamily: {
+              mono: ['"Orbitron"', "sans-serif"],
+              sans: ['"Rajdhani"', "sans-serif"],
+            },
+            boxShadow: {
+              "glow-primary": "0 0 15px rgba(56, 189, 248, 0.3)",
+              "glow-accent": "0 0 20px rgba(217, 70, 239, 0.4)",
+            },
+            backgroundImage: {
+              "tech-grid":
+                "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)",
+            },
+            animation: {
+              "spin-slow": "spin 120s linear infinite",
+            },
+          },
+        },
+      };
+    </script>
 
     <style>
-        /* Global Reset & Base */
-        :root {
-            --color-bg: #050505;
-            --color-cyber: #38bdf8;
-            --color-plasma: #d946ef;
-        }
+      body {
+        background-color: #050505;
+        color: #e2e8f0;
+        overflow: hidden;
+        touch-action: none;
+        font-family: "Rajdhani", sans-serif;
+      }
 
-        body {
-            background-color: var(--color-bg);
-            color: white;
-            font-family: 'Rajdhani', sans-serif;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
+      .hud-module {
+        background: var(--panel);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+      }
+      .hud-module::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.1),
+          transparent
+        );
+      }
 
-        /* Glassmorphism Classes */
-        .glass-panel {
-            background: var(--lumina-glass, rgba(20, 20, 30, 0.7));
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
+      .label-tech {
+        font-weight: 700;
+        font-size: 0.65rem;
+        letter-spacing: 0.15em;
+        color: #64748b;
+        text-transform: uppercase;
+      }
+      .value-tech {
+        font-family: "Orbitron", sans-serif;
+        letter-spacing: 0.05em;
+      }
 
-        .glass-panel::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.4), transparent);
-            opacity: 0.5;
-        }
+      /* Compass */
+      .compass-lens {
+        border-radius: 50%;
+        background: radial-gradient(
+          circle at 50% 50%,
+          rgba(255, 255, 255, 0.01) 0%,
+          rgba(0, 0, 0, 0.6) 80%
+        );
+        box-shadow:
+          0 0 0 1px rgba(255, 255, 255, 0.1),
+          inset 0 0 40px rgba(0, 0, 0, 0.8);
+        position: relative;
+      }
+      .dial-ring {
+        transition: transform 0.1s linear;
+        will-change: transform;
+      }
+      .smooth-move {
+        transition: transform 0.3s ease-out;
+      }
+      .tick-mark {
+        position: absolute;
+        left: 50%;
+        transform-origin: bottom center;
+        background: rgba(255, 255, 255, 0.5);
+      }
+      .tick-major {
+        height: 8px;
+        width: 2px;
+        background: #38bdf8;
+        box-shadow: 0 0 5px #38bdf8;
+      }
+      .tick-minor {
+        height: 4px;
+        width: 1px;
+        opacity: 0.4;
+      }
+      .locked .compass-lens {
+        border-color: #d946ef;
+        box-shadow:
+          inset 0 0 30px rgba(217, 70, 239, 0.2),
+          0 0 20px rgba(217, 70, 239, 0.3);
+      }
+      .locked .center-reticle {
+        background: #d946ef;
+        box-shadow: 0 0 15px #d946ef;
+      }
 
-        .glass-panel:hover {
-            border-color: rgba(56, 189, 248, 0.3);
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.15);
-        }
+      /* Navigation */
+      .nav-dock {
+        background: rgba(5, 5, 5, 0.95);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+      .nav-item {
+        color: #64748b;
+        transition: all 0.3s ease;
+        position: relative;
+      }
+      .nav-item.active {
+        color: #38bdf8;
+      }
 
-        /* Scanline Background */
-        .scanline-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.3) 50%, rgba(0, 0, 0, 0.3));
-            background-size: 100% 4px;
-            pointer-events: none;
-            z-index: -1;
-            opacity: 0.6;
-        }
+      /* AR Overlay */
+      #ar-video {
+        object-fit: cover;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 0;
+      }
+      .ar-hud-corner {
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        border-color: rgba(56, 189, 248, 0.6);
+        pointer-events: none;
+      }
 
-        /* Target Lock Styles */
-        .target-locked {
-            border-color: var(--color-plasma) !important;
-            box-shadow: 0 0 30px var(--color-plasma) !important;
-        }
-
-        .text-locked {
-            color: var(--color-plasma) !important;
-            text-shadow: 0 0 10px var(--color-plasma);
-        }
-
-        /* Performance Optimization */
-        .will-change-transform {
-            will-change: transform;
-        }
-
-        /* Scrollbar prevention */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        /* AR HUD Overlay */
-        #ar-hud {
-            pointer-events: none;
-        }
-
-        .hud-line {
-            background: rgba(255, 255, 255, 0.3);
-            height: 1px;
-            width: 100%;
-        }
+      canvas {
+        image-rendering: pixelated;
+      }
+      ::-webkit-scrollbar {
+        width: 0px;
+      }
     </style>
-</head>
+  </head>
+  <body
+    class="bg-void h-screen w-screen flex flex-col relative selection:bg-accent selection:text-white"
+  >
+    <div
+      class="absolute inset-0 bg-tech-grid bg-[length:30px_30px] opacity-10 pointer-events-none"
+    ></div>
 
-<body class="relative">
-
-    <!-- AR Background Video -->
-    <video id="ar-video"
-        class="fixed top-0 left-0 w-full h-full object-cover -z-20 opacity-0 transition-opacity duration-1000"
-        playsinline muted autoplay></video>
-
-    <!-- AR HUD Overlay (Hidden by default) -->
-    <div id="ar-hud"
-        class="fixed inset-0 z-0 opacity-0 transition-opacity duration-300 flex flex-col justify-between p-4">
-        <!-- Top HUD -->
-        <div class="flex justify-between items-start">
-            <div class="glass-panel px-3 py-1 border-l-4 border-lumina-cyber">
-                <span class="text-[9px] text-gray-400 font-tech uppercase block">Rumbo</span>
-                <span id="hud-heading" class="text-xl font-tech text-white">000°</span>
-            </div>
-
-            <!-- Artificial Horizon Line (Top Center visual aid) -->
-            <div class="flex-1 mx-4 mt-4 border-t border-white/20 flex justify-center relative">
-                <div class="absolute -top-1.5 w-[1px] h-3 bg-lumina-cyber"></div>
-                <span class="absolute -top-5 text-[9px] text-lumina-cyber font-mono bg-black/50 px-1">NIVEL</span>
-            </div>
-
-            <div class="glass-panel px-3 py-1 border-r-4 border-lumina-plasma text-right">
-                <span class="text-[9px] text-gray-400 font-tech uppercase block">Objetivo</span>
-                <span id="hud-target" class="text-xl font-tech text-lumina-plasma">---°</span>
-            </div>
-        </div>
-
-        <!-- Center Reticle (Dynamic) -->
+    <!-- BOOT SEQUENCE -->
+    <div
+      id="boot-sequence"
+      class="fixed inset-0 z-[100] bg-void flex flex-col items-center justify-center p-8 transition-opacity duration-700"
+    >
+      <div class="relative w-48 h-48 flex items-center justify-center mb-10">
         <div
-            class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 flex items-center justify-center opacity-80">
-            <!-- Outer Ring -->
-            <div id="hud-reticle-ring"
-                class="absolute w-full h-full rounded-full border border-dashed border-white/30 animate-[spin_10s_linear_infinite]">
-            </div>
-            <!-- Inner Bracket -->
-            <div id="hud-reticle-bracket"
-                class="absolute w-32 h-32 border-2 border-white/50 border-t-0 border-b-0 rounded-lg transition-colors duration-300">
-            </div>
-            <!-- Center Crosshair -->
-            <div class="w-4 h-4 relative">
-                <div class="absolute top-1/2 left-0 w-full h-[1px] bg-white"></div>
-                <div class="absolute top-0 left-1/2 h-full w-[1px] bg-white"></div>
-            </div>
+          class="absolute inset-0 border border-primary/20 rounded-full animate-[spin_10s_linear_infinite]"
+        ></div>
+        <div
+          class="absolute inset-4 border border-t-primary border-r-transparent border-b-transparent border-l-transparent rounded-full animate-[spin_3s_linear_infinite]"
+        ></div>
+        <div
+          class="absolute inset-8 border border-b-accent border-t-transparent border-l-transparent border-r-transparent rounded-full animate-[spin_2s_linear_infinite_reverse]"
+        ></div>
+        <div class="relative z-10 flex flex-col items-center animate-pulse">
+          <i
+            class="ph-duotone ph-planet text-6xl text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]"
+          ></i>
         </div>
-
-        <!-- Bottom HUD -->
-        <div class="flex justify-between items-end">
-            <div class="glass-panel px-3 py-1">
-                <span class="text-[9px] text-gray-400 font-tech uppercase block">Alt Luna</span>
-                <span id="hud-alt" class="text-lg font-mono text-white">--°</span>
-            </div>
-            <div class="glass-panel px-3 py-1">
-                <span class="text-[9px] text-gray-400 font-tech uppercase block">Distancia</span>
-                <span id="hud-dist" class="text-lg font-mono text-white">-- km</span>
-            </div>
-        </div>
+      </div>
+      <h1
+        class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-white to-purple-500 font-mono tracking-tighter mb-2"
+      >
+        LUMINA
+      </h1>
+      <button
+        id="system-start-btn"
+        class="group relative px-10 py-4 overflow-hidden bg-transparent border border-white/20 hover:border-purple-500/50 transition-all duration-500"
+      >
+        <span
+          class="relative text-sm font-mono font-bold text-white group-hover:text-purple-400 transition-colors tracking-widest flex items-center gap-3"
+          >INICIAR SISTEMA <i class="ph-bold ph-caret-right"></i
+        ></span>
+      </button>
     </div>
 
-    <!-- Background Effects -->
-    <div class="scanline-bg"></div>
-
-    <!-- Main Container -->
-    <main class="min-h-screen w-full flex flex-col p-4 md:p-6 lg:p-8 pb-32 relative z-10">
-
-        <!-- Header -->
-        <header
-            class="flex justify-between items-center mb-6 border-b border-lumina-cyber/20 pb-4 backdrop-blur-sm sticky top-0 z-30 pt-2">
-            <div class="flex items-center gap-3">
-                <i class="ph ph-planet text-3xl text-lumina-cyber animate-pulse-fast"></i>
-                <div class="flex flex-col">
-                    <h1
-                        class="font-tech text-xl md:text-2xl text-lumina-cyber tracking-widest uppercase font-bold text-shadow-glow">
-                        Lumina</h1>
-                    <span class="text-[10px] text-gray-400 tracking-[0.3em] font-tech uppercase">Omni-Tool
-                        Edition</span>
-                </div>
-            </div>
-            <button id="paywall-btn-top"
-                class="flex items-center gap-2 bg-lumina-glass border border-lumina-gold/40 px-3 py-1.5 rounded hover:bg-lumina-gold/10 transition-colors group">
-                <i
-                    class="ph ph-crown-simple text-lumina-gold group-hover:drop-shadow-[0_0_5px_rgba(251,191,36,0.8)]"></i>
-                <span class="text-xs font-bold text-lumina-gold font-tech hidden sm:inline">PREMIUM</span>
-            </button>
-        </header>
-
-        <!-- Dynamic Grid Layout -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 w-full max-w-7xl mx-auto">
-
-            <!-- 1. COMPASS & AR MODULE -->
-            <section class="col-span-1 md:col-span-1 lg:col-span-4 flex flex-col gap-4">
-                <div class="glass-panel p-6 flex flex-col items-center justify-center relative min-h-[350px]">
-                    <div class="absolute top-3 left-3 flex items-center gap-2">
-                        <div class="w-1.5 h-1.5 bg-lumina-cyber rounded-full animate-pulse"></div>
-                        <span class="text-[10px] text-lumina-cyber/70 font-tech tracking-wider">BRÚJULA TÁCTICA</span>
-                    </div>
-
-                    <!-- Compass Visual -->
-                    <div class="relative w-64 h-64 md:w-72 md:h-72 flex items-center justify-center my-4">
-
-                        <!-- Line of Sight Indicator (Fixed Heading) -->
-                        <div class="absolute -top-4 z-20 flex flex-col items-center">
-                            <div
-                                class="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[10px] border-b-lumina-cyber drop-shadow-[0_0_5px_rgba(56,189,248,0.8)]">
-                            </div>
-                            <span
-                                class="text-[9px] text-lumina-cyber font-tech uppercase tracking-widest mt-1">MIRA</span>
-                        </div>
-
-                        <!-- Rotating Compass Ring (North Oriented) -->
-                        <div id="compass-ring"
-                            class="absolute inset-0 border-2 border-lumina-cyber/20 rounded-full flex items-center justify-center transition-transform duration-100 ease-linear will-change-transform shadow-[0_0_15px_rgba(56,189,248,0.1)]">
-                            <!-- Ticks & Labels -->
-                            <div class="absolute top-1 w-0.5 h-4 bg-lumina-cyber shadow-[0_0_5px_rgba(56,189,248,1)]">
-                            </div>
-                            <span class="absolute top-6 text-lumina-cyber font-tech font-bold text-sm">N</span>
-
-                            <div class="absolute bottom-1 w-0.5 h-3 bg-gray-600"></div>
-                            <span class="absolute bottom-6 text-gray-500 font-tech text-xs">S</span>
-
-                            <div class="absolute left-1 w-3 h-0.5 bg-gray-600"></div>
-                            <span class="absolute left-6 text-gray-500 font-tech text-xs">O</span>
-
-                            <div class="absolute right-1 w-3 h-0.5 bg-gray-600"></div>
-                            <span class="absolute right-6 text-gray-500 font-tech text-xs">E</span>
-
-                            <!-- Moon Pointer (Absolute Position relative to North) -->
-                            <div id="moon-pointer"
-                                class="absolute top-0 bottom-0 w-0.5 bg-transparent origin-center transition-transform duration-300 will-change-transform z-10">
-                                <!-- The Arrow/Needle -->
-                                <div class="absolute top-4 left-1/2 -translate-x-1/2 flex flex-col items-center">
-                                    <div
-                                        class="w-6 h-6 rounded-full border-2 border-lumina-plasma bg-black/80 flex items-center justify-center shadow-[0_0_15px_#d946ef]">
-                                        <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
-                                    </div>
-                                    <!-- Floating Label -->
-                                    <div id="moon-float-label"
-                                        class="mt-1 px-2 py-0.5 bg-lumina-plasma/20 border border-lumina-plasma/50 rounded text-[9px] text-lumina-plasma font-tech whitespace-nowrap shadow-lg backdrop-blur-md">
-                                        OBJETIVO
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Fixed HUD Reticle -->
-                        <div id="reticle"
-                            class="w-24 h-24 border border-white/10 rounded-full flex items-center justify-center relative transition-all duration-300 pointer-events-none">
-                            <div class="absolute w-full h-[1px] bg-white/10"></div>
-                            <div class="absolute h-full w-[1px] bg-white/10"></div>
-                            <div class="w-1 h-1 bg-lumina-cyber/50 rounded-full"></div>
-                        </div>
-                    </div>
-
-                    <!-- Digital Readout -->
-                    <div class="grid grid-cols-2 gap-x-8 gap-y-2 w-full text-center mt-2 max-w-xs mx-auto">
-                        <div class="border-r border-gray-700 pr-4">
-                            <span class="block text-[9px] text-gray-500 uppercase tracking-widest">Rumbo Actual</span>
-                            <div class="flex items-baseline justify-center gap-1">
-                                <span id="heading-val" class="font-tech text-2xl text-white">000°</span>
-                                <span id="heading-cardinal" class="font-mono text-xs text-lumina-cyber">--</span>
-                            </div>
-                        </div>
-                        <div class="pl-4">
-                            <span class="block text-[9px] text-gray-500 uppercase tracking-widest">Azimut
-                                Objetivo</span>
-                            <div class="flex items-baseline justify-center gap-1">
-                                <span id="azimuth-val" class="font-tech text-2xl text-lumina-plasma">---°</span>
-                                <span id="azimuth-cardinal" class="font-mono text-xs text-lumina-plasma">--</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="w-full text-center mt-3">
-                        <span id="lock-status"
-                            class="font-tech text-xs text-gray-400 block tracking-[0.2em] border-t border-gray-800 pt-2 mt-2">ESCANEANDO...</span>
-                        <p id="target-feedback" class="text-[10px] text-lumina-cyber mt-1 h-4 font-mono"></p>
-                    </div>
-
-                    <!-- AR Toggle -->
-                    <button id="camera-btn"
-                        class="mt-4 px-6 py-2 bg-lumina-cyber/10 border border-lumina-cyber/50 text-lumina-cyber font-tech text-xs uppercase tracking-widest hover:bg-lumina-cyber/20 transition-colors w-full flex items-center justify-center gap-2 rounded-sm group">
-                        <i class="ph ph-camera text-lg group-hover:scale-110 transition-transform"></i> <span
-                            id="cam-btn-text">Activar HUD Táctico</span>
-                    </button>
-                    <p id="sensor-msg" class="text-[9px] text-red-500 mt-2 text-center h-3"></p>
-                </div>
-            </section>
-
-            <!-- 2. DATA CENTER -->
-            <section class="col-span-1 md:col-span-1 lg:col-span-8 flex flex-col gap-6">
-
-                <!-- Visibility Verdict Panel -->
-                <div class="glass-panel p-4 flex items-center justify-between bg-gradient-to-r from-lumina-glass to-transparent border-l-4 border-l-gray-600 transition-colors duration-500"
-                    id="verdict-panel">
-                    <div>
-                        <h3 class="text-[10px] text-gray-400 font-tech uppercase tracking-widest mb-1">Estado de
-                            Observación</h3>
-                        <div id="visibility-verdict" class="text-xl md:text-2xl font-tech text-white">CALCULANDO...
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <i id="verdict-icon" class="ph ph-circle-notch animate-spin text-4xl text-gray-500"></i>
-                    </div>
-                </div>
-
-                <!-- Telemetry Grid -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <!-- Phase -->
-                    <div
-                        class="glass-panel p-4 flex flex-col relative group overflow-hidden hover:border-lumina-cyber/40 transition-colors">
-                        <span
-                            class="text-[9px] text-lumina-cyber uppercase tracking-wider mb-2 border-l-2 border-lumina-cyber pl-2">Fase
-                            Lunar</span>
-                        <span id="phase-name" class="font-tech text-lg text-white mb-1">---</span>
-                        <span id="illum-percent" class="font-mono text-sm text-gray-400">Ilum: --%</span>
-                    </div>
-
-                    <!-- Distance -->
-                    <div
-                        class="glass-panel p-4 flex flex-col relative group overflow-hidden hover:border-lumina-cyber/40 transition-colors">
-                        <span
-                            class="text-[9px] text-lumina-cyber uppercase tracking-wider mb-2 border-l-2 border-lumina-cyber pl-2">Distancia</span>
-                        <span id="distance-val" class="font-tech text-lg text-white mb-1">--- km</span>
-                        <span class="font-mono text-sm text-gray-400">Tiempo Real</span>
-                    </div>
-
-                    <!-- Altitude -->
-                    <div
-                        class="glass-panel p-4 flex flex-col relative group overflow-hidden hover:border-lumina-cyber/40 transition-colors">
-                        <span
-                            class="text-[9px] text-lumina-cyber uppercase tracking-wider mb-2 border-l-2 border-lumina-cyber pl-2">Altitud</span>
-                        <span id="altitude-val" class="font-tech text-lg text-white mb-1">---°</span>
-                        <span class="font-mono text-sm text-gray-400">Horizonte Rel.</span>
-                    </div>
-
-                    <!-- Meridian -->
-                    <div
-                        class="glass-panel p-4 flex flex-col relative group overflow-hidden hover:border-lumina-cyber/40 transition-colors">
-                        <span
-                            class="text-[9px] text-lumina-gold uppercase tracking-wider mb-2 border-l-2 border-lumina-gold pl-2">Próximo
-                            Evento</span>
-                        <span id="event-type" class="text-[9px] text-gray-500 mb-0.5">---</span>
-                        <span id="zenith-val" class="font-tech text-lg text-lumina-gold mb-1">--:--</span>
-                    </div>
-                </div>
-
-                <!-- Trajectory Graph -->
-                <div class="glass-panel w-full p-4 flex flex-col flex-1 min-h-[250px]">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-[10px] text-gray-400 font-tech uppercase tracking-widest"><i
-                                class="ph ph-chart-line-up mr-2"></i>Trayectoria Orbital</h3>
-                        <div class="flex items-center gap-2">
-                            <span class="w-1.5 h-1.5 bg-lumina-cyber rounded-full animate-pulse"></span>
-                            <span class="text-[9px] text-lumina-cyber tracking-wider">EN VIVO</span>
-                        </div>
-                    </div>
-                    <div
-                        class="relative w-full h-full flex-1 rounded border border-white/5 bg-black/40 overflow-hidden">
-                        <canvas id="trajectory-canvas" class="w-full h-full block cursor-crosshair"></canvas>
-                        <!-- Dynamic overlay info -->
-                        <div class="absolute bottom-2 left-2 text-[9px] font-mono text-gray-500">
-                            Eje X: Tiempo / Eje Y: Altitud
-                        </div>
-                    </div>
-                </div>
-
-            </section>
+    <!-- MAIN APP -->
+    <div
+      id="main-app"
+      class="flex-1 flex flex-col h-full opacity-0 transition-opacity duration-1000 relative overflow-hidden"
+    >
+      <!-- GLOBAL HEADER -->
+      <header
+        class="flex justify-between items-start px-5 pt-5 z-20 mb-2 absolute w-full top-0 pointer-events-none"
+      >
+        <div class="pointer-events-auto">
+          <div class="flex items-center gap-2 mb-0.5">
+            <span class="relative flex h-2 w-2"
+              ><span
+                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"
+              ></span
+              ><span
+                class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"
+              ></span
+            ></span>
+            <span
+              id="user-tier"
+              class="text-[10px] font-mono font-bold text-emerald-500 tracking-widest"
+              >GRATUITO</span
+            >
+          </div>
+          <div class="text-[9px] font-mono text-gray-500" id="gps-coords">
+            GPS: BUSCANDO...
+          </div>
         </div>
+        <div class="text-right pointer-events-auto">
+          <button
+            id="upgrade-btn"
+            class="mb-1 bg-gradient-to-r from-amber-500 to-yellow-600 text-black text-[10px] font-bold px-3 py-1 rounded-full shadow-[0_0_15px_rgba(251,191,36,0.4)] animate-pulse hover:scale-105 transition-transform"
+          >
+            <i class="ph-fill ph-crown"></i> PRO
+          </button>
+          <div
+            id="clock"
+            class="text-xl font-mono font-bold text-white leading-none"
+          >
+            00:00
+          </div>
+          <div
+            id="date"
+            class="text-[10px] font-sans font-bold text-cyan-400 tracking-widest mt-0.5"
+          >
+            -- ---
+          </div>
+        </div>
+      </header>
 
-        <!-- Extra Tools (Locked) -->
-        <section class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-7xl mx-auto">
+      <!-- VIEWS -->
+      <div
+        class="flex-1 relative overflow-y-auto pb-20 pt-16 scroll-smooth"
+        id="views-container"
+      >
+        <!-- [VIEW 1] COMMAND CENTER -->
+        <section id="view-home" class="view-section flex flex-col min-h-full">
+          <!-- COMPASS -->
+          <div
+            class="flex-shrink-0 relative flex flex-col items-center justify-center py-2 min-h-[260px]"
+          >
             <div
-                class="paywall-lock glass-panel p-6 flex flex-col items-center justify-center opacity-60 hover:opacity-100 transition-opacity cursor-pointer border-dashed border-gray-600 hover:border-lumina-gold group">
-                <i
-                    class="ph ph-map-trifold text-3xl text-lumina-gold mb-2 group-hover:scale-110 transition-transform"></i>
-                <h4 class="font-tech text-xs text-gray-300">Mapas Contaminación</h4>
-                <i class="ph ph-lock-key text-lumina-gold mt-2"></i>
+              class="absolute w-[240px] h-[240px] border border-white/5 rounded-full pointer-events-none"
+            ></div>
+            <div
+              class="absolute w-[260px] h-[260px] border border-dashed border-white/5 rounded-full pointer-events-none animate-[spin_60s_linear_infinite]"
+            ></div>
+            <div
+              class="relative w-64 h-64 flex items-center justify-center compass-lens transition-all duration-300"
+              id="compass-unit"
+            >
+              <div
+                class="absolute top-0 z-50 w-1 h-5 bg-cyan-400 rounded-full shadow-[0_0_15px_#38bdf8]"
+              ></div>
+              <div
+                id="compass-dial"
+                class="dial-ring w-full h-full rounded-full relative"
+              >
+                <div
+                  id="ticks-layer"
+                  class="w-full h-full absolute inset-0 opacity-70"
+                ></div>
+                <div class="absolute inset-0 z-30 pointer-events-none">
+                  <span
+                    class="absolute top-3 left-1/2 -translate-x-1/2 text-lg font-mono font-black text-white"
+                    >N</span
+                  >
+                  <span
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono font-bold text-gray-600"
+                    >E</span
+                  >
+                  <span
+                    class="absolute bottom-3 left-1/2 -translate-x-1/2 text-xs font-mono font-bold text-gray-600"
+                    >S</span
+                  >
+                  <span
+                    class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-mono font-bold text-gray-600"
+                    >O</span
+                  >
+                </div>
+                <!-- Moon Pointer: rotated independently or within the dial -->
+                <div
+                  id="moon-pointer"
+                  class="absolute inset-0 z-20 smooth-move"
+                >
+                  <div
+                    class="absolute top-8 left-1/2 -translate-x-1/2 flex flex-col items-center"
+                  >
+                    <i
+                      id="moon-icon"
+                      class="ph-fill ph-moon-stars text-3xl text-gray-400 drop-shadow-md"
+                    ></i>
+                    <div
+                      id="azimuth-pill"
+                      class="mt-1 bg-black/60 px-1.5 rounded text-[8px] font-mono text-gray-400 border border-white/10"
+                    >
+                      ---
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                id="lock-alert"
+                class="absolute inset-0 flex items-center justify-center opacity-0 scale-75 transition-all duration-300 pointer-events-none"
+              >
+                <div
+                  class="bg-black/90 border border-purple-500 text-purple-500 px-3 py-1 rounded text-[10px] font-mono font-bold tracking-[0.2em] shadow-[0_0_20px_#d946ef] animate-pulse"
+                >
+                  LOCKED
+                </div>
+              </div>
             </div>
             <div
-                class="paywall-lock glass-panel p-6 flex flex-col items-center justify-center opacity-60 hover:opacity-100 transition-opacity cursor-pointer border-dashed border-gray-600 hover:border-lumina-gold group">
-                <i
-                    class="ph ph-camera-rotate text-3xl text-lumina-gold mb-2 group-hover:scale-110 transition-transform"></i>
-                <h4 class="font-tech text-xs text-gray-300">Planificador Fotos</h4>
-                <i class="ph ph-lock-key text-lumina-gold mt-2"></i>
+              class="absolute bottom-0 w-full flex justify-between px-8 pointer-events-none"
+            >
+              <div class="text-left">
+                <div class="label-tech text-cyan-400">RUMBO</div>
+                <div
+                  id="heading-val"
+                  class="text-xl font-mono font-bold text-white"
+                >
+                  000°
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="label-tech text-purple-500">OBJETIVO</div>
+                <div
+                  id="target-val"
+                  class="text-xl font-mono font-bold text-gray-400"
+                >
+                  ---°
+                </div>
+              </div>
             </div>
+          </div>
+
+          <!-- DASHBOARD -->
+          <div class="px-4 mt-2 space-y-3">
             <div
-                class="paywall-lock glass-panel p-6 flex flex-col items-center justify-center opacity-60 hover:opacity-100 transition-opacity cursor-pointer border-dashed border-gray-600 hover:border-lumina-gold group">
-                <i
-                    class="ph ph-mountains text-3xl text-lumina-gold mb-2 group-hover:scale-110 transition-transform"></i>
-                <h4 class="font-tech text-xs text-gray-300">Terreno 3D</h4>
-                <i class="ph ph-lock-key text-lumina-gold mt-2"></i>
+              class="hud-module p-3 flex items-center justify-between border-l-4 border-gray-600 transition-colors duration-500"
+              id="status-bar"
+            >
+              <div class="flex flex-col">
+                <span class="label-tech">ESTADO VISUAL</span>
+                <div
+                  id="vis-verdict"
+                  class="text-xl font-sans font-bold text-white leading-none mt-1"
+                >
+                  ANALIZANDO...
+                </div>
+              </div>
+              <div class="text-right">
+                <div
+                  id="vis-icon-container"
+                  class="bg-white/5 p-2 rounded-lg border border-white/5"
+                >
+                  <i
+                    id="vis-icon"
+                    class="ph-fill ph-broadcast text-xl text-gray-500"
+                  ></i>
+                </div>
+              </div>
             </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div class="hud-module p-3 flex flex-col gap-2">
+                <div
+                  class="flex justify-between items-center border-b border-white/5 pb-1"
+                >
+                  <span class="label-tech text-purple-500"
+                    ><i class="ph-bold ph-planet"></i> LUNA</span
+                  ><span id="phase-val" class="text-[10px] font-mono text-white"
+                    >--%</span
+                  >
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <span class="label-tech block">ILUM</span
+                    ><span
+                      id="illum-val"
+                      class="value-tech text-sm font-bold text-white"
+                      >--%</span
+                    >
+                  </div>
+                  <div class="text-right">
+                    <span class="label-tech block">DIST</span
+                    ><span
+                      id="dist-val"
+                      class="value-tech text-sm font-bold text-cyan-400"
+                      >--K</span
+                    >
+                  </div>
+                </div>
+              </div>
+              <div class="hud-module p-3 flex flex-col gap-2">
+                <div
+                  class="flex justify-between items-center border-b border-white/5 pb-1"
+                >
+                  <span class="label-tech text-cyan-400"
+                    ><i class="ph-bold ph-crosshair"></i> POSICIÓN</span
+                  ><span id="alt-val" class="text-[10px] font-mono text-white"
+                    >ALT: --°</span
+                  >
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <span class="label-tech block">PICO</span
+                    ><span
+                      id="peak-val"
+                      class="value-tech text-sm font-bold text-yellow-500"
+                      >--:--</span
+                    >
+                  </div>
+                  <div class="text-right">
+                    <span class="label-tech block">AZIMUT</span
+                    ><span
+                      id="az-grid-val"
+                      class="value-tech text-sm font-bold text-white"
+                      >--</span
+                    >
+                  </div>
+                </div>
+              </div>
+              <div class="hud-module p-3">
+                <span class="label-tech block mb-1">CICLO DIARIO</span>
+                <div
+                  class="flex justify-between items-center bg-black/20 rounded p-1.5 border border-white/5"
+                >
+                  <div class="text-center">
+                    <i class="ph-bold ph-arrow-up text-cyan-400 text-xs"></i>
+                    <div
+                      id="rise-val"
+                      class="text-xs font-mono font-bold text-white"
+                    >
+                      --:--
+                    </div>
+                  </div>
+                  <div class="h-6 w-[1px] bg-white/10"></div>
+                  <div class="text-center">
+                    <i
+                      class="ph-bold ph-arrow-down text-purple-500 text-xs"
+                    ></i>
+                    <div
+                      id="set-val"
+                      class="text-xs font-mono font-bold text-white"
+                    >
+                      --:--
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="hud-module p-3">
+                <span class="label-tech block mb-1">ATMÓSFERA</span>
+                <div class="grid grid-cols-2 gap-2">
+                  <div class="flex flex-col">
+                    <span class="text-[9px] text-gray-500 font-mono">NUBES</span
+                    ><span
+                      id="cloud-val"
+                      class="text-sm font-mono font-bold text-white"
+                      >--%</span
+                    >
+                  </div>
+                  <div class="flex flex-col text-right">
+                    <span class="text-[9px] text-gray-500 font-mono">HUM</span
+                    ><span
+                      id="humid-val"
+                      class="text-sm font-mono font-bold text-cyan-400"
+                      >--%</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div
-                class="paywall-lock glass-panel p-6 flex flex-col items-center justify-center opacity-60 hover:opacity-100 transition-opacity cursor-pointer border-dashed border-gray-600 hover:border-lumina-gold group">
-                <i
-                    class="ph ph-star-four text-3xl text-lumina-gold mb-2 group-hover:scale-110 transition-transform"></i>
-                <h4 class="font-tech text-xs text-gray-300">Constelaciones</h4>
-                <i class="ph ph-lock-key text-lumina-gold mt-2"></i>
+              class="hud-module p-0 relative h-40 flex items-center justify-center"
+            >
+              <div class="absolute top-3 left-4 z-10">
+                <span class="label-tech text-purple-500 block tracking-widest"
+                  >TRAYECTORIA PICO</span
+                >
+              </div>
+              <canvas
+                id="graph-canvas"
+                class="w-full h-full absolute inset-0"
+              ></canvas>
+              <button
+                id="future-btn"
+                class="absolute top-3 right-4 bg-white/5 hover:bg-purple-500 hover:text-white border border-white/10 text-gray-400 px-2 py-1 rounded text-[9px] font-mono font-bold transition-colors z-10"
+              >
+                SIMULAR
+              </button>
             </div>
+
+            <div
+              id="future-panel"
+              class="hidden hud-module p-4 border-t border-purple-500 animate-[fadeIn_0.3s_ease]"
+            >
+              <div class="flex justify-between items-center mb-3">
+                <span class="label-tech text-purple-500">SIMULADOR</span
+                ><button
+                  id="close-future"
+                  class="text-gray-400 hover:text-white"
+                >
+                  <i class="ph-bold ph-x"></i>
+                </button>
+              </div>
+              <div class="flex gap-2 mb-3">
+                <input
+                  type="datetime-local"
+                  id="f-input"
+                  class="w-full bg-black/40 border border-white/20 rounded px-3 py-2 text-xs text-white font-mono outline-none focus:border-purple-500"
+                />
+              </div>
+              <button
+                id="f-calc"
+                class="w-full bg-purple-500/20 border border-purple-500/50 text-purple-500 hover:bg-purple-500 hover:text-white py-2 rounded font-mono font-bold text-xs transition-colors"
+              >
+                CALCULAR
+              </button>
+              <div id="f-result" class="mt-3 text-center hidden"></div>
+            </div>
+          </div>
         </section>
 
-    </main>
+        <!-- [VIEW 2] AR (HUD MEJORADO) -->
+        <section
+          id="view-ar"
+          class="view-section hidden h-full relative bg-black"
+        >
+          <div
+            id="ar-container"
+            class="absolute inset-0 flex flex-col items-center justify-center overflow-hidden"
+          >
+            <video
+              id="ar-video"
+              playsinline
+              autoplay
+              muted
+              class="opacity-70"
+            ></video>
 
-    <!-- Navigation Dock -->
-    <nav class="fixed bottom-0 left-0 w-full z-40 px-4 pb-4 pt-2">
-        <div
-            class="glass-panel mx-auto max-w-lg h-16 flex items-center justify-around px-2 shadow-[0_-5px_20px_rgba(0,0,0,0.5)] bg-black/80">
-            <button class="flex flex-col items-center gap-1 text-lumina-cyber p-2">
-                <i class="ph ph-crosshair text-xl"></i>
-                <span class="text-[9px] font-tech uppercase">Rastreo</span>
-            </button>
-            <button class="flex flex-col items-center gap-1 text-gray-500 hover:text-white transition-colors p-2">
-                <i class="ph ph-chart-bar text-xl"></i>
-                <span class="text-[9px] font-tech uppercase">Datos</span>
-            </button>
-            <div
-                class="w-16 h-16 bg-lumina-cyber rounded-full -mt-10 flex items-center justify-center shadow-[0_0_20px_rgba(56,189,248,0.5)] border-4 border-[#050505] hover:scale-105 transition-transform cursor-pointer">
-                <i class="ph ph-moon-stars text-2xl text-black"></i>
+            <!-- HUD OVERLAY -->
+            <div class="absolute inset-0 z-10 pointer-events-none">
+              <!-- Esquinas -->
+              <div
+                class="absolute top-8 left-8 w-16 h-16 border-t-2 border-l-2 border-cyan-500/50 rounded-tl-xl"
+              ></div>
+              <div
+                class="absolute top-8 right-8 w-16 h-16 border-t-2 border-r-2 border-cyan-500/50 rounded-tr-xl"
+              ></div>
+              <div
+                class="absolute bottom-24 left-8 w-16 h-16 border-b-2 border-l-2 border-cyan-500/50 rounded-bl-xl"
+              ></div>
+              <div
+                class="absolute bottom-24 right-8 w-16 h-16 border-b-2 border-r-2 border-cyan-500/50 rounded-br-xl"
+              ></div>
+
+              <!-- Reticula Central -->
+              <div
+                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 border border-white/10 rounded-full flex items-center justify-center"
+              >
+                <div class="w-1 h-4 bg-cyan-500 absolute top-0"></div>
+                <div class="w-1 h-4 bg-cyan-500 absolute bottom-0"></div>
+                <div class="w-4 h-1 bg-cyan-500 absolute left-0"></div>
+                <div class="w-4 h-1 bg-cyan-500 absolute right-0"></div>
+                <div
+                  class="w-2 h-2 bg-purple-500 rounded-full animate-pulse"
+                ></div>
+              </div>
+
+              <!-- Datos Flotantes -->
+              <div
+                class="absolute top-10 left-1/2 -translate-x-1/2 bg-black/60 px-4 py-1 rounded-full border border-white/10"
+              >
+                <span class="text-xs font-mono text-cyan-400" id="ar-heading"
+                  >RUMBO: ---°</span
+                >
+              </div>
             </div>
-            <button
-                class="paywall-lock flex flex-col items-center gap-1 text-lumina-gold/70 hover:text-lumina-gold transition-colors p-2">
-                <i class="ph ph-images text-xl"></i>
-                <span class="text-[9px] font-tech uppercase relative">Galería <i
-                        class="ph ph-lock-key text-[8px] absolute -top-1 -right-2"></i></span>
-            </button>
-            <button class="flex flex-col items-center gap-1 text-gray-500 hover:text-white transition-colors p-2">
-                <i class="ph ph-gear text-xl"></i>
-                <span class="text-[9px] font-tech uppercase">Sistema</span>
-            </button>
-        </div>
-    </nav>
 
-    <!-- Paywall Modal -->
-    <div id="paywall-modal"
-        class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/90 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300">
-        <div
-            class="glass-panel w-full sm:w-96 m-4 p-8 flex flex-col items-center text-center transform translate-y-10 transition-transform duration-300 border-lumina-gold/50 shadow-[0_0_40px_rgba(251,191,36,0.15)]">
-            <i class="ph ph-crown text-5xl text-lumina-gold mb-4 animate-[bounce_2s_infinite]"></i>
-            <h2 class="font-tech text-2xl text-white mb-2">DESBLOQUEAR OMNI-TOOL</h2>
-            <div class="w-16 h-1 bg-lumina-gold/50 mb-4 rounded-full"></div>
-            <p class="text-sm text-gray-300 mb-6 leading-relaxed">
-                Acceso a funciones militares: <span class="text-lumina-gold">Mapas de Luz</span>, <span
-                    class="text-lumina-gold">Terreno 3D</span>, y el <span class="text-lumina-gold">Planificador de
-                    Astrofotografía</span>.
-            </p>
-            <button id="sim-pay-btn"
-                class="w-full py-4 bg-lumina-gold text-black font-bold font-tech text-lg uppercase tracking-widest hover:bg-yellow-400 transition-colors rounded-sm shadow-[0_0_20px_rgba(251,191,36,0.4)]">
-                INICIALIZAR ($4.99)
-            </button>
-            <button id="close-paywall"
-                class="mt-4 text-xs text-gray-500 hover:text-white underline font-mono">Cancelar</button>
-        </div>
+            <div
+              class="absolute bottom-24 bg-black/80 px-6 py-2 rounded-xl border-l-4 border-purple-500 text-center backdrop-blur-md z-20"
+            >
+              <span class="label-tech text-white block">SISTEMA AR ACTIVO</span>
+              <div class="text-xs text-gray-400 font-mono">
+                APUNTE AL CIELO PARA LOCALIZAR
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- [VIEW 3] MAP (PRO) -->
+        <section
+          id="view-map"
+          class="view-section hidden h-full relative p-4 flex flex-col gap-4"
+        >
+          <h2
+            class="text-xl font-bold font-mono text-yellow-500 mb-2 flex items-center gap-2"
+          >
+            <i class="ph-fill ph-map-trifold"></i> MAPA DE OSCURIDAD
+            <span class="bg-yellow-500 text-black text-[10px] px-1 rounded"
+              >PRO</span
+            >
+          </h2>
+          <div
+            class="hud-module h-96 relative flex items-center justify-center overflow-hidden group border-yellow-500/30"
+          >
+            <div
+              class="absolute inset-0 bg-[url('https://upload.wikimedia.org/wikipedia/commons/8/86/Earth_lights_vs_population_density.png')] bg-cover bg-center opacity-30 grayscale group-hover:grayscale-0 transition-all duration-700"
+            ></div>
+            <div
+              class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-center p-6 backdrop-blur-sm"
+              id="map-lock-overlay"
+            >
+              <i class="ph-fill ph-lock-key text-4xl text-yellow-500 mb-2"></i>
+              <h3 class="text-lg font-bold text-white mb-1">
+                FUNCIÓN BLOQUEADA
+              </h3>
+              <button
+                onclick="openPaywall()"
+                class="bg-yellow-500 text-black font-bold px-6 py-2 rounded-full hover:scale-105 transition-transform shadow-[0_0_15px_#fbbf24] mt-2"
+              >
+                DESBLOQUEAR
+              </button>
+            </div>
+            <div
+              id="map-unlocked"
+              class="hidden absolute inset-0 bg-black flex flex-col"
+            >
+              <div
+                class="bg-gray-800 h-full w-full flex items-center justify-center text-gray-500 font-mono"
+              >
+                [MAPA INTERACTIVO CARGADO]
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- [VIEW 4] TOOLS -->
+        <section
+          id="view-tools"
+          class="view-section hidden h-full p-4 pb-20 overflow-y-auto"
+        >
+          <h2
+            class="text-xl font-bold font-mono text-white mb-4 flex items-center gap-2"
+          >
+            <i class="ph-fill ph-toolbox"></i> EQUIPAMIENTO
+          </h2>
+          <!-- Photo Kit -->
+          <div
+            class="hud-module p-4 mb-4 border-l-4 border-yellow-500 bg-gradient-to-r from-yellow-500/5 to-transparent"
+          >
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="text-sm font-bold text-yellow-500">
+                KIT FOTÓGRAFO PRO
+              </h3>
+              <i class="ph-fill ph-camera text-yellow-500"></i>
+            </div>
+            <div class="relative">
+              <div
+                class="grid grid-cols-2 gap-3 blur-sm select-none"
+                id="photo-kit-blur"
+              >
+                <div class="bg-black/40 p-2 rounded">
+                  <span class="label-tech">ISO</span>
+                  <div class="text-white font-mono">100</div>
+                </div>
+                <div class="bg-black/40 p-2 rounded">
+                  <span class="label-tech">OBTURADOR</span>
+                  <div class="text-white font-mono">1/125</div>
+                </div>
+              </div>
+              <div
+                class="absolute inset-0 flex items-center justify-center"
+                id="photo-lock-btn"
+              >
+                <button
+                  onclick="openPaywall()"
+                  class="bg-yellow-500 text-black text-xs font-bold px-4 py-2 rounded-full shadow-[0_0_10px_#fbbf24] flex items-center gap-2"
+                >
+                  <i class="ph-bold ph-lock-key"></i> DESBLOQUEAR
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- Affiliates -->
+          <h3
+            class="label-tech text-white mb-3 mt-6 border-b border-white/10 pb-1"
+          >
+            RECOMENDADO
+          </h3>
+          <div class="grid grid-cols-1 gap-4">
+            <div
+              class="hud-module p-3 flex gap-4 items-center group cursor-pointer hover:border-cyan-500/50 transition-colors"
+            >
+              <div
+                class="w-16 h-16 bg-white/10 rounded flex items-center justify-center"
+              >
+                <i
+                  class="ph-duotone ph-telescope text-3xl text-gray-400 group-hover:text-cyan-400"
+                ></i>
+              </div>
+              <div class="flex-1">
+                <h4
+                  class="font-bold text-sm text-white group-hover:text-cyan-400"
+                >
+                  Celestron AstroMaster
+                </h4>
+                <span class="text-xs font-mono text-yellow-500 mt-2 block"
+                  >$149.99</span
+                >
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- NAV -->
+      <nav
+        class="nav-dock fixed bottom-0 w-full flex justify-around items-center px-2 py-3 z-40"
+      >
+        <button
+          class="nav-item active flex flex-col items-center gap-1 w-16"
+          onclick="switchView('view-home', this)"
+        >
+          <i class="ph-fill ph-crosshair text-xl"></i
+          ><span class="text-[9px] font-bold tracking-widest">CMD</span>
+        </button>
+        <button
+          class="nav-item flex flex-col items-center gap-1 w-16 text-gray-500"
+          onclick="switchView('view-ar', this)"
+        >
+          <i class="ph-fill ph-camera text-xl"></i
+          ><span class="text-[9px] font-bold tracking-widest">AR</span>
+        </button>
+        <button
+          class="nav-item flex flex-col items-center gap-1 w-16 text-gray-500"
+          onclick="switchView('view-map', this)"
+        >
+          <i class="ph-fill ph-map-trifold text-xl"></i
+          ><span class="text-[9px] font-bold tracking-widest">MAPA</span>
+        </button>
+        <button
+          class="nav-item flex flex-col items-center gap-1 w-16 text-gray-500"
+          onclick="switchView('view-tools', this)"
+        >
+          <i class="ph-fill ph-toolbox text-xl"></i
+          ><span class="text-[9px] font-bold tracking-widest">KIT</span>
+        </button>
+      </nav>
     </div>
 
-    <!-- Permission Modal (iOS) -->
-    <div id="perm-modal"
-        class="fixed inset-0 z-[60] flex items-center justify-center bg-black transition-opacity duration-300 hidden">
-        <div class="glass-panel max-w-xs p-6 text-center border-lumina-cyber/50">
-            <i class="ph ph-compass text-4xl text-lumina-cyber mb-4"></i>
-            <h3 class="font-tech text-lg text-white mb-2">CALIBRACIÓN DE SENSOR</h3>
-            <p class="text-xs text-gray-400 mb-6 font-mono">Lumina requiere acceso al giroscopio para la alineación
-                táctica.</p>
-            <button id="grant-perm-btn"
-                class="px-8 py-3 bg-lumina-cyber text-black font-bold font-tech uppercase tracking-widest rounded hover:bg-cyan-400 shadow-[0_0_15px_rgba(56,189,248,0.4)]">
-                CONCEDER ACCESO
-            </button>
+    <!-- PAYWALL -->
+    <div
+      id="paywall-modal"
+      class="fixed inset-0 z-[200] bg-black/90 backdrop-blur-xl flex items-center justify-center p-6 hidden opacity-0 transition-opacity duration-300"
+    >
+      <div
+        class="bg-gray-900 border border-yellow-500 rounded-2xl p-6 max-w-sm w-full relative shadow-[0_0_30px_#fbbf24]"
+      >
+        <button
+          onclick="closePaywall()"
+          class="absolute top-4 right-4 text-gray-400 hover:text-white"
+        >
+          <i class="ph-bold ph-x text-xl"></i>
+        </button>
+        <div class="text-center mb-6">
+          <i class="ph-fill ph-crown text-4xl text-yellow-500 mb-2"></i>
+          <h2 class="text-2xl font-bold text-white font-mono">
+            LUMINA <span class="text-yellow-500">PRO</span>
+          </h2>
+          <p class="text-gray-400 text-xs mt-2">
+            Desbloquea el poder del cosmos.
+          </p>
         </div>
+        <button
+          onclick="processPayment()"
+          class="w-full bg-gradient-to-r from-yellow-500 to-amber-600 text-black font-bold py-3 rounded-xl hover:scale-105 transition-transform shadow-lg mb-3"
+          id="pay-btn"
+        >
+          SUSCRIBIRSE - $2.99
+        </button>
+      </div>
     </div>
 
-    <!-- Core Logic -->
+    <!-- TOAST -->
+    <div
+      id="toast"
+      class="fixed top-4 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur border border-white/20 px-4 py-2 rounded-full text-xs font-bold text-white shadow-lg pointer-events-none transform -translate-y-20 transition-transform duration-500 z-[300]"
+    ></div>
+
     <script>
-        // --- UTILS ---
-        const $ = (id) => document.getElementById(id);
-        const $$ = (sel) => document.querySelectorAll(sel);
-        const formatDeg = (d) => `${Math.round(d).toString().padStart(3, '0')}°`;
-        const formatTime = (d) => d ? d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '--:--';
-        const formatDist = (d) => Math.round(d).toLocaleString('es-ES'); // Spanish thousands separator point
-
-        const getCardinal = (deg) => {
-            const norm = ((deg % 360) + 360) % 360;
-            const val = Math.floor((norm / 22.5) + 0.5);
-            // Spanish cardinals: N, NNE, NE, ENE, E, ESE, SE, SSE, S, SSO, SO (SW), OSO, O (W), ONO, NO (NW), NNO
-            const arr = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSO", "SO", "OSO", "O", "ONO", "NO", "NNO"];
-            return arr[val % 16];
-        };
-
-        // --- APP STATE ---
-        const State = {
-            pos: { lat: 0, lon: 0 },
-            heading: 0,
-            targetHeading: 0,
-            moonAz: 0,
-            moonAlt: 0,
-            dist: 0,
-            isPro: false,
-            sensorsActive: false,
-            lastTick: 0,
-            animationId: null
-        };
-
-        // --- MAIN APP ---
-        const App = {
-            init() {
-                this.bindUI();
-                this.checkPlatform();
-                this.startTelemetry();
-                this.requestLocation();
-
-                requestAnimationFrame((t) => this.loop(t));
-                console.log("Lumina Omni-Tool inicializado v3.0 ES.");
-            },
-
-            bindUI() {
-                $('camera-btn').addEventListener('click', () => this.toggleCamera());
-
-                $$('.paywall-lock, #paywall-btn-top').forEach(el => {
-                    el.addEventListener('click', () => this.showPaywall());
-                });
-                $('close-paywall').addEventListener('click', () => this.hidePaywall());
-                $('sim-pay-btn').addEventListener('click', () => this.processUpgrade());
-                $('grant-perm-btn').addEventListener('click', () => this.requestSensors());
-                window.addEventListener('resize', () => this.drawTrajectory());
-            },
-
-            checkPlatform() {
-                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                    $('sensor-msg').innerText = "REQUIERE CALIBRACIÓN";
-                } else {
-                    this.startSensorListeners();
-                }
-            },
-
-            requestSensors() {
-                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                    DeviceOrientationEvent.requestPermission()
-                        .then(resp => {
-                            if (resp === 'granted') {
-                                $('perm-modal').classList.add('hidden');
-                                this.startSensorListeners();
-                            }
-                        })
-                        .catch(console.error);
-                } else {
-                    $('perm-modal').classList.add('hidden');
-                    this.startSensorListeners();
-                }
-            },
-
-            startSensorListeners() {
-                const handleOr = (e) => {
-                    let alpha = e.alpha;
-                    if (e.webkitCompassHeading) {
-                        alpha = e.webkitCompassHeading;
-                    } else {
-                        // Android default approx
-                        alpha = 360 - alpha;
-                    }
-
-                    if (alpha === null || isNaN(alpha)) return;
-
-                    // Shortest Path Interpolation
-                    let currentMod = ((State.heading % 360) + 360) % 360;
-                    let delta = alpha - currentMod;
-
-                    if (delta > 180) delta -= 360;
-                    if (delta < -180) delta += 360;
-
-                    State.heading += delta;
-                    State.sensorsActive = true;
-                    $('sensor-msg').innerText = "";
-                };
-
-                if ('ondeviceorientationabsolute' in window) {
-                    window.addEventListener("deviceorientationabsolute", handleOr, true);
-                } else {
-                    window.addEventListener("deviceorientation", handleOr, true);
-                }
-            },
-
-            requestLocation() {
-                if ("geolocation" in navigator) {
-                    navigator.geolocation.watchPosition(
-                        (p) => {
-                            State.pos.lat = p.coords.latitude;
-                            State.pos.lon = p.coords.longitude;
-                            this.updateTelemetry();
-                        },
-                        (err) => {
-                            console.warn("GPS Fail", err);
-                            $('visibility-verdict').innerText = "GPS OFFLINE";
-                            $('visibility-verdict').className = "text-xl md:text-2xl font-tech text-red-500";
-                        },
-                        { enableHighAccuracy: true }
-                    );
-                }
-            },
-
-            toggleCamera() {
-                const vid = $('ar-video');
-                const hud = $('ar-hud');
-                const btnText = $('cam-btn-text');
-
-                if (vid.srcObject) {
-                    // Stop
-                    vid.srcObject.getTracks().forEach(t => t.stop());
-                    vid.srcObject = null;
-                    vid.style.opacity = '0';
-                    hud.style.opacity = '0'; // Hide HUD
-                    btnText.innerText = "Activar HUD Táctico";
-                    $('camera-btn').classList.remove('bg-red-500/20', 'border-red-500/50', 'text-red-500');
-                    $('camera-btn').classList.add('bg-lumina-cyber/10', 'border-lumina-cyber/50', 'text-lumina-cyber');
-                } else {
-                    // Start
-                    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
-                        .then(stream => {
-                            vid.srcObject = stream;
-                            vid.style.opacity = '1';
-                            hud.style.opacity = '1'; // Show HUD
-                            btnText.innerText = "Desactivar HUD";
-                            $('camera-btn').classList.remove('bg-lumina-cyber/10', 'border-lumina-cyber/50', 'text-lumina-cyber');
-                            $('camera-btn').classList.add('bg-red-500/20', 'border-red-500/50', 'text-red-500');
-
-                            if (!State.sensorsActive && typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                                $('perm-modal').classList.remove('hidden');
-                            }
-                        })
-                        .catch(err => {
-                            alert("Acceso a cámara denegado. Revise permisos o HTTPS.");
-                        });
-                }
-            },
-
-            // --- LOGIC FRAMEWORK ---
-            startTelemetry() {
-                setInterval(() => this.updateTelemetry(), 1000);
-                this.updateTelemetry();
-            },
-
-            updateTelemetry() {
-                const now = new Date();
-                if (typeof SunCalc === 'undefined') return;
-
-                const moon = SunCalc.getMoonPosition(now, State.pos.lat, State.pos.lon);
-                // Get Sun Position for realistic check
-                const sun = SunCalc.getPosition(now, State.pos.lat, State.pos.lon);
-                const illum = SunCalc.getMoonIllumination(now);
-                const times = SunCalc.getMoonTimes(now, State.pos.lat, State.pos.lon);
-
-                if (!moon || isNaN(moon.altitude)) return;
-
-                State.moonAz = (moon.azimuth * 180 / Math.PI) + 180;
-                State.moonAlt = moon.altitude * 180 / Math.PI;
-                State.dist = moon.distance;
-
-                const sunAlt = sun.altitude * 180 / Math.PI;
-
-                // Update UI Texts
-                $('azimuth-val').textContent = formatDeg(State.moonAz);
-                $('azimuth-cardinal').textContent = getCardinal(State.moonAz);
-                $('moon-float-label').textContent = `${getCardinal(State.moonAz)} ${Math.round(State.moonAz)}°`;
-
-                $('altitude-val').textContent = formatDeg(State.moonAlt);
-                $('distance-val').textContent = `${formatDist(moon.distance)} km`;
-                $('illum-percent').textContent = `Ilum: ${Math.round(illum.fraction * 100)}%`;
-
-                // Phase Name Spanish
-                const phases = ["Luna Nueva", "Luna Creciente", "Cuarto Creciente", "Gibosa Creciente", "Luna Llena", "Gibosa Menguante", "Cuarto Menguante", "Luna Menguante"];
-                let phaseIdx = Math.round(illum.phase * 8) % 8;
-                $('phase-name').innerText = phases[phaseIdx];
-
-                // Zenith/Times
-                if (times.rise && times.rise > now) {
-                    $('event-type').innerText = "SALIDA";
-                    $('zenith-val').textContent = formatTime(times.rise);
-                } else if (times.set && times.set > now) {
-                    $('event-type').innerText = "PUESTA";
-                    $('zenith-val').textContent = formatTime(times.set);
-                } else {
-                    $('event-type').innerText = "CÉNIT";
-                    $('zenith-val').textContent = "--:--";
-                }
-
-                // --- REALISTIC VISIBILITY VERDICT ---
-                let visText = "VISIBLE";
-                let visIcon = "ph-check-circle";
-                let visColor = "text-lumina-cyber";
-                let visBorder = "border-lumina-cyber";
-
-                if (State.moonAlt < 0) {
-                    visText = "NO VISIBLE (BAJO HORIZONTE)";
-                    visIcon = "ph-arrow-down-right";
-                    visColor = "text-gray-500";
-                    visBorder = "border-gray-500";
-                }
-                else if (sunAlt > 10 && illum.fraction < 0.3) {
-                    // Sun is high, moon is thin 
-                    visText = "INVISIBLE (SOLAR)";
-                    visIcon = "ph-sun";
-                    visColor = "text-lumina-alert"; // Red/Warning
-                    visBorder = "border-lumina-alert";
-                }
-                else if (sunAlt > 0 && illum.fraction < 0.5) {
-                    // Sun is up but maybe visible if atmosphere is clear
-                    visText = "DIFÍCIL (LUZ DE DÍA)";
-                    visIcon = "ph-sun-horizon";
-                    visColor = "text-orange-400";
-                    visBorder = "border-orange-400";
-                }
-                else if (State.moonAlt < 15) {
-                    visText = "OBSTRUIDO (BAJA ALT.)";
-                    visIcon = "ph-warning";
-                    visColor = "text-lumina-gold";
-                    visBorder = "border-lumina-gold";
-                }
-
-                const vEl = $('visibility-verdict');
-                const pEl = $('verdict-panel');
-                vEl.innerText = visText;
-                vEl.className = `text-xl md:text-2xl font-tech ${visColor}`;
-                $('verdict-icon').className = `ph ${visIcon} text-4xl ${visColor}`;
-                pEl.className = `glass-panel p-4 flex items-center justify-between bg-gradient-to-r from-lumina-glass to-transparent border-l-4 ${visBorder} transition-colors duration-500`;
-
-                // Calculate Feedback
-                const cardinal = getCardinal(State.moonAz);
-                $('target-feedback').innerText = `ALINEACIÓN: ${cardinal} (${Math.round(State.moonAz)}°)`;
-
-                this.drawTrajectory();
-            },
-
-            loop(t) {
-                // Visuals Loop
-                const ring = $('compass-ring');
-                ring.style.transform = `rotate(${-State.heading}deg)`;
-
-                $('moon-pointer').style.transform = `rotate(${State.moonAz}deg)`;
-
-                const label = $('moon-float-label');
-                if (label) {
-                    // Keep text upright
-                    label.style.transform = `rotate(${State.heading - State.moonAz}deg)`;
-                }
-
-                // Valid heading 0-360
-                let disHead = (State.heading % 360 + 360) % 360;
-                $('heading-val').textContent = formatDeg(disHead);
-                $('heading-cardinal').textContent = getCardinal(State.heading);
-
-                // --- HUD DATA UPDATES ---
-                const hud = $('ar-hud');
-                if (hud.style.opacity !== '0') {
-                    $('hud-heading').innerText = `${formatDeg(disHead)} ${getCardinal(State.heading)}`;
-                    $('hud-target').innerText = `${formatDeg(State.moonAz)} ${getCardinal(State.moonAz)}`;
-                    $('hud-alt').innerText = formatDeg(State.moonAlt);
-                    $('hud-dist').innerText = formatDist(State.dist) + " km";
-                }
-
-                // Target Lock Logic
-                let diff = Math.abs(disHead - State.moonAz);
-                if (diff > 180) diff = 360 - diff;
-
-                const reticle = $('reticle');
-                const hudBracket = $('hud-reticle-bracket');
-                const azVal = $('azimuth-val');
-                const status = $('lock-status');
-
-                if (diff < 4 && State.moonAlt > 0) {
-                    // LOCKED
-                    reticle.classList.add('target-locked');
-                    azVal.classList.add('text-locked');
-                    status.innerText = "OBJETIVO FIJADO";
-                    status.classList.add('text-lumina-plasma', 'animate-pulse');
-                    status.classList.remove('text-gray-400');
-                    if (navigator.vibrate) navigator.vibrate(50);
-
-                    // HUD Color Logic
-                    if (hudBracket) {
-                        hudBracket.classList.remove('border-white/50', 'border-lumina-cyber');
-                        hudBracket.classList.add('border-lumina-plasma', 'drop-shadow-[0_0_10px_#d946ef]');
-                    }
-                } else if (diff < 20) {
-                    // NEAR
-                    reticle.classList.remove('target-locked');
-                    azVal.classList.remove('text-locked');
-                    status.innerText = "ACERCANDO...";
-                    status.classList.add('text-lumina-cyber');
-                    status.classList.remove('text-gray-400', 'text-lumina-plasma', 'animate-pulse');
-
-                    if (hudBracket) {
-                        hudBracket.classList.remove('border-white/50', 'border-lumina-plasma', 'drop-shadow-[0_0_10px_#d946ef]');
-                        hudBracket.classList.add('border-lumina-cyber');
-                    }
-                } else {
-                    // SCANNING
-                    reticle.classList.remove('target-locked');
-                    azVal.classList.remove('text-locked');
-                    status.innerText = "ESCANEANDO...";
-                    status.classList.add('text-gray-400');
-                    status.classList.remove('text-lumina-plasma', 'text-lumina-cyber', 'animate-pulse');
-
-                    if (hudBracket) {
-                        hudBracket.classList.remove('border-lumina-plasma', 'border-lumina-cyber', 'drop-shadow-[0_0_10px_#d946ef]');
-                        hudBracket.classList.add('border-white/50');
-                    }
-                }
-
-                requestAnimationFrame((timestamp) => this.loop(timestamp));
-            },
-
-            drawTrajectory() {
-                const cvs = $('trajectory-canvas');
-                const ctx = cvs.getContext('2d');
-                const w = cvs.clientWidth;
-                const h = cvs.clientHeight;
-
-                if (cvs.width !== w) {
-                    cvs.width = w;
-                    cvs.height = h;
-                }
-
-                ctx.clearRect(0, 0, w, h);
-
-                // Trajectory Curve
-                ctx.beginPath();
-                ctx.moveTo(0, h);
-                ctx.quadraticCurveTo(w / 2, h - 180, w, h);
-
-                const grad = ctx.createLinearGradient(0, 0, 0, h);
-                grad.addColorStop(0, "rgba(56, 189, 248, 0.4)");
-                grad.addColorStop(1, "rgba(56, 189, 248, 0)");
-
-                ctx.fillStyle = grad;
-                ctx.fill();
-                ctx.strokeStyle = "#38bdf8";
-                ctx.lineWidth = 2;
-                ctx.stroke();
-
-                // "Now" Dot
-                const now = new Date();
-                const times = SunCalc.getMoonTimes(now, State.pos.lat, State.pos.lon);
-
-                if (times.rise && times.set) {
-                    let start = times.rise;
-                    let end = times.set;
-
-                    if (end < start) end = new Date(end.getTime() + 24 * 60 * 60 * 1000);
-
-                    const totalWin = end - start;
-                    const elapsed = now - start;
-                    let pct = elapsed / totalWin;
-
-                    if (pct < 0) pct = 0; if (pct > 1) pct = 1;
-
-                    const inv = 1 - pct;
-                    const x = (inv * inv * 0) + (2 * inv * pct * (w / 2)) + (pct * pct * w);
-                    const y = (inv * inv * h) + (2 * inv * pct * (h - 180)) + (pct * pct * h);
-
-                    ctx.beginPath();
-                    ctx.arc(x, y, 6, 0, Math.PI * 2);
-                    ctx.fillStyle = "#fbbf24";
-                    ctx.shadowBlur = 10;
-                    ctx.shadowColor = "#fbbf24";
-                    ctx.fill();
-
-                    ctx.beginPath();
-                    ctx.moveTo(x, y);
-                    ctx.lineTo(x, h);
-                    ctx.lineWidth = 1;
-                    ctx.strokeStyle = "rgba(251, 191, 36, 0.5)";
-                    ctx.setLineDash([4, 4]);
-                    ctx.stroke();
-                    ctx.setLineDash([]);
-
-                    ctx.fillStyle = "#fbbf24";
-                    ctx.font = "10px Orbitron";
-                    ctx.textAlign = "center";
-                    ctx.fillText("AHORA", x, y - 10);
-                }
-            },
-
-            showPaywall() {
-                if (State.isPro) return;
-                const modal = $('paywall-modal');
-                modal.classList.remove('opacity-0', 'pointer-events-none');
-                modal.querySelector('div').classList.remove('translate-y-10');
-            },
-
-            hidePaywall() {
-                const modal = $('paywall-modal');
-                modal.classList.add('opacity-0', 'pointer-events-none');
-                modal.querySelector('div').classList.add('translate-y-10');
-            },
-
-            processUpgrade() {
-                const btn = $('sim-pay-btn');
-                btn.innerHTML = "<i class='ph ph-spinner animate-spin'></i> AUTENTICANDO...";
-                setTimeout(() => {
-                    btn.classList.replace('bg-lumina-gold', 'bg-green-500');
-                    btn.innerHTML = "ACCESO CONCEDIDO";
-                    State.isPro = true;
-                    setTimeout(() => {
-                        this.hidePaywall();
-                        $$('.paywall-lock').forEach(el => {
-                            el.classList.remove('opacity-60', 'cursor-pointer');
-                            el.classList.add('border-lumina-gold');
-                            const icon = el.querySelector('.ph-lock-key');
-                            if (icon) icon.className = "ph ph-check-circle text-green-500 mt-2";
-                        });
-                        $('paywall-btn-top').classList.add('bg-lumina-gold/20');
-                        $('paywall-btn-top').innerHTML = '<span class="text-xs font-bold text-lumina-gold">PRO ACTIVO</span>';
-                    }, 1000);
-                }, 1500);
-            }
-        };
-
-        window.addEventListener('DOMContentLoaded', () => App.init());
-
+      // --- UTILS ---
+      const $ = (id) => document.getElementById(id);
+      const safeText = (id, txt) => {
+        const el = $(id);
+        if (el) el.innerText = txt;
+      };
+
+      // --- HELPER: CARDINAL DIRECTION ---
+      function getCardinal(angle) {
+        const directions = [
+          "N",
+          "NNE",
+          "NE",
+          "ENE",
+          "E",
+          "ESE",
+          "SE",
+          "SSE",
+          "S",
+          "SSO",
+          "SO",
+          "OSO",
+          "O",
+          "ONO",
+          "NO",
+          "NNO",
+        ];
+        // Normalize angle
+        const normalized = ((angle % 360) + 360) % 360;
+        const index = Math.round(normalized / 22.5) % 16;
+        return directions[index];
+      }
+
+      // --- STATE ---
+      const sys = {
+        lat: null,
+        lon: null,
+        heading: 0,
+        accumHeading: 0,
+        lastRawHeading: 0,
+        moonAz: 0,
+        moonAlt: 0,
+        moonDist: 0,
+        isLocked: false,
+        clouds: 0,
+        humidity: 0,
+        isPro: false,
+      };
+
+      // --- TICKS ---
+      const ticksLayer = $("ticks-layer");
+      if (ticksLayer) {
+        for (let i = 0; i < 360; i += 2) {
+          if (i % 90 === 0) continue;
+          const el = document.createElement("div");
+          el.className = `tick-mark ${i % 10 === 0 ? "tick-major" : "tick-minor"}`;
+          el.style.top = "6px";
+          el.style.left = "50%";
+          el.style.top = "50%";
+          el.style.transform = `translate(-50%, -50%) rotate(${i}deg) translateY(-110px)`;
+          ticksLayer.appendChild(el);
+        }
+      }
+
+      // --- INIT ---
+      $("system-start-btn").addEventListener("click", async () => {
+        if (
+          typeof DeviceOrientationEvent !== "undefined" &&
+          typeof DeviceOrientationEvent.requestPermission === "function"
+        ) {
+          try {
+            await DeviceOrientationEvent.requestPermission();
+          } catch (e) {}
+        }
+        if (navigator.geolocation) {
+          navigator.geolocation.watchPosition(handleGPS, null, {
+            enableHighAccuracy: true,
+          });
+        }
+
+        // Modern event listener logic
+        if ("ondeviceorientationabsolute" in window) {
+          window.addEventListener(
+            "deviceorientationabsolute",
+            handleOrientation,
+          );
+        } else {
+          window.addEventListener("deviceorientation", handleOrientation);
+        }
+
+        $("boot-sequence").style.opacity = "0";
+        setTimeout(() => {
+          $("boot-sequence").style.display = "none";
+          $("main-app").style.opacity = "1";
+          startLoops();
+        }, 800);
+      });
+
+      function startLoops() {
+        setInterval(() => {
+          const now = new Date();
+          safeText("clock", now.toLocaleTimeString("es-ES", { hour12: false }));
+          safeText(
+            "date",
+            now
+              .toLocaleDateString("es-ES", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })
+              .toUpperCase()
+              .replace(".", ""),
+          );
+        }, 1000);
+
+        setInterval(() => {
+          if (sys.lat) updateTelemetry();
+        }, 1000); // 1s is enough
+
+        const now = new Date();
+        const pad = (n) => n.toString().padStart(2, "0");
+        const fi = $("f-input");
+        if (fi)
+          fi.value = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+        // Initial render
+        drawConeGraph(now);
+      }
+
+      function handleGPS(pos) {
+        sys.lat = pos.coords.latitude;
+        sys.lon = pos.coords.longitude;
+        safeText(
+          "gps-coords",
+          `GPS: ${sys.lat.toFixed(4)}, ${sys.lon.toFixed(4)}`,
+        );
+        fetchWeather();
+        drawConeGraph(new Date());
+        updateTelemetry();
+      }
+
+      async function fetchWeather() {
+        if (!sys.lat) return;
+        try {
+          const r = await fetch(
+            `https://api.open-meteo.com/v1/forecast?latitude=${sys.lat}&longitude=${sys.lon}&current=cloud_cover,relative_humidity_2m&timezone=auto`,
+          );
+          const d = await r.json();
+          sys.clouds = d.current.cloud_cover;
+          sys.humidity = d.current.relative_humidity_2m;
+        } catch (e) {}
+      }
+
+      function handleOrientation(e) {
+        let alpha = e.alpha;
+        // Handle iOS vs Android differences
+        if (e.webkitCompassHeading) {
+          // iOS: webkitCompassHeading is already "Degree from North"
+          alpha = e.webkitCompassHeading;
+        } else {
+          // Android: alpha is usually "Degree from North" but inverted or offset
+          // deviceorientationabsolute is best, but standard fallback:
+          alpha = 360 - alpha;
+        }
+
+        if (alpha === null || isNaN(alpha)) return;
+
+        // Screen Orientation Correction (Landscape/Portrait)
+        // let screenAngle = window.screen.orientation ? window.screen.orientation.angle : 0;
+        // Actually, for compass UI, we often just want the heading.
+        // If the user rotates the phone to landscape, the heading value might need adjustment relative to the "top" of the phone.
+        // But usually browsers handle this via the event or we just use phone's top.
+        // We will stick to raw heading but ensure 0-360 range.
+
+        let heading = alpha;
+
+        // Smoothing filter
+        let delta = heading - sys.lastRawHeading;
+        if (delta < -180) delta += 360;
+        else if (delta > 180) delta -= 360;
+
+        sys.accumHeading += delta;
+        sys.lastRawHeading = heading;
+        sys.heading = heading;
+
+        // Normalized heading for display
+        let displayHeading = ((heading % 360) + 360) % 360;
+
+        safeText("heading-val", `${Math.round(displayHeading)}°`);
+        safeText(
+          "ar-heading",
+          `RUMBO: ${Math.round(displayHeading)}° ${getCardinal(displayHeading)}`,
+        );
+
+        // Rotate the Dial
+        // The dial ticks should rotate counter to the heading so "North" always points to real North
+        const cd = $("compass-dial");
+        if (cd) cd.style.transform = `rotate(${-displayHeading}deg)`;
+
+        // Rotate the Moon Pointer
+        // The pointer is inside the dial.
+        // The dial is already rotated by -Heading.
+        // If we rotate the pointer by Azimuth, it will point to (Azimuth - Heading) visually relative to the phone top?
+        // Wait:
+        // Container (0deg) -> Dial (-H deg).
+        // If we put Pointer inside Dial and rotate Pointer by (A deg),
+        // Total transform = -H + A = A - H.
+        // If Moon is at 90 (East) and Heading is 0 (North), Result = 90 (Right). Correct.
+        // If Moon is at 90 (East) and Heading is 90 (East), Result = 0 (Top). Correct.
+        // So we just rotate by Azimuth.
+
+        const mp = $("moon-pointer");
+        if (mp) mp.style.transform = `rotate(${sys.moonAz}deg)`;
+
+        // Lock Logic
+        let diff = Math.abs(displayHeading - sys.moonAz);
+        if (diff > 180) diff = 360 - diff;
+
+        if (diff < 5 && sys.moonAlt > -5) engageLock();
+        else disengageLock();
+      }
+
+      function engageLock() {
+        if (sys.isLocked) return;
+        sys.isLocked = true;
+        if (navigator.vibrate) navigator.vibrate(50);
+        const cu = $("compass-unit");
+        if (cu) cu.classList.add("locked");
+        const la = $("lock-alert");
+        if (la) {
+          la.style.opacity = "1";
+          la.style.transform = "scale(1)";
+        }
+        const mi = $("moon-icon");
+        if (mi)
+          mi.className =
+            "ph-fill ph-crosshair text-3xl text-purple-500 drop-shadow-[0_0_15px_#d946ef]";
+        const tv = $("target-val");
+        if (tv) tv.classList.replace("text-gray-400", "text-purple-500");
+        const ap = $("azimuth-pill");
+        if (ap)
+          ap.className =
+            "mt-1 bg-purple-500 text-white px-1.5 rounded text-[8px] font-mono font-bold shadow-glow-accent";
+      }
+
+      function disengageLock() {
+        if (!sys.isLocked) return;
+        sys.isLocked = false;
+        const cu = $("compass-unit");
+        if (cu) cu.classList.remove("locked");
+        const la = $("lock-alert");
+        if (la) {
+          la.style.opacity = "0";
+          la.style.transform = "scale(0.75)";
+        }
+        const mi = $("moon-icon");
+        if (mi)
+          mi.className =
+            "ph-fill ph-moon-stars text-3xl text-gray-400 drop-shadow-md";
+        const tv = $("target-val");
+        if (tv) tv.classList.replace("text-purple-500", "text-gray-400");
+        const ap = $("azimuth-pill");
+        if (ap)
+          ap.className =
+            "mt-1 bg-black/60 border border-white/10 px-1.5 rounded text-[8px] font-mono text-gray-400";
+      }
+
+      function updateTelemetry() {
+        if (!sys.lat) return;
+        const now = new Date();
+        const times = SunCalc.getMoonTimes(now, sys.lat, sys.lon);
+        const mp = SunCalc.getMoonPosition(now, sys.lat, sys.lon);
+        const mi = SunCalc.getMoonIllumination(now);
+
+        // Correct Azimuth/Altitude
+        // SunCalc returns radians. Azimuth is 0=South, increasing westward? No, check docs.
+        // SunCalc: azimuth: 0 is South and Math.PI * 3/4 is Northwest.
+        // Standard Compass: 0 is North, 90 East.
+        // Formula: (azimuth * 180/PI) + 180.
+        // If SunCalc returns 0 (South), +180 = 180 (South). Correct.
+        sys.moonAz = (mp.azimuth * (180 / Math.PI) + 180) % 360;
+        sys.moonAlt = mp.altitude * (180 / Math.PI);
+        sys.moonDist = mp.distance;
+
+        // Cardinal direction text
+        const moonDir = getCardinal(sys.moonAz);
+        // Format degrees properly
+        const degTxt = `${Math.round(sys.moonAz)}° ${moonDir}`;
+        safeText("target-val", degTxt);
+        safeText("azimuth-pill", degTxt);
+        safeText("az-grid-val", degTxt);
+
+        safeText("alt-val", `ALT: ${Math.round(sys.moonAlt)}°`);
+        safeText("phase-val", Math.round(mi.fraction * 100) + "%"); // Fraction is illuminated area
+        safeText("illum-val", Math.round(mi.fraction * 100) + "%");
+        safeText("dist-val", (sys.moonDist / 1000).toFixed(1) + "K");
+        safeText("cloud-val", sys.clouds + "%");
+        safeText("humid-val", sys.humidity + "%");
+
+        const fmt = (d) =>
+          d
+            ? d.toLocaleTimeString("es-ES", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+            : "--:--";
+
+        // Rise/Set logic can be tricky if the event happened "yesterday" relative to today
+        // But SunCalc returns events for the given date.
+        // If rise is undefined, it might not rise today.
+        safeText("rise-val", fmt(times.rise));
+        safeText("set-val", fmt(times.set));
+
+        // Determine Peak (highest altitude)
+        // We just iterate to find max.
+        let peakAlt = -90;
+        let peakTime = null;
+        const startDay = new Date(now);
+        startDay.setHours(0, 0, 0, 0);
+        // Use 15m intervals for better precision
+        for (let i = 0; i <= 24 * 4; i++) {
+          const t = new Date(startDay.getTime() + i * 15 * 60000);
+          const p = SunCalc.getMoonPosition(t, sys.lat, sys.lon);
+          if (p.altitude > peakAlt) {
+            peakAlt = p.altitude;
+            peakTime = t;
+          }
+        }
+        safeText("peak-val", peakTime ? fmt(peakTime) : "N/A");
+
+        const bar = $("status-bar");
+        const title = $("vis-verdict");
+        const icon = $("vis-icon");
+        if (bar && title && icon) {
+          if (sys.moonAlt < 0) {
+            bar.className =
+              "hud-module p-3 flex items-center justify-between border-l-4 border-danger transition-colors duration-500";
+            title.innerText = "NO VISIBLE";
+            title.className =
+              "text-xl font-sans font-bold text-danger leading-none mt-1";
+            icon.className = "ph-fill ph-eye-closed text-xl text-danger";
+          } else if (sys.clouds > 70) {
+            bar.className =
+              "hud-module p-3 flex items-center justify-between border-l-4 border-warning transition-colors duration-500";
+            title.innerText = "OBSTRUIDO";
+            title.className =
+              "text-xl font-sans font-bold text-warning leading-none mt-1";
+            icon.className = "ph-fill ph-cloud text-xl text-warning";
+          } else {
+            bar.className =
+              "hud-module p-3 flex items-center justify-between border-l-4 border-success transition-colors duration-500";
+            title.innerText = "ÓPTIMO";
+            title.className =
+              "text-xl font-sans font-bold text-success leading-none mt-1 shadow-glow-primary";
+            icon.className =
+              "ph-fill ph-eye text-xl text-success animate-pulse";
+          }
+        }
+
+        // Also redraw graph occasionally to keep "NOW" dot updated
+        drawConeGraph(now);
+      }
+
+      function drawConeGraph(now) {
+        const cvs = $("graph-canvas");
+        if (!cvs) return;
+        const ctx = cvs.getContext("2d");
+        // Scale by pixel ratio for sharpness if desired, but kept simple here
+        const w = cvs.parentElement.offsetWidth;
+        const h = cvs.parentElement.offsetHeight;
+        cvs.width = w;
+        cvs.height = h;
+
+        const start = new Date(now);
+        start.setHours(0, 0, 0, 0);
+
+        ctx.clearRect(0, 0, w, h);
+
+        // Horizon Line
+        const horizonY = h * 0.85;
+        ctx.beginPath();
+        ctx.strokeStyle = "rgba(255,255,255,0.2)";
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        ctx.moveTo(0, horizonY);
+        ctx.lineTo(w, horizonY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Plot Trajectory (0 to 24h)
+        ctx.beginPath();
+        let first = true;
+
+        // Gradient fill setup
+        const grad = ctx.createLinearGradient(0, 0, 0, h);
+        grad.addColorStop(0, "rgba(56, 189, 248, 0.4)");
+        grad.addColorStop(1, "rgba(0, 0, 0, 0)");
+
+        let points = [];
+
+        for (let i = 0; i <= 24; i += 0.5) {
+          // 30 min steps
+          const t = new Date(start.getTime() + i * 3600000);
+          const pos = SunCalc.getMoonPosition(t, sys.lat, sys.lon);
+          // Map Altitude (-90 to 90) to Y
+          // 90deg (Zenith) -> slightly below top
+          // 0deg (Horizon) -> horizonY
+          // -90deg -> below
+
+          // Scale factor: 90 degrees = horizonY - some_padding
+          const pxPerDeg = (horizonY - 20) / 90;
+          const y = horizonY - pos.altitude * (180 / Math.PI) * pxPerDeg;
+          const x = (i / 24) * w;
+
+          points.push({ x, y });
+          if (first) {
+            ctx.moveTo(x, y);
+            first = false;
+          } else {
+            ctx.lineTo(x, y);
+          }
+        }
+
+        // Close path for fill
+        ctx.lineTo(w, h);
+        ctx.lineTo(0, h);
+        ctx.closePath();
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        // Stroke the line
+        ctx.beginPath();
+        first = true;
+        for (let p of points) {
+          if (first) {
+            ctx.moveTo(p.x, p.y);
+            first = false;
+          } else {
+            ctx.lineTo(p.x, p.y);
+          }
+        }
+        ctx.strokeStyle = "#38bdf8";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Draw "NOW" dot
+        const currHours = now.getHours() + now.getMinutes() / 60;
+        const currPos = SunCalc.getMoonPosition(now, sys.lat, sys.lon);
+        const pxPerDeg = (horizonY - 20) / 90;
+        const nowY = horizonY - currPos.altitude * (180 / Math.PI) * pxPerDeg;
+        const nowX = (currHours / 24) * w;
+
+        // Only draw if within bounds (roughly)
+        if (nowX >= 0 && nowX <= w) {
+          const isVisible = currPos.altitude > 0;
+
+          ctx.beginPath();
+          ctx.strokeStyle = "rgba(255,255,255,0.5)";
+          ctx.lineWidth = 1;
+          ctx.moveTo(nowX, nowY);
+          ctx.lineTo(nowX, horizonY);
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.arc(nowX, nowY, 6, 0, Math.PI * 2);
+          ctx.fillStyle = isVisible ? "#ffffff" : "#64748b";
+          ctx.fill();
+
+          ctx.fillStyle = isVisible ? "#38bdf8" : "#64748b";
+          ctx.font = "bold 10px Orbitron";
+          ctx.textAlign = "center";
+          ctx.fillText("AHORA", nowX, nowY - 10);
+        }
+      }
+
+      const futBtn = $("future-btn");
+      if (futBtn)
+        futBtn.addEventListener("click", () => {
+          const p = $("future-panel");
+          if (p) p.classList.toggle("hidden");
+        });
+      const closeFut = $("close-future");
+      if (closeFut)
+        closeFut.addEventListener("click", () => {
+          const p = $("future-panel");
+          if (p) p.classList.add("hidden");
+        });
+
+      const fCalc = $("f-calc");
+      if (fCalc) {
+        fCalc.addEventListener("click", async () => {
+          const val = $("f-input").value;
+          if (!val) return;
+          const t = new Date(val);
+          const res = $("f-result");
+          res.classList.remove("hidden");
+          res.innerHTML =
+            "<span class='text-primary animate-pulse'>CALCULANDO...</span>";
+          const mp = SunCalc.getMoonPosition(t, sys.lat, sys.lon);
+          const alt = Math.round(mp.altitude * (180 / Math.PI));
+          let c = "--";
+          try {
+            const iso = val.split("T")[0];
+            const r = await fetch(
+              `https://api.open-meteo.com/v1/forecast?latitude=${sys.lat}&longitude=${sys.lon}&hourly=cloud_cover&start_date=${iso}&end_date=${iso}&timezone=auto`,
+            );
+            const d = await r.json();
+            c = d.hourly.cloud_cover[t.getHours()] || "--";
+          } catch (e) {}
+          let status =
+            alt > 0 ? (c < 50 ? "VISIBLE" : "RIESGO NUBES") : "NO VISIBLE";
+          let color =
+            alt > 0
+              ? c < 50
+                ? "text-success"
+                : "text-warning"
+              : "text-danger";
+          res.innerHTML = `<div class="grid grid-cols-2 gap-2 mt-2 bg-black/40 p-2 rounded"><div><span class="label-tech block">ALT</span><b class="text-white">${alt}°</b></div><div><span class="label-tech block">NUBES</span><b class="text-white">${c}%</b></div></div><div class="${color} font-bold font-mono text-center mt-2 border border-current rounded py-1 text-xs tracking-widest">${status}</div>`;
+        });
+      }
+
+      // --- VIEW SWITCHING ---
+      function switchView(viewId, btn) {
+        document.querySelectorAll(".nav-item").forEach((el) => {
+          el.classList.remove("active");
+          if (
+            el.classList.contains("text-gray-500") === false &&
+            !el.classList.contains("active")
+          ) {
+            el.classList.add("text-gray-500");
+          }
+        });
+
+        if (btn) {
+          btn.classList.add("active");
+          btn.classList.remove("text-gray-500");
+        }
+
+        document
+          .querySelectorAll(".view-section")
+          .forEach((el) => el.classList.add("hidden"));
+        const v = $(viewId);
+        if (v) v.classList.remove("hidden");
+
+        if (viewId === "view-ar") startAR();
+        else stopAR();
+      }
+
+      // AR Mock functions
+      function startAR() {
+        const v = $("ar-video");
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          navigator.mediaDevices
+            .getUserMedia({ video: { facingMode: "environment" } })
+            .then((s) => {
+              v.srcObject = s;
+              v.play();
+            })
+            .catch((e) => console.log("AR Error", e));
+        }
+      }
+      function stopAR() {
+        const v = $("ar-video");
+        if (v.srcObject) v.srcObject.getTracks().forEach((t) => t.stop());
+      }
+
+      // Paywall Mocks
+      window.openPaywall = () => {
+        $("paywall-modal").classList.remove("hidden");
+        setTimeout(() => $("paywall-modal").classList.remove("opacity-0"), 10);
+      };
+      window.closePaywall = () => {
+        $("paywall-modal").classList.add("opacity-0");
+        setTimeout(() => $("paywall-modal").classList.add("hidden"), 300);
+      };
+      window.processPayment = () => {
+        const b = $("pay-btn");
+        b.innerText = "PROCESANDO...";
+        setTimeout(() => {
+          b.innerText = "¡ÉXITO!";
+          setTimeout(closePaywall, 1000);
+          sys.isPro = true;
+        }, 1500);
+      };
     </script>
-</body>
-
+  </body>
 </html>
