@@ -350,6 +350,13 @@
         <div class="text-right pointer-events-auto">
           <div class="flex items-center justify-end gap-3 mb-1">
             <button
+              id="header-install-btn"
+              onclick="installApp()"
+              class="hidden bg-white/10 text-white text-[9px] font-bold px-3 py-1 rounded-full border border-white/20 hover:bg-white/20 transition-colors mr-2"
+            >
+              <i class="ph-bold ph-download-simple"></i> INSTALAR
+            </button>
+            <button
               id="upgrade-btn"
               class="bg-gradient-to-r from-amber-500 to-orange-600 text-black text-[9px] font-bold px-3 py-1 rounded-full shadow-glow-sm hover:scale-105 transition-transform"
             >
@@ -1040,6 +1047,36 @@
         isPro: false,
       };
 
+      // --- PWA & SERVICE WORKER ---
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./sw.js").then(
+            (reg) => console.log("SW Registered"),
+            (err) => console.log("SW Failed", err),
+          );
+        });
+      }
+
+      let deferredPrompt;
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        // Show install trigger in header if available
+        const installBtn = document.getElementById("header-install-btn");
+        if (installBtn) installBtn.classList.remove("hidden");
+      });
+
+      async function installApp() {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        if (outcome === "accepted") {
+          const b = document.getElementById("header-install-btn");
+          if (b) b.classList.add("hidden");
+        }
+      }
+
       // --- TICKS & SETUP ---
       const ticksLayer = $("ticks-layer");
       if (ticksLayer) {
@@ -1152,6 +1189,11 @@
         if (alpha === null || isNaN(alpha)) return;
 
         let heading = alpha;
+
+        // Initialize lastRawHeading on first run
+        if (sys.lastRawHeading === undefined) sys.lastRawHeading = heading;
+
+        // Smooth rotation logic: calculate shortest path
         let delta = heading - sys.lastRawHeading;
         if (delta < -180) delta += 360;
         else if (delta > 180) delta -= 360;
@@ -1160,6 +1202,7 @@
         sys.lastRawHeading = heading;
         sys.heading = heading;
 
+        // Display 0-360 for text
         let displayHeading = ((heading % 360) + 360) % 360;
 
         safeText("heading-val", `${Math.round(displayHeading)}°`);
@@ -1169,7 +1212,9 @@
         );
 
         const cd = $("compass-dial");
-        if (cd) cd.style.transform = `rotate(${-displayHeading}deg)`;
+        // Apply negative ACCUMULATED heading to rotating dial
+        if (cd) cd.style.transform = `rotate(${-sys.accumHeading}deg)`;
+
         const mp = $("moon-pointer");
         if (mp) mp.style.transform = `rotate(${sys.moonAz}deg)`;
 
