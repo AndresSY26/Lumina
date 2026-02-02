@@ -15,6 +15,7 @@ const App = {
     ui: {},
 
     init() {
+        console.log("🚀 Iniciando Lumina en entorno de producción simulado: https://lumina-tactical.app");
         console.log("Lumina System Initialize...");
         this.cacheDOM();
         this.bindEvents();
@@ -23,6 +24,23 @@ const App = {
 
         // Geolocation is safe to request immediately on most browsers
         this.requestLocation();
+        this.registerSW();
+    },
+
+    registerSW() {
+        if ('serviceWorker' in navigator) {
+            try {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => {
+                        console.log('Service Worker registrado con éxito en el scope:', reg.scope);
+                    })
+                    .catch(err => {
+                        console.error('Service Worker registration failed:', err);
+                    });
+            } catch (e) {
+                console.error('Service Worker logic error:', e);
+            }
+        }
     },
 
     cacheDOM() {

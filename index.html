@@ -12,303 +12,794 @@
       name="apple-mobile-web-app-status-bar-style"
       content="black-translucent"
     />
+    <meta name="apple-mobile-web-app-title" content="Lumina" />
     <title>Lumina: Orbital Command</title>
 
-    <!-- PWA Manifest Simulation -->
-    <link
-      rel="manifest"
-      href="data:application/json;base64,eyJuYW1lIjoiTHVtaW5hIFBybyIsInNob3J0X25hbWUiOiJMdW1pbmEiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzA1MDUwNSIsInRoZW1lX2NvbG9yIjoiIzM4YmRmOCIsImljb25zIjpbeyJzcmMiOiJodHRwczovL2ltZy5pY29uczhjb20vY29sb3IvOTYvMDAwMDAwL21vb24tc2F0ZWxsaXRlLnBuZyIsInNpemVzIjoiOTZ4OTYiLCJ0eXBlIjoiaW1hZ2UvcG5nIn1dfQ=="
-    />
+    <link rel="manifest" href="./manifest.json" />
 
-    <!-- Libraries -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
+    <!-- Libraries (Inlined & Robust) -->
+    <script>
+      /* SunCalc v1.9.0 */
+      !(function () {
+        "use strict";
+        var w = Math.PI,
+          i = Math.sin,
+          c = Math.cos,
+          o = Math.tan,
+          a = Math.asin,
+          d = Math.atan2,
+          s = Math.acos,
+          p = w / 180,
+          e = 864e5,
+          n = 2440588,
+          r = 2451545;
+        function m(t) {
+          return new Date((t + 0.5 - n) * e);
+        }
+        function D(t) {
+          return t.valueOf() / e - 0.5 + n - r;
+        }
+        var u = 23.4397 * p;
+        function f(t, n) {
+          return d(i(t) * c(u) - o(n) * i(u), c(t));
+        }
+        function P(t, n) {
+          return a(i(n) * c(u) + c(n) * i(u) * i(t));
+        }
+        function l(t, n, e) {
+          return d(i(t), c(t) * i(n) - o(e) * c(n));
+        }
+        function h(t, n, e) {
+          return a(i(n) * i(e) + c(n) * c(e) * c(t));
+        }
+        function M(t, n) {
+          return p * (280.16 + 360.9856235 * t) - n;
+        }
+        function y(t) {
+          return p * (357.5291 + 0.98560028 * t);
+        }
+        function b(t) {
+          return (
+            t +
+            p * (1.9148 * i(t) + 0.02 * i(2 * t) + 3e-4 * i(3 * t)) +
+            102.9372 * p +
+            w
+          );
+        }
+        function g(t) {
+          t = b(y(t));
+          return { dec: P(t, 0), ra: f(t, 0) };
+        }
+        var H = {
+            getPosition: function (t, n, e) {
+              var a = p * -e,
+                e = p * n,
+                n = D(t),
+                t = g(n),
+                a = M(n, a) - t.ra;
+              return { azimuth: l(a, e, t.dec), altitude: h(a, e, t.dec) };
+            },
+          },
+          T = (H.times = [
+            [-0.833, "sunrise", "sunset"],
+            [-0.3, "sunriseEnd", "sunsetStart"],
+            [-6, "dawn", "dusk"],
+            [-12, "nauticalDawn", "nauticalDusk"],
+            [-18, "nightEnd", "night"],
+            [6, "goldenHourEnd", "goldenHour"],
+          ]);
+        H.addTime = function (t, n, e) {
+          T.push([t, n, e]);
+        };
+        function E(t, n, e) {
+          return 9e-4 + (t + n) / (2 * w) + e;
+        }
+        function I(t, n, e) {
+          return r + t + 0.0053 * i(n) - 0.0069 * i(2 * e);
+        }
+        function k(t, n, e, a, r, u, o) {
+          return I(
+            E(
+              ((e = e), (a = a), s((i(t) - i(e) * i(a)) / (c(e) * c(a)))),
+              n,
+              r,
+            ),
+            u,
+            o,
+          );
+        }
+        function v(t) {
+          var n = p * (134.963 + 13.064993 * t),
+            e = p * (93.272 + 13.22935 * t),
+            t = p * (218.316 + 13.176396 * t) + 6.289 * p * i(n),
+            e = 5.128 * p * i(e),
+            n = 385001 - 20905 * c(n);
+          return { ra: f(t, e), dec: P(t, e), dist: n };
+        }
+        function q(t, n) {
+          return new Date(t.valueOf() + (n * e) / 24);
+        }
+        ((H.getTimes = function (t, n, e, a) {
+          for (
+            var r,
+              u,
+              o = p * -e,
+              i = p * n,
+              c = ((a = a = a || 0), (-2.076 * Math.sqrt(a)) / 60),
+              t = D(t),
+              d = Math.round(t - 9e-4 - o / (2 * w)),
+              t = E(0, o, d),
+              s = y(t),
+              f = b(s),
+              l = P(f, 0),
+              h = I(t, s, f),
+              M = { solarNoon: m(h), nadir: m(h - 0.5) },
+              g = 0,
+              v = T.length;
+            g < v;
+            g += 1
+          )
+            ((u = k(((r = T[g])[0] + c) * p, o, i, l, d, s, f)),
+              (M[r[1]] = m(h - (u - h))),
+              (M[r[2]] = m(u)));
+          return M;
+        }),
+          (H.getMoonPosition = function (t, n, e) {
+            var a = p * -e,
+              r = p * n,
+              u = D(t),
+              e = v(u),
+              n = M(u, a) - e.ra,
+              t = h(n, r, e.dec),
+              u = d(i(n), o(r) * c(e.dec) - i(e.dec) * c(n));
+            return (
+              (t +=
+                ((a = t) < 0 && (a = 0),
+                2967e-7 / Math.tan(a + 0.00312536 / (a + 0.08901179)))),
+              {
+                azimuth: l(n, r, e.dec),
+                altitude: t,
+                distance: e.dist,
+                parallacticAngle: u,
+              }
+            );
+          }),
+          (H.getMoonIllumination = function (t) {
+            var n = D(t || new Date()),
+              e = g(n),
+              t = v(n),
+              n = s(i(e.dec) * i(t.dec) + c(e.dec) * c(t.dec) * c(e.ra - t.ra)),
+              n = d(149598e3 * i(n), t.dist - 149598e3 * c(n)),
+              t = d(
+                c(e.dec) * i(e.ra - t.ra),
+                i(e.dec) * c(t.dec) - c(e.dec) * i(t.dec) * c(e.ra - t.ra),
+              );
+            return {
+              fraction: (1 + c(n)) / 2,
+              phase: 0.5 + (0.5 * n * (t < 0 ? -1 : 1)) / Math.PI,
+              angle: t,
+            };
+          }),
+          (H.getMoonTimes = function (t, n, e, a) {
+            var r = new Date(t);
+            a ? r.setUTCHours(0, 0, 0, 0) : r.setHours(0, 0, 0, 0);
+            for (
+              var u,
+                o,
+                i,
+                c,
+                d,
+                s,
+                f,
+                l,
+                h,
+                M,
+                g,
+                v = 0.133 * p,
+                w = H.getMoonPosition(r, n, e).altitude - v,
+                m = 1;
+              m <= 24 &&
+              ((l = H.getMoonPosition(q(r, m), n, e).altitude - v),
+              (f =
+                ((c =
+                  (w +
+                    (u = H.getMoonPosition(q(r, m + 1), n, e).altitude - v)) /
+                    2 -
+                  l) *
+                  (s = -(d = (u - w) / 2) / (2 * c)) +
+                  d) *
+                  s +
+                l),
+              (h = 0) <= (l = d * d - 4 * c * l) &&
+                ((M = s - (g = Math.sqrt(l) / (2 * Math.abs(c)))),
+                (g = s + g),
+                Math.abs(M) <= 1 && h++,
+                Math.abs(g) <= 1 && h++,
+                M < -1 && (M = g)),
+              1 === h
+                ? w < 0
+                  ? (o = m + M)
+                  : (i = m + M)
+                : 2 === h &&
+                  ((o = m + (f < 0 ? g : M)), (i = m + (f < 0 ? M : g))),
+              !o || !i);
+              m += 2
+            )
+              w = u;
+            a = {};
+            return (
+              o && (a.rise = q(r, o)),
+              i && (a.set = q(r, i)),
+              o || i || (a[0 < f ? "alwaysUp" : "alwaysDown"] = !0),
+              a
+            );
+          }),
+          "object" == typeof exports && "undefined" != typeof module
+            ? (module.exports = H)
+            : "function" == typeof define && define.amd
+              ? define(H)
+              : (window.SunCalc = H));
+      })();
+    </script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
 
-    <script>
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            colors: {
-              void: "#050505",
-              deep: "#0a0a10",
-              glass: "rgba(20, 20, 25, 0.7)",
-              primary: "#38bdf8", // Sky Blue
-              accent: "#d946ef", // Fuchsia
-              gold: "#fbbf24",
-              success: "#10b981",
-              warning: "#f59e0b",
-              danger: "#f43f5e",
-            },
-            fontFamily: {
-              mono: ['"Orbitron"', "sans-serif"],
-              sans: ['"Rajdhani"', "sans-serif"],
-            },
-            boxShadow: {
-              "glow-sm": "0 0 10px rgba(56, 189, 248, 0.2)",
-              "glow-primary": "0 0 20px rgba(56, 189, 248, 0.3)",
-              "glow-accent": "0 0 25px rgba(217, 70, 239, 0.3)",
-              panel: "0 8px 32px 0 rgba(0, 0, 0, 0.3)",
-            },
-            backgroundImage: {
-              "tech-grid":
-                "radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px)",
-              scanline:
-                "linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2))",
-            },
-            animation: {
-              "spin-slow": "spin 120s linear infinite",
-              float: "float 6s ease-in-out infinite",
-            },
-            keyframes: {
-              float: {
-                "0%, 100%": { transform: "translateY(0)" },
-                "50%": { transform: "translateY(-10px)" },
-              },
-            },
-          },
-        },
-      };
-    </script>
-
     <style>
       :root {
-        --panel-bg: rgba(15, 15, 20, 0.65);
-      }
-      body {
-        background-color: #050505;
-        color: #e2e8f0;
-        overflow: hidden;
-        font-family: "Rajdhani", sans-serif;
-        -webkit-font-smoothing: antialiased;
+        /* Onyx & Starlight Palette */
+        --c-void: #000000; /* Absolute Black */
+        --c-deep: #020205; /* Midnight */
+        --c-glass: rgba(10, 10, 12, 0.6); /* Smoked Glass */
+        --c-border: rgba(255, 255, 255, 0.08); /* Ultra-fine border */
+
+        --c-white: #ffffff; /* Primary Text */
+        --c-silver: #94a3b8; /* Secondary Text */
+
+        --c-primary: #38bdf8; /* Cyan Accent */
+        --c-accent: #d946ef; /* Purple Accent */
+        --c-gold: #fbbf24;
+        --c-success: #10b981;
+        --c-warning: #f59e0b;
+        --c-danger: #f43f5e;
+
+        /* Fonts */
+        --f-mono: "Orbitron", sans-serif;
+        --f-sans: "Rajdhani", sans-serif;
+
+        /* Effects */
+        --s-glow-primary: 0 0 20px rgba(56, 189, 248, 0.2);
+        --s-glow-text: 0 0 10px rgba(56, 189, 248, 0.3);
       }
 
-      /* Grain Texture */
+      * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: var(--c-void);
+        color: var(--c-silver);
+        font-family: var(--f-sans);
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+      }
+
+      /* Utilities */
+      .hidden {
+        display: none !important;
+      }
+      .flex {
+        display: flex;
+      }
+      .flex-col {
+        flex-direction: column;
+      }
+      .items-center {
+        align-items: center;
+      }
+      .justify-center {
+        justify-content: center;
+      }
+      .justify-between {
+        justify-content: space-between;
+      }
+      .justify-end {
+        justify-content: flex-end;
+      }
+      .gap-1 {
+        gap: 0.25rem;
+      }
+      .gap-2 {
+        gap: 0.5rem;
+      }
+      .gap-3 {
+        gap: 0.75rem;
+      }
+      .gap-4 {
+        gap: 1rem;
+      }
+      .gap-6 {
+        gap: 1.5rem;
+      }
+
+      .text-center {
+        text-align: center;
+      }
+      .text-right {
+        text-align: right;
+      }
+      .uppercase {
+        text-transform: uppercase;
+      }
+      .relative {
+        position: relative;
+      }
+      .absolute {
+        position: absolute;
+      }
+      .fixed {
+        position: fixed;
+      }
+      .inset-0 {
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+      }
+      .w-full {
+        width: 100%;
+      }
+      .h-full {
+        height: 100%;
+      }
+      .pointer-events-none {
+        pointer-events: none;
+      }
+      .pointer-events-auto {
+        pointer-events: auto;
+      }
+      .z-10 {
+        z-index: 10;
+      }
+      .z-20 {
+        z-index: 20;
+      }
+      .z-30 {
+        z-index: 30;
+      }
+      .z-50 {
+        z-index: 50;
+      }
+
+      /* Visual Utilities */
+      .text-white {
+        color: var(--c-white);
+      }
+      .text-silver {
+        color: var(--c-silver);
+      }
+      .text-primary {
+        color: var(--c-primary);
+      }
+      .text-accent {
+        color: var(--c-accent);
+      }
+      .text-gold {
+        color: var(--c-gold);
+      }
+      .text-success {
+        color: var(--c-success);
+      }
+      .text-warning {
+        color: var(--c-warning);
+      }
+      .text-danger {
+        color: var(--c-danger);
+      }
+      .text-gray-400 {
+        color: var(--c-silver);
+      }
+      .text-gray-500 {
+        color: #64748b;
+      }
+
+      .bg-primary {
+        background-color: var(--c-primary);
+      }
+
+      /* Typography Luxury */
+      .font-mono {
+        font-family: var(--f-mono);
+      }
+      .font-sans {
+        font-family: var(--f-sans);
+      }
+      .font-light {
+        font-weight: 300;
+      }
+      .font-medium {
+        font-weight: 500;
+      }
+      .font-bold {
+        font-weight: 600;
+      }
+
+      .text-xs {
+        font-size: 0.75rem;
+      }
+      .text-sm {
+        font-size: 0.875rem;
+      }
+      .text-lg {
+        font-size: 1.125rem;
+      }
+      .text-2xl {
+        font-size: 1.5rem;
+      }
+      .text-3xl {
+        font-size: 1.875rem;
+      }
+      .text-6xl {
+        font-size: 3.75rem;
+      }
+
+      .tracking-widest {
+        letter-spacing: 0.2em;
+      }
+
+      /* Backgrounds */
       .noise-overlay {
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
-        pointer-events: none;
+        inset: 0;
         z-index: 5;
+        opacity: 0.03;
+        pointer-events: none;
+        background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
+      }
+      .bg-tech-grid {
+        background-image: radial-gradient(
+          circle,
+          rgba(255, 255, 255, 0.05) 0.5px,
+          transparent 0.5px
+        );
+        background-size: 40px 40px;
+      }
+      .bg-scanline {
+        background: linear-gradient(
+          to bottom,
+          transparent 50%,
+          rgba(0, 0, 0, 0.3) 50%
+        );
+        background-size: 100% 3px;
         opacity: 0.4;
       }
 
-      /* Premium Panels */
+      /* Animations */
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.4;
+        }
+      }
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-8px);
+        }
+      }
+
+      .animate-spin {
+        animation: spin 1s linear infinite;
+      }
+      .animate-spin-slow {
+        animation: spin 120s linear infinite;
+      }
+      .animate-pulse {
+        animation: pulse 3s ease-in-out infinite;
+      }
+      .animate-float {
+        animation: float 6s ease-in-out infinite;
+      }
+      .transition-all {
+        transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+
+      /* Components: Smoked Glass Panels */
       .hud-module {
-        background: var(--panel-bg);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow:
-          0 4px 6px -1px rgba(0, 0, 0, 0.1),
-          0 2px 4px -1px rgba(0, 0, 0, 0.06),
-          inset 0 1px 0 rgba(255, 255, 255, 0.05);
-        border-radius: 16px;
+        background: var(--c-glass);
+        backdrop-filter: blur(30px);
+        -webkit-backdrop-filter: blur(30px);
+        border: 1px solid var(--c-border);
+        border-radius: 24px; /* Organic Capsule */
         position: relative;
         overflow: hidden;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition:
+          border-color 0.3s ease,
+          box-shadow 0.3s ease;
       }
       .hud-module:hover {
-        border-color: rgba(56, 189, 248, 0.2);
-        box-shadow: 0 0 15px rgba(56, 189, 248, 0.1);
+        border-color: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
       }
 
-      /* Typography */
       .label-tech {
-        font-weight: 700;
+        font-weight: 300; /* Light weight elegance */
         font-size: 0.65rem;
-        letter-spacing: 0.15em;
-        color: #94a3b8;
+        letter-spacing: 0.2em; /* Wide tracking */
+        color: var(--c-silver);
         text-transform: uppercase;
+        margin-bottom: 0.25rem;
       }
       .value-tech {
-        font-family: "Orbitron", sans-serif;
-        letter-spacing: 0.02em;
+        font-family: var(--f-mono);
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        color: var(--c-white);
       }
 
-      /* Compass */
+      .shadow-glow-primary {
+        box-shadow: var(--s-glow-primary);
+      }
+
+      /* Compass Precision */
       .compass-lens {
         border-radius: 50%;
         background: radial-gradient(
-          circle at 50% 50%,
+          circle at center,
           rgba(255, 255, 255, 0.02) 0%,
-          rgba(0, 0, 0, 0.8) 90%
+          rgba(0, 0, 0, 0.95) 100%
         );
-        box-shadow:
-          0 0 0 1px rgba(255, 255, 255, 0.05),
-          inset 0 0 50px rgba(0, 0, 0, 0.9);
-        position: relative;
+        box-shadow: inset 0 0 60px rgba(0, 0, 0, 1);
+        border: 0.5px solid rgba(255, 255, 255, 0.1);
       }
-      .dial-ring {
-        transition: transform 0.1s linear;
-        will-change: transform;
-      }
-      .smooth-move {
-        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-      } /* Bouncy */
-
       .tick-mark {
         position: absolute;
         left: 50%;
         transform-origin: bottom center;
-        background: rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.2);
+        width: 0.5px;
       }
       .tick-major {
-        height: 10px;
-        width: 2px;
-        background: #38bdf8;
-        box-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
+        height: 12px;
+        background: var(--c-white);
+        width: 1px;
       }
       .tick-minor {
-        height: 5px;
-        width: 1px;
-        opacity: 0.3;
+        height: 6px;
+        opacity: 0.4;
       }
 
-      .locked .compass-lens {
-        border-color: rgba(217, 70, 239, 0.5);
-        box-shadow:
-          inset 0 0 40px rgba(217, 70, 239, 0.2),
-          0 0 30px rgba(217, 70, 239, 0.15);
-      }
-
-      /* Navigation */
+      /* Navigation: Starlight Capsule */
       .nav-dock {
-        background: rgba(10, 10, 12, 0.85);
-        border-top: 1px solid rgba(255, 255, 255, 0.08);
-        backdrop-filter: blur(20px);
-        padding-bottom: env(safe-area-inset-bottom);
-        z-index: 50;
+        position: fixed;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        width: auto;
+        min-width: unset;
+
+        /* The Capsule Material */
+        background: rgba(8, 8, 12, 0.85);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.08); /* Fine edge */
+        border-radius: 24px; /* Squircle-ish capsule */
+        padding: 0.5rem 1rem;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+
+        /* Premium Shadow Layering */
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.15),
+          /* Inner Top Shine */ 0 20px 40px -10px rgba(0, 0, 0, 0.8); /* Deep Elevation */
+
+        transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
       }
+
+      .nav-dock:hover {
+        transform: translateX(-50%) translateY(-2px);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.2),
+          0 25px 50px -10px rgba(0, 0, 0, 0.9);
+      }
+
       .nav-item {
-        color: #64748b;
-        transition: all 0.3s ease;
         position: relative;
+        color: #64748b; /* Mid gray inactive */
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 3.5rem;
+        height: 3.5rem;
+        border-radius: 18px; /* Smooth corners */
       }
-      .nav-item:hover {
-        color: #e2e8f0;
+
+      .nav-item i {
+        font-size: 1.5rem;
+        transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        z-index: 2;
       }
+
+      .nav-item span {
+        display: none !important;
+      }
+
+      /* Active State: The Magic Touch */
       .nav-item.active {
-        color: #38bdf8;
+        color: #ffffff;
+        background: linear-gradient(
+          135deg,
+          rgba(56, 189, 248, 0.15),
+          rgba(217, 70, 239, 0.15)
+        );
+        box-shadow: 0 0 20px rgba(56, 189, 248, 0.1);
       }
+
+      .nav-item.active i {
+        transform: scale(1.1);
+        filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
+      }
+
+      /* Clean indicators */
+      .nav-item.active::before,
       .nav-item.active::after {
-        content: "";
-        position: absolute;
-        bottom: -4px;
-        width: 4px;
-        height: 4px;
-        background: #38bdf8;
-        border-radius: 50%;
-        box-shadow: 0 0 8px #38bdf8;
+        content: none;
       }
 
-      /* Desktop Sidebar Transition */
+      /* Desktop: Floating Side Bar */
       @media (min-width: 1024px) {
-        .nav-dock {
-          top: 50%;
-          left: 1.5rem;
-          transform: translateY(-50%);
-          width: 4rem;
-          height: auto;
+        .lg-flex-col {
           flex-direction: column;
-          border-top: 1px solid rgba(255, 255, 255, 0.08); /* Reset */
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 20px;
-          padding-bottom: 1rem;
-          padding-top: 1rem;
-          gap: 1.5rem;
         }
-        .nav-item.active::after {
-          right: -8px;
-          bottom: 50%;
-          transform: translateY(50%);
+        .lg-grid-cols-12 {
+          display: grid;
+          grid-template-columns: repeat(12, minmax(0, 1fr));
+        }
+        .lg-col-span-4 {
+          grid-column: span 4 / span 4;
+        }
+        .lg-px-10 {
+          padding-left: 3rem;
+          padding-right: 3rem;
         }
 
-        /* Main Content Scroll Adjustment */
-        #views-container {
-          padding-left: 6rem;
+        .nav-dock {
+          left: 40px;
+          top: 50%;
+          bottom: auto;
+          transform: translateY(-50%);
+          flex-direction: column;
+          padding: 1.25rem 0.5rem;
+          width: auto;
+          min-width: auto;
+          gap: 1.25rem;
+        }
+
+        .nav-dock:hover {
+          transform: translateY(-50%) translateX(2px);
+        }
+
+        .nav-item.active::after {
+          content: none;
+        }
+        .nav-item.active::before {
+          content: none;
+        }
+
+        .main-view-container {
+          padding-left: 120px;
           padding-bottom: 2rem;
         }
       }
 
-      /* Elements */
-      #ar-video {
-        object-fit: cover;
-        width: 100%;
-        height: 100%;
-        position: absolute;
-        inset: 0;
-        z-index: 0;
-      }
-      canvas {
-        image-rendering: pixelated;
-      }
-
       /* Scrollbar */
       ::-webkit-scrollbar {
-        width: 6px;
+        width: 4px;
       }
       ::-webkit-scrollbar-track {
         background: transparent;
       }
       ::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 3px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 4px;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.25);
       }
     </style>
   </head>
-  <body
-    class="bg-void h-screen w-screen flex flex-col relative selection:bg-accent selection:text-white"
-  >
+  <body>
     <div class="noise-overlay"></div>
     <div
-      class="absolute inset-0 bg-tech-grid bg-[length:40px_40px] opacity-20 pointer-events-none"
+      class="absolute inset-0 bg-tech-grid pointer-events-none"
+      style="opacity: 0.2"
     ></div>
-    <div class="absolute inset-0 bg-scanline pointer-events-none z-[2]"></div>
+    <div class="absolute inset-0 bg-scanline pointer-events-none z-10"></div>
 
-    <!-- BOOT SEQUENCE (Unchanged logic) -->
+    <!-- BOOT SEQUENCE -->
     <div
       id="boot-sequence"
-      class="fixed inset-0 z-[100] bg-void flex flex-col items-center justify-center p-8 transition-opacity duration-700"
+      class="fixed inset-0 z-50 flex flex-col items-center justify-center"
+      style="background-color: var(--c-void); transition: opacity 0.7s ease"
     >
       <div class="relative w-48 h-48 flex items-center justify-center mb-10">
         <div
-          class="absolute inset-0 border border-primary/20 rounded-full animate-[spin_10s_linear_infinite]"
+          class="absolute inset-0 border rounded-full animate-spin-slow"
+          style="border-color: rgba(56, 189, 248, 0.2)"
         ></div>
         <div
-          class="absolute inset-4 border border-t-primary border-r-transparent border-b-transparent border-l-transparent rounded-full animate-[spin_3s_linear_infinite]"
+          class="absolute inset-4 border rounded-full animate-spin"
+          style="
+            border-color: var(--c-primary) transparent transparent transparent;
+            animation-duration: 3s;
+          "
         ></div>
         <div
-          class="absolute inset-8 border border-b-accent border-t-transparent border-l-transparent border-r-transparent rounded-full animate-[spin_2s_linear_infinite_reverse]"
+          class="absolute inset-8 border rounded-full"
+          style="
+            border-width: 1px;
+            border-color: transparent transparent var(--c-accent) transparent;
+            animation: spin 2s linear infinite reverse;
+          "
         ></div>
         <div class="relative z-10 flex flex-col items-center animate-pulse">
           <i
-            class="ph-duotone ph-planet text-6xl text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]"
+            class="ph-duotone ph-planet text-6xl text-white"
+            style="filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.5))"
           ></i>
         </div>
       </div>
       <h1
-        class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-white to-purple-500 font-mono tracking-tighter mb-4 drop-shadow-2xl"
+        class="text-6xl font-bold font-mono tracking-widest mb-4"
+        style="
+          background: linear-gradient(to right, #22d3ee, #ffffff, #d946ef);
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+          filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.2));
+        "
       >
         LUMINA
       </h1>
       <button
         id="system-start-btn"
-        class="group relative px-12 py-4 overflow-hidden bg-white/5 border border-white/10 hover:border-purple-500/50 hover:bg-purple-500/10 rounded transition-all duration-500"
+        class="relative px-12 py-4 overflow-hidden rounded transition-all"
+        style="
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          cursor: pointer;
+        "
       >
         <span
-          class="relative text-sm font-mono font-bold text-white group-hover:text-purple-400 transition-colors tracking-[0.2em] flex items-center gap-3"
+          class="relative text-sm font-mono font-bold text-white transition-all flex items-center gap-3 tracking-widest"
         >
           INICIAR SISTEMA <i class="ph-bold ph-caret-right"></i>
         </span>
@@ -318,60 +809,80 @@
     <!-- MAIN APP STRUCTURE -->
     <div
       id="main-app"
-      class="flex-1 flex flex-col h-full opacity-0 transition-opacity duration-1000 relative overflow-hidden"
+      class="flex-col h-full relative overflow-hidden"
+      style="opacity: 0; transition: opacity 1s ease; display: flex"
     >
-      <!-- HEADER: Sticky Top w/ Glass -->
+      <!-- HEADER -->
       <header
-        class="flex justify-between items-start px-6 pt-6 pb-2 z-30 absolute w-full top-0 pointer-events-none lg:px-10 lg:pt-8"
+        class="flex justify-between items-start z-30 absolute w-full top-0 pointer-events-none"
+        style="padding: 1.5rem 1.5rem 0.5rem 1.5rem"
       >
         <div class="pointer-events-auto flex flex-col gap-1">
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2">
             <span class="relative flex h-2 w-2">
               <span
-                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"
+                class="absolute h-full w-full rounded-full opacity-75 animate-pulse"
+                style="background-color: var(--c-success)"
               ></span>
               <span
-                class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"
+                class="relative rounded-full h-2 w-2"
+                style="background-color: var(--c-success)"
               ></span>
             </span>
             <span
               id="user-tier"
-              class="text-[10px] font-mono font-bold text-emerald-500 tracking-[0.2em]"
+              class="text-xs font-mono font-bold text-success tracking-widest"
+              style="font-size: 10px; letter-spacing: 0.2em"
               >ONLINE</span
             >
           </div>
           <div
-            class="text-[10px] font-mono text-gray-400 flex items-center gap-1"
+            class="text-xs font-mono text-gray-400 flex items-center gap-1"
             id="gps-coords"
+            style="font-size: 10px"
           >
             <i class="ph-bold ph-crosshair-simple"></i> GPS: BUSCANDO...
           </div>
         </div>
         <div class="text-right pointer-events-auto">
-          <div class="flex items-center justify-end gap-3 mb-1">
+          <div class="flex items-center justify-end gap-2 mb-1">
             <button
               id="header-install-btn"
               onclick="installApp()"
-              class="hidden bg-white/10 text-white text-[9px] font-bold px-3 py-1 rounded-full border border-white/20 hover:bg-white/20 transition-colors mr-2"
+              class="hidden text-white font-bold rounded-full transition-colors flex items-center gap-1"
+              style="
+                font-size: 9px;
+                padding: 4px 8px;
+                background: rgba(255, 255, 255, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+              "
             >
               <i class="ph-bold ph-download-simple"></i> INSTALAR
             </button>
             <button
               id="upgrade-btn"
-              class="bg-gradient-to-r from-amber-500 to-orange-600 text-black text-[9px] font-bold px-3 py-1 rounded-full shadow-glow-sm hover:scale-105 transition-transform"
+              onclick="openPaywall()"
+              class="text-black font-bold rounded-full shadow-glow-sm transform transition-all hover:scale-105"
+              style="
+                font-size: 9px;
+                padding: 4px 8px;
+                background: linear-gradient(to right, #fbbf24, #ea580c);
+              "
             >
               <i class="ph-fill ph-crown"></i> PRO
             </button>
           </div>
           <div
             id="clock"
-            class="text-2xl font-mono font-bold text-white leading-none drop-shadow-md"
+            class="text-2xl font-mono font-bold text-white"
+            style="line-height: 1; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5)"
           >
             00:00
           </div>
           <div
             id="date"
-            class="text-[10px] font-sans font-bold text-primary tracking-widest mt-0.5 opacity-80"
+            class="font-sans font-bold text-primary tracking-widest opacity-80"
+            style="font-size: 10px; margin-top: 2px"
           >
             -- ---
           </div>
@@ -380,38 +891,75 @@
 
       <!-- VIEW CONTAINER -->
       <div
-        class="flex-1 relative overflow-y-auto overflow-x-hidden pt-24 pb-28 lg:pb-8 lg:pt-28 lg:pl-32 scroll-smooth"
         id="views-container"
+        class="relative h-full overflow-y-auto main-view-container"
+        style="
+          padding-top: 6rem;
+          padding-bottom: 12rem;
+          scroll-behavior: smooth;
+          -webkit-overflow-scrolling: touch;
+        "
       >
-        <!-- [VIEW 1] COMMAND DASHBOARD (Responsive Grid) -->
+        <!-- [VIEW 1] COMMAND DASHBOARD -->
         <section
           id="view-home"
-          class="view-section min-h-full px-4 lg:px-10 max-w-[1920px] mx-auto"
+          class="view-section h-full w-full lg-px-10"
+          style="
+            max-width: 1920px;
+            margin: 0 auto;
+            padding-left: 1rem;
+            padding-right: 1rem;
+          "
         >
-          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
-            <!-- LEFT COL: COMPASS (Desktop: Col 1-4) -->
+          <div
+            class="lg-grid-cols-12 gap-6 h-full"
+            style="display: grid; grid-template-columns: 1fr"
+          >
+            <!-- LEFT COL: COMPASS -->
             <div
-              class="lg:col-span-4 flex flex-col items-center justify-center"
+              class="lg-col-span-4 flex flex-col items-center justify-center"
             >
               <!-- Compass Module -->
               <div
-                class="relative w-full aspect-square max-w-[400px] flex items-center justify-center group"
+                class="relative w-full flex items-center justify-center"
+                style="aspect-ratio: 1; max-width: 400px"
               >
                 <!-- Decor Rings -->
                 <div
-                  class="absolute w-[90%] h-[90%] border border-white/5 rounded-full pointer-events-none group-hover:border-white/10 transition-colors duration-700"
+                  class="absolute pointer-events-none"
+                  style="
+                    width: 90%;
+                    height: 90%;
+                    border: 1px solid rgba(255, 255, 255, 0.05);
+                    border-radius: 50%;
+                    opacity: 0.5;
+                  "
                 ></div>
                 <div
-                  class="absolute w-[98%] h-[98%] border border-dashed border-white/5 rounded-full pointer-events-none animate-[spin_60s_linear_infinite] opacity-50"
+                  class="absolute pointer-events-none animate-spin-slow"
+                  style="
+                    width: 98%;
+                    height: 98%;
+                    border: 1px dashed rgba(255, 255, 255, 0.05);
+                    border-radius: 50%;
+                    opacity: 0.5;
+                  "
                 ></div>
 
                 <!-- Main Lens -->
                 <div
-                  class="relative w-[80%] h-[80%] flex items-center justify-center compass-lens transition-all duration-300 backdrop-blur-sm"
+                  class="relative compass-lens flex items-center justify-center"
                   id="compass-unit"
+                  style="
+                    width: 80%;
+                    height: 80%;
+                    transition: all 0.3s ease;
+                    backdrop-filter: blur(4px);
+                  "
                 >
                   <div
-                    class="absolute top-0 z-50 w-1 h-6 bg-primary rounded-full shadow-glow-primary"
+                    class="absolute top-0 z-50 bg-primary rounded-full shadow-glow-primary"
+                    style="width: 4px; height: 24px"
                   ></div>
 
                   <div
@@ -425,19 +973,42 @@
                     <!-- Cardinals -->
                     <div class="absolute inset-0 z-30 pointer-events-none">
                       <span
-                        class="absolute top-4 left-1/2 -translate-x-1/2 text-xl font-mono font-black text-white drop-shadow-md"
+                        class="absolute font-mono font-bold text-white"
+                        style="
+                          top: 1rem;
+                          left: 50%;
+                          transform: translateX(-50%);
+                          font-size: 1.25rem;
+                          font-weight: 900;
+                          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+                        "
                         >N</span
                       >
                       <span
-                        class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-mono font-bold text-gray-500"
+                        class="absolute font-mono font-bold text-gray-500 text-xs"
+                        style="
+                          right: 1rem;
+                          top: 50%;
+                          transform: translateY(-50%);
+                        "
                         >E</span
                       >
                       <span
-                        class="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs font-mono font-bold text-gray-500"
+                        class="absolute font-mono font-bold text-gray-500 text-xs"
+                        style="
+                          bottom: 1rem;
+                          left: 50%;
+                          transform: translateX(-50%);
+                        "
                         >S</span
                       >
                       <span
-                        class="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-mono font-bold text-gray-500"
+                        class="absolute font-mono font-bold text-gray-500 text-xs"
+                        style="
+                          left: 1rem;
+                          top: 50%;
+                          transform: translateY(-50%);
+                        "
                         >O</span
                       >
                     </div>
@@ -445,17 +1016,37 @@
                     <div
                       id="moon-pointer"
                       class="absolute inset-0 z-20 smooth-move"
+                      style="
+                        transition: transform 0.5s
+                          cubic-bezier(0.34, 1.56, 0.64, 1);
+                      "
                     >
                       <div
-                        class="absolute top-10 left-1/2 -translate-x-1/2 flex flex-col items-center group-hover:scale-110 transition-transform"
+                        class="absolute flex flex-col items-center"
+                        style="
+                          top: 2.5rem;
+                          left: 50%;
+                          transform: translateX(-50%);
+                        "
                       >
                         <i
                           id="moon-icon"
-                          class="ph-fill ph-moon-stars text-4xl text-gray-300 drop-shadow-lg"
+                          class="ph-fill ph-moon-stars text-gray-400"
+                          style="
+                            font-size: 2.25rem;
+                            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+                          "
                         ></i>
                         <div
                           id="azimuth-pill"
-                          class="mt-2 bg-deep/80 backdrop-blur px-2 py-0.5 rounded text-[9px] font-mono text-gray-400 border border-white/10"
+                          class="bg-glass text-gray-400 font-mono"
+                          style="
+                            margin-top: 0.5rem;
+                            padding: 2px 6px;
+                            border-radius: 4px;
+                            font-size: 9px;
+                            border: 1px solid rgba(255, 255, 255, 0.1);
+                          "
                         >
                           ---
                         </div>
@@ -465,10 +1056,23 @@
 
                   <div
                     id="lock-alert"
-                    class="absolute inset-0 flex items-center justify-center opacity-0 scale-75 transition-all duration-300 pointer-events-none active-layer"
+                    class="absolute inset-0 flex items-center justify-center pointer-events-none transition-all"
+                    style="
+                      opacity: 0;
+                      transform: scale(0.75);
+                      transition-duration: 300ms;
+                    "
                   >
                     <div
-                      class="bg-black/90 border border-accent text-accent px-4 py-1 rounded text-xs font-mono font-bold tracking-[0.3em] shadow-glow-accent animate-pulse"
+                      class="text-accent font-mono font-bold animate-pulse shadow-glow-accent"
+                      style="
+                        background: rgba(0, 0, 0, 0.9);
+                        border: 1px solid var(--c-accent);
+                        padding: 4px 16px;
+                        border-radius: 4px;
+                        font-size: 0.75rem;
+                        letter-spacing: 0.3em;
+                      "
                     >
                       LOCKED
                     </div>
@@ -478,22 +1082,35 @@
 
               <!-- Readouts -->
               <div
-                class="w-full flex justify-between px-4 lg:px-10 mt-4 pointer-events-none max-w-[400px]"
+                class="w-full flex justify-between px-4 mt-4 pointer-events-none"
+                style="max-width: 400px"
               >
                 <div class="text-left">
-                  <div class="label-tech text-primary mb-1">RUMBO ACTUAL</div>
+                  <div
+                    class="label-tech text-primary"
+                    style="margin-bottom: 0.25rem"
+                  >
+                    RUMBO ACTUAL
+                  </div>
                   <div
                     id="heading-val"
-                    class="text-3xl font-mono font-bold text-white tracking-tighter"
+                    class="text-3xl font-mono font-bold text-white"
+                    style="letter-spacing: -0.05em"
                   >
                     000°
                   </div>
                 </div>
                 <div class="text-right">
-                  <div class="label-tech text-accent mb-1">OBJETIVO</div>
+                  <div
+                    class="label-tech text-accent"
+                    style="margin-bottom: 0.25rem"
+                  >
+                    OBJETIVO
+                  </div>
                   <div
                     id="target-val"
-                    class="text-3xl font-mono font-bold text-gray-500 tracking-tighter"
+                    class="text-3xl font-mono font-bold text-gray-500"
+                    style="letter-spacing: -0.05em"
                   >
                     ---°
                   </div>
@@ -501,21 +1118,30 @@
               </div>
             </div>
 
-            <!-- MID COL: TELEMETRY (Desktop: Col 5-8) -->
-            <div class="lg:col-span-4 flex flex-col justify-center gap-4">
+            <!-- MID COL: TELEMETRY -->
+            <div class="lg-col-span-4 flex flex-col justify-center gap-4">
               <!-- Status Panel -->
               <div
-                class="hud-module p-5 flex items-center justify-between border-l-4 border-gray-600 transition-colors duration-500 group"
+                class="hud-module flex items-center justify-between"
                 id="status-bar"
+                style="
+                  padding: 1.25rem;
+                  border-left: 4px solid var(--c-gray-500);
+                  transition: border-color 0.5s ease;
+                "
               >
                 <div class="flex flex-col">
-                  <span
-                    class="label-tech group-hover:text-white transition-colors"
+                  <span class="label-tech" style="transition: color 0.3s ease"
                     >ESTADO DE OBSERVACIÓN</span
                   >
                   <div
                     id="vis-verdict"
-                    class="text-2xl font-sans font-bold text-white leading-none mt-2 tracking-wide"
+                    class="font-sans font-bold text-white text-2xl"
+                    style="
+                      line-height: 1;
+                      margin-top: 0.5rem;
+                      letter-spacing: 0.025em;
+                    "
                   >
                     ANALIZANDO...
                   </div>
@@ -523,7 +1149,12 @@
                 <div class="text-right">
                   <div
                     id="vis-icon-container"
-                    class="bg-white/5 p-3 rounded-xl border border-white/5 group-hover:bg-white/10 transition-colors"
+                    style="
+                      background: rgba(255, 255, 255, 0.05);
+                      padding: 0.75rem;
+                      border-radius: 0.75rem;
+                      border: 1px solid rgba(255, 255, 255, 0.05);
+                    "
                   >
                     <i
                       id="vis-icon"
@@ -534,35 +1165,63 @@
               </div>
 
               <!-- Grid Data -->
-              <div class="grid grid-cols-2 gap-4">
+              <div
+                style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem"
+              >
                 <!-- Moon Card -->
                 <div
-                  class="hud-module p-4 flex flex-col gap-3 hover:-translate-y-1 transition-transform"
+                  class="hud-module flex flex-col gap-3"
+                  style="
+                    padding: 1rem;
+                    transform: translateY(0);
+                    transition: transform 0.2s ease;
+                  "
+                  onmouseover="this.style.transform = 'translateY(-4px)'"
+                  onmouseout="this.style.transform = 'translateY(0)'"
                 >
                   <div
-                    class="flex justify-between items-center border-b border-white/5 pb-2"
+                    class="flex justify-between items-center"
+                    style="
+                      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                      padding-bottom: 0.5rem;
+                    "
                   >
                     <span class="label-tech text-accent"
                       ><i class="ph-bold ph-planet"></i> LUNA</span
                     >
                     <span
                       id="phase-val"
-                      class="text-[10px] font-mono text-white opacity-80"
+                      class="text-xs font-mono text-white opacity-80"
+                      style="font-size: 10px"
                       >--%</span
                     >
                   </div>
-                  <div class="grid grid-cols-2 gap-2">
+                  <div
+                    style="
+                      display: grid;
+                      grid-template-columns: 1fr 1fr;
+                      gap: 0.5rem;
+                    "
+                  >
                     <div>
-                      <span class="label-tech block mb-0.5">ILUM</span
-                      ><span
+                      <span
+                        class="label-tech"
+                        style="display: block; margin-bottom: 0.125rem"
+                        >ILUM</span
+                      >
+                      <span
                         id="illum-val"
                         class="value-tech text-lg font-bold text-white"
                         >--%</span
                       >
                     </div>
                     <div class="text-right">
-                      <span class="label-tech block mb-0.5">DIST</span
-                      ><span
+                      <span
+                        class="label-tech"
+                        style="display: block; margin-bottom: 0.125rem"
+                        >DIST</span
+                      >
+                      <span
                         id="dist-val"
                         class="value-tech text-lg font-bold text-primary"
                         >--K</span
@@ -573,32 +1232,58 @@
 
                 <!-- Pos Card -->
                 <div
-                  class="hud-module p-4 flex flex-col gap-3 hover:-translate-y-1 transition-transform"
+                  class="hud-module flex flex-col gap-3"
+                  style="
+                    padding: 1rem;
+                    transform: translateY(0);
+                    transition: transform 0.2s ease;
+                  "
+                  onmouseover="this.style.transform = 'translateY(-4px)'"
+                  onmouseout="this.style.transform = 'translateY(0)'"
                 >
                   <div
-                    class="flex justify-between items-center border-b border-white/5 pb-2"
+                    class="flex justify-between items-center"
+                    style="
+                      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                      padding-bottom: 0.5rem;
+                    "
                   >
                     <span class="label-tech text-primary"
                       ><i class="ph-bold ph-crosshair"></i> POSICIÓN</span
                     >
                     <span
                       id="alt-val"
-                      class="text-[10px] font-mono text-white opacity-80"
+                      class="text-xs font-mono text-white opacity-80"
+                      style="font-size: 10px"
                       >ALT: --°</span
                     >
                   </div>
-                  <div class="grid grid-cols-2 gap-2">
+                  <div
+                    style="
+                      display: grid;
+                      grid-template-columns: 1fr 1fr;
+                      gap: 0.5rem;
+                    "
+                  >
                     <div>
-                      <span class="label-tech block mb-0.5">PICO</span
-                      ><span
+                      <span
+                        class="label-tech"
+                        style="display: block; margin-bottom: 0.125rem"
+                        >PICO</span
+                      >
+                      <span
                         id="peak-val"
                         class="value-tech text-lg font-bold text-warning"
                         >--:--</span
                       >
                     </div>
                     <div class="text-right">
-                      <span class="label-tech block mb-0.5">AZIMUT</span
-                      ><span
+                      <span
+                        class="label-tech"
+                        style="display: block; margin-bottom: 0.125rem"
+                        >AZIMUT</span
+                      >
+                      <span
                         id="az-grid-val"
                         class="value-tech text-lg font-bold text-white"
                         >--</span
@@ -609,15 +1294,37 @@
 
                 <!-- Cycle -->
                 <div
-                  class="hud-module p-4 hover:-translate-y-1 transition-transform"
+                  class="hud-module"
+                  style="
+                    padding: 1rem;
+                    transform: translateY(0);
+                    transition: transform 0.2s ease;
+                  "
+                  onmouseover="this.style.transform = 'translateY(-4px)'"
+                  onmouseout="this.style.transform = 'translateY(0)'"
                 >
-                  <span class="label-tech block mb-3">CICLO DIARIO</span>
+                  <span
+                    class="label-tech"
+                    style="display: block; margin-bottom: 0.75rem"
+                    >CICLO DIARIO</span
+                  >
                   <div
-                    class="flex justify-between items-center bg-black/30 rounded-lg p-2 border border-white/5"
+                    class="flex justify-between items-center"
+                    style="
+                      background: rgba(0, 0, 0, 0.3);
+                      border-radius: 0.5rem;
+                      padding: 0.5rem;
+                      border: 1px solid rgba(255, 255, 255, 0.05);
+                    "
                   >
                     <div class="text-center">
                       <i
-                        class="ph-bold ph-arrow-up text-primary text-xs mb-1 block"
+                        class="ph-bold ph-arrow-up text-primary"
+                        style="
+                          font-size: 0.75rem;
+                          display: block;
+                          margin-bottom: 0.25rem;
+                        "
                       ></i>
                       <div
                         id="rise-val"
@@ -626,10 +1333,21 @@
                         --:--
                       </div>
                     </div>
-                    <div class="h-8 w-[1px] bg-white/10"></div>
+                    <div
+                      style="
+                        height: 2rem;
+                        width: 1px;
+                        background: rgba(255, 255, 255, 0.1);
+                      "
+                    ></div>
                     <div class="text-center">
                       <i
-                        class="ph-bold ph-arrow-down text-accent text-xs mb-1 block"
+                        class="ph-bold ph-arrow-down text-accent"
+                        style="
+                          font-size: 0.75rem;
+                          display: block;
+                          margin-bottom: 0.25rem;
+                        "
                       ></i>
                       <div
                         id="set-val"
@@ -643,12 +1361,31 @@
 
                 <!-- Atmosphere -->
                 <div
-                  class="hud-module p-4 hover:-translate-y-1 transition-transform"
+                  class="hud-module"
+                  style="
+                    padding: 1rem;
+                    transform: translateY(0);
+                    transition: transform 0.2s ease;
+                  "
+                  onmouseover="this.style.transform = 'translateY(-4px)'"
+                  onmouseout="this.style.transform = 'translateY(0)'"
                 >
-                  <span class="label-tech block mb-3">ATMÓSFERA</span>
-                  <div class="grid grid-cols-2 gap-2">
+                  <span
+                    class="label-tech"
+                    style="display: block; margin-bottom: 0.75rem"
+                    >ATMÓSFERA</span
+                  >
+                  <div
+                    style="
+                      display: grid;
+                      grid-template-columns: 1fr 1fr;
+                      gap: 0.5rem;
+                    "
+                  >
                     <div class="flex flex-col">
-                      <span class="text-[9px] text-gray-500 font-mono mb-1"
+                      <span
+                        class="label-tech"
+                        style="font-size: 9px; margin-bottom: 0.25rem"
                         >NUBES</span
                       >
                       <span
@@ -658,7 +1395,9 @@
                       >
                     </div>
                     <div class="flex flex-col text-right">
-                      <span class="text-[9px] text-gray-500 font-mono mb-1"
+                      <span
+                        class="label-tech"
+                        style="font-size: 9px; margin-bottom: 0.25rem"
                         >HUM</span
                       >
                       <span
@@ -672,17 +1411,25 @@
               </div>
             </div>
 
-            <!-- RIGHT COL: GRAPH / TOOLS (Desktop: Col 9-12) -->
-            <div class="lg:col-span-4 flex flex-col gap-4">
+            <!-- RIGHT COL: GRAPH / TOOLS -->
+            <div class="lg-col-span-4 flex flex-col gap-4">
               <!-- Graph -->
               <div
-                class="hud-module p-0 relative h-64 lg:h-auto lg:flex-1 flex flex-col"
+                class="hud-module flex flex-col"
+                style="
+                  padding: 0;
+                  position: relative;
+                  min-height: 16rem;
+                  flex: 1;
+                "
               >
                 <div class="absolute top-4 left-5 z-10 pointer-events-none">
-                  <span class="label-tech text-accent block tracking-widest"
+                  <span
+                    class="label-tech text-accent"
+                    style="display: block; letter-spacing: 0.1em"
                     >TRAYECTORIA PICO</span
                   >
-                  <span class="text-[9px] text-gray-500 font-mono"
+                  <span class="text-gray-500 font-mono" style="font-size: 9px"
                     >ELEVACIÓN 24 HORAS</span
                   >
                 </div>
@@ -695,36 +1442,81 @@
                 <!-- Sim Button -->
                 <button
                   id="future-btn"
-                  class="absolute top-4 right-4 bg-white/5 hover:bg-accent hover:text-white border border-white/10 text-gray-400 text-[10px] font-mono font-bold px-3 py-1.5 rounded transition-all z-10 backdrop-blur-md"
+                  class="absolute top-4 right-4 text-gray-400 font-mono font-bold rounded transition-all z-10"
+                  style="
+                    background: rgba(255, 255, 255, 0.05);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    font-size: 10px;
+                    padding: 6px 12px;
+                    backdrop-filter: blur(12px);
+                  "
+                  onmouseover="
+                    this.style.background = 'var(--c-accent)';
+                    this.style.color = 'white';
+                  "
+                  onmouseout="
+                    this.style.background = 'rgba(255,255,255,0.05)';
+                    this.style.color = '#94a3b8';
+                  "
                 >
                   <i class="ph-bold ph-clock"></i> SIMULAR
                 </button>
               </div>
 
-              <!-- Sim Panel (Collapsible) -->
+              <!-- Sim Panel -->
               <div
                 id="future-panel"
-                class="hidden hud-module p-5 border-t-2 border-accent animate-[fadeIn_0.3s_ease]"
+                class="hidden hud-module"
+                style="
+                  padding: 1.25rem;
+                  border-top: 2px solid var(--c-accent);
+                  animation: fadeIn 0.3s ease;
+                "
               >
                 <div class="flex justify-between items-center mb-4">
                   <span class="label-tech text-accent">SIMULADOR ORBITAL</span
                   ><button
                     id="close-future"
-                    class="text-gray-400 hover:text-white"
+                    class="text-gray-400"
+                    onmouseover="this.style.color = 'white'"
+                    onmouseout="this.style.color = '#94a3b8'"
                   >
                     <i class="ph-bold ph-x"></i>
                   </button>
                 </div>
+                <!-- Input container -->
                 <div class="flex gap-2 mb-4">
                   <input
                     type="datetime-local"
                     id="f-input"
-                    class="w-full bg-deep border border-white/10 rounded-lg px-3 py-2 text-xs text-white font-mono outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all"
+                    class="w-full font-mono text-xs text-white"
+                    style="
+                      background: var(--c-deep);
+                      border: 1px solid rgba(255, 255, 255, 0.1);
+                      border-radius: 0.5rem;
+                      padding: 0.5rem;
+                      outline: none;
+                    "
                   />
                 </div>
                 <button
                   id="f-calc"
-                  class="w-full bg-accent/10 border border-accent/50 text-accent hover:bg-accent hover:text-white py-2 rounded-lg font-mono font-bold text-xs tracking-widest transition-all"
+                  class="w-full font-mono font-bold text-xs tracking-widest transition-all"
+                  style="
+                    background: rgba(217, 70, 239, 0.1);
+                    border: 1px solid rgba(217, 70, 239, 0.5);
+                    color: var(--c-accent);
+                    padding: 0.5rem;
+                    border-radius: 0.5rem;
+                  "
+                  onmouseover="
+                    this.style.background = 'var(--c-accent)';
+                    this.style.color = 'white';
+                  "
+                  onmouseout="
+                    this.style.background = 'rgba(217, 70, 239, 0.1)';
+                    this.style.color = 'var(--c-accent)';
+                  "
                 >
                   CALCULAR VIABILIDAD
                 </button>
@@ -737,9 +1529,9 @@
         <!-- [VIEW 2] AR -->
         <section
           id="view-ar"
-          class="view-section hidden h-full w-full relative bg-black"
+          class="view-section hidden h-full w-full relative"
+          style="background-color: #000"
         >
-          <!-- Copied logic from source, kept clean -->
           <div
             id="ar-container"
             class="absolute inset-0 flex flex-col items-center justify-center overflow-hidden"
@@ -749,38 +1541,109 @@
               playsinline
               autoplay
               muted
-              class="opacity-70"
+              style="
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                opacity: 0.7;
+              "
             ></video>
             <!-- HUD Elements -->
             <div class="absolute inset-0 z-10 pointer-events-none">
+              <!-- Corners -->
               <div
-                class="absolute top-8 left-8 w-16 h-16 border-t-2 border-l-2 border-primary/50 rounded-tl-2xl"
+                class="absolute"
+                style="
+                  top: 2rem;
+                  left: 2rem;
+                  width: 4rem;
+                  height: 4rem;
+                  border-top: 2px solid rgba(56, 189, 248, 0.5);
+                  border-left: 2px solid rgba(56, 189, 248, 0.5);
+                  border-top-left-radius: 1rem;
+                "
               ></div>
               <div
-                class="absolute top-8 right-8 w-16 h-16 border-t-2 border-r-2 border-primary/50 rounded-tr-2xl"
+                class="absolute"
+                style="
+                  top: 2rem;
+                  right: 2rem;
+                  width: 4rem;
+                  height: 4rem;
+                  border-top: 2px solid rgba(56, 189, 248, 0.5);
+                  border-right: 2px solid rgba(56, 189, 248, 0.5);
+                  border-top-right-radius: 1rem;
+                "
               ></div>
               <div
-                class="absolute bottom-32 left-8 w-16 h-16 border-b-2 border-l-2 border-primary/50 rounded-bl-2xl"
+                class="absolute"
+                style="
+                  bottom: 8rem;
+                  left: 2rem;
+                  width: 4rem;
+                  height: 4rem;
+                  border-bottom: 2px solid rgba(56, 189, 248, 0.5);
+                  border-left: 2px solid rgba(56, 189, 248, 0.5);
+                  border-bottom-left-radius: 1rem;
+                "
               ></div>
               <div
-                class="absolute bottom-32 right-8 w-16 h-16 border-b-2 border-r-2 border-primary/50 rounded-br-2xl"
+                class="absolute"
+                style="
+                  bottom: 8rem;
+                  right: 2rem;
+                  width: 4rem;
+                  height: 4rem;
+                  border-bottom: 2px solid rgba(56, 189, 248, 0.5);
+                  border-right: 2px solid rgba(56, 189, 248, 0.5);
+                  border-bottom-right-radius: 1rem;
+                "
               ></div>
 
+              <!-- Reticle -->
               <div
-                class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 border border-white/10 rounded-full flex items-center justify-center"
+                class="absolute top-1/2 left-1/2 border rounded-full flex items-center justify-center"
+                style="
+                  transform: translate(-50%, -50%);
+                  width: 18rem;
+                  height: 18rem;
+                  border-color: rgba(255, 255, 255, 0.1);
+                "
               >
                 <div
-                  class="w-1 h-5 bg-primary absolute top-0 shadow-glow-primary"
+                  class="absolute top-0 shadow-glow-primary bg-primary"
+                  style="width: 4px; height: 20px"
                 ></div>
-                <div class="w-1 h-5 bg-primary absolute bottom-0"></div>
-                <div class="w-5 h-1 bg-primary absolute left-0"></div>
-                <div class="w-5 h-1 bg-primary absolute right-0"></div>
                 <div
-                  class="w-2 h-2 bg-accent rounded-full animate-pulse shadow-glow-accent"
+                  class="absolute bottom-0 bg-primary"
+                  style="width: 4px; height: 20px"
+                ></div>
+                <div
+                  class="absolute left-0 bg-primary"
+                  style="width: 20px; height: 4px"
+                ></div>
+                <div
+                  class="absolute right-0 bg-primary"
+                  style="width: 20px; height: 4px"
+                ></div>
+                <div
+                  class="rounded-full animate-pulse shadow-glow-accent bg-accent"
+                  style="width: 8px; height: 8px"
                 ></div>
               </div>
+
+              <!-- Heading -->
               <div
-                class="absolute top-12 left-1/2 -translate-x-1/2 bg-deep/80 backdrop-blur px-6 py-2 rounded-full border border-white/10"
+                class="absolute left-1/2 rounded-full border border-white/10"
+                style="
+                  top: 3rem;
+                  transform: translateX(-50%);
+                  background: rgba(10, 10, 16, 0.8);
+                  backdrop-filter: blur(4px);
+                  padding: 0.5rem 1.5rem;
+                "
               >
                 <span
                   class="text-xs font-mono text-primary font-bold"
@@ -795,40 +1658,87 @@
         <!-- [VIEW 3] MAP -->
         <section
           id="view-map"
-          class="view-section hidden h-full p-4 lg:p-10 flex flex-col gap-6 max-w-5xl mx-auto"
+          class="view-section hidden h-full w-full"
+          style="
+            padding: 1.5rem;
+            max-width: 64rem;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+          "
         >
           <h2
             class="text-2xl font-bold font-mono text-gold mb-2 flex items-center gap-3"
           >
             <i class="ph-fill ph-map-trifold"></i> MAPA DE CONTAMINACIÓN
             <span
-              class="bg-gold text-black text-[10px] px-2 py-0.5 rounded font-bold"
+              class="text-black text-xs px-2 py-0.5 rounded font-bold"
+              style="background-color: var(--c-gold)"
               >PRO</span
             >
           </h2>
           <div
-            class="hud-module h-[60vh] relative flex items-center justify-center overflow-hidden group border-gold/20 hover:border-gold/50 transition-colors"
+            class="hud-module relative flex items-center justify-center overflow-hidden"
+            style="
+              height: 60vh;
+              border: 1px solid rgba(251, 191, 36, 0.2);
+              transition: border-color 0.3s;
+            "
+            onmouseover="
+              this.querySelector('.bg-map').style.filter = 'grayscale(0)';
+              this.style.borderColor = 'rgba(251, 191, 36, 0.5)';
+            "
+            onmouseout="
+              this.querySelector('.bg-map').style.filter = 'grayscale(1)';
+              this.style.borderColor = 'rgba(251, 191, 36, 0.2)';
+            "
           >
             <div
-              class="absolute inset-0 bg-[url('https://upload.wikimedia.org/wikipedia/commons/8/86/Earth_lights_vs_population_density.png')] bg-cover bg-center opacity-40 grayscale group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100"
+              class="absolute inset-0 bg-map"
+              style="
+                background-image: url(&quot;https://upload.wikimedia.org/wikipedia/commons/8/86/Earth_lights_vs_population_density.png&quot;);
+                background-size: cover;
+                background-position: center;
+                opacity: 0.4;
+                filter: grayscale(1);
+                transition: all 1s ease;
+                transform: scale(1.05);
+              "
             ></div>
             <div
-              class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-center p-6 backdrop-blur-sm transition-opacity"
+              class="absolute inset-0 flex flex-col items-center justify-center text-center p-6"
+              style="background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px)"
               id="map-lock-overlay"
             >
               <i
-                class="ph-fill ph-lock-key text-5xl text-gold mb-4 drop-shadow-lg"
+                class="ph-fill ph-lock-key text-gold mb-4"
+                style="
+                  font-size: 3rem;
+                  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
+                "
               ></i>
               <h3 class="text-xl font-bold text-white mb-2 font-mono">
                 ACCESO RESTRINGIDO
               </h3>
-              <p class="text-xs text-gray-400 mb-6 max-w-xs">
+              <p class="text-xs text-gray-400 mb-6" style="max-width: 20rem">
                 Los mapas de alta resolución requieren credenciales de nivel
                 PRO.
               </p>
               <button
                 onclick="openPaywall()"
-                class="bg-gold text-black font-bold px-8 py-3 rounded-lg hover:scale-105 transition-transform shadow-[0_0_20px_#fbbf24] tracking-widest text-xs font-mono"
+                class="text-black font-bold px-8 py-3 rounded-lg"
+                style="
+                  background: var(--c-gold);
+                  box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+                  letter-spacing: 0.1em;
+                  font-size: 0.75rem;
+                  font-family: var(--f-mono);
+                  cursor: pointer;
+                  transition: transform 0.2s;
+                "
+                onmouseover="this.style.transform = 'scale(1.05)'"
+                onmouseout="this.style.transform = 'scale(1)'"
               >
                 DESBLOQUEAR
               </button>
@@ -839,7 +1749,13 @@
         <!-- [VIEW 4] TOOLS -->
         <section
           id="view-tools"
-          class="view-section hidden h-full p-4 lg:p-10 pb-32 max-w-4xl mx-auto"
+          class="view-section hidden h-full w-full"
+          style="
+            padding: 1.5rem;
+            max-width: 64rem;
+            margin: 0 auto;
+            padding-bottom: 8rem;
+          "
         >
           <h2
             class="text-2xl font-bold font-mono text-white mb-6 flex items-center gap-3"
@@ -848,7 +1764,16 @@
           </h2>
 
           <div
-            class="hud-module p-6 mb-6 border-l-4 border-gold bg-gradient-to-r from-gold/5 to-transparent"
+            class="hud-module mb-6"
+            style="
+              padding: 1.5rem;
+              border-left: 4px solid var(--c-gold);
+              background: linear-gradient(
+                to right,
+                rgba(251, 191, 36, 0.05),
+                transparent
+              );
+            "
           >
             <div class="flex justify-between items-start mb-4">
               <h3 class="text-base font-bold text-gold tracking-widest">
@@ -858,21 +1783,57 @@
             </div>
             <div class="relative py-4">
               <div
-                class="grid grid-cols-2 lg:grid-cols-4 gap-4 blur-sm select-none opacity-50"
+                style="
+                  display: grid;
+                  grid-template-columns: repeat(2, 1fr);
+                  gap: 1rem;
+                  filter: blur(4px);
+                  opacity: 0.5;
+                  user-select: none;
+                "
+                class="lg-tools-grid"
               >
-                <div class="bg-black/40 p-3 rounded border border-white/5">
+                <div
+                  style="
+                    background: rgba(0, 0, 0, 0.4);
+                    padding: 0.75rem;
+                    border-radius: 0.25rem;
+                    border: 1px solid rgba(255, 255, 255, 0.05);
+                  "
+                >
                   <span class="label-tech block">ISO</span>
                   <div class="text-white font-mono text-lg">100</div>
                 </div>
-                <div class="bg-black/40 p-3 rounded border border-white/5">
+                <div
+                  style="
+                    background: rgba(0, 0, 0, 0.4);
+                    padding: 0.75rem;
+                    border-radius: 0.25rem;
+                    border: 1px solid rgba(255, 255, 255, 0.05);
+                  "
+                >
                   <span class="label-tech block">f/STOP</span>
                   <div class="text-white font-mono text-lg">f/2.8</div>
                 </div>
-                <div class="bg-black/40 p-3 rounded border border-white/5">
+                <div
+                  style="
+                    background: rgba(0, 0, 0, 0.4);
+                    padding: 0.75rem;
+                    border-radius: 0.25rem;
+                    border: 1px solid rgba(255, 255, 255, 0.05);
+                  "
+                >
                   <span class="label-tech block">REGLA 500</span>
                   <div class="text-white font-mono text-lg">12s</div>
                 </div>
-                <div class="bg-black/40 p-3 rounded border border-white/5">
+                <div
+                  style="
+                    background: rgba(0, 0, 0, 0.4);
+                    padding: 0.75rem;
+                    border-radius: 0.25rem;
+                    border: 1px solid rgba(255, 255, 255, 0.05);
+                  "
+                >
                   <span class="label-tech block">LENTE</span>
                   <div class="text-white font-mono text-lg">24mm</div>
                 </div>
@@ -880,7 +1841,15 @@
               <div class="absolute inset-0 flex items-center justify-center">
                 <button
                   onclick="openPaywall()"
-                  class="bg-gold text-black text-xs font-bold px-6 py-2 rounded-full shadow-[0_0_15px_#fbbf24] flex items-center gap-2 hover:bg-white transition-colors"
+                  class="text-black text-xs font-bold px-6 py-2 rounded-full flex items-center gap-2"
+                  style="
+                    background: var(--c-gold);
+                    box-shadow: 0 0 15px rgba(251, 191, 36, 0.5);
+                    cursor: pointer;
+                    transition: background 0.3s;
+                  "
+                  onmouseover="this.style.background = 'white'"
+                  onmouseout="this.style.background = 'var(--c-gold)'"
                 >
                   <i class="ph-bold ph-lock-key"></i> ACCEDER AL KIT
                 </button>
@@ -890,53 +1859,39 @@
         </section>
       </div>
 
-      <!-- NAV DOCK (Responsive: Bottom Mobile, Side Desktop) -->
-      <nav
-        class="nav-dock fixed bottom-0 w-full flex justify-around items-center px-2 py-3 lg:flex-col lg:justify-start lg:w-20 lg:h-auto lg:top-1/2 lg:left-6 lg:rounded-2xl lg:border lg:py-6 lg:bg-deep/90"
-      >
+      <!-- NAV DOCK (Floating) -->
+      <nav class="nav-dock">
         <button
-          class="nav-item active flex flex-col items-center gap-1 w-16 lg:w-full group"
+          class="nav-item active"
           onclick="switchView('view-home', this)"
+          style="cursor: pointer"
         >
-          <i
-            class="ph-fill ph-crosshair text-2xl group-hover:scale-110 transition-transform"
-          ></i>
-          <span class="text-[8px] font-bold tracking-widest mt-1 opacity-70"
-            >CMD</span
-          >
+          <i class="ph-fill ph-crosshair"></i>
+          <span>CMD</span>
         </button>
         <button
-          class="nav-item flex flex-col items-center gap-1 w-16 lg:w-full group text-gray-500"
+          class="nav-item"
           onclick="switchView('view-ar', this)"
+          style="cursor: pointer"
         >
-          <i
-            class="ph-fill ph-camera text-2xl group-hover:scale-110 transition-transform"
-          ></i>
-          <span class="text-[8px] font-bold tracking-widest mt-1 opacity-70"
-            >AR</span
-          >
+          <i class="ph-fill ph-camera"></i>
+          <span>AR</span>
         </button>
         <button
-          class="nav-item flex flex-col items-center gap-1 w-16 lg:w-full group text-gray-500"
+          class="nav-item"
           onclick="switchView('view-map', this)"
+          style="cursor: pointer"
         >
-          <i
-            class="ph-fill ph-map-trifold text-2xl group-hover:scale-110 transition-transform"
-          ></i>
-          <span class="text-[8px] font-bold tracking-widest mt-1 opacity-70"
-            >MAPA</span
-          >
+          <i class="ph-fill ph-map-trifold"></i>
+          <span>MAPA</span>
         </button>
         <button
-          class="nav-item flex flex-col items-center gap-1 w-16 lg:w-full group text-gray-500"
+          class="nav-item"
           onclick="switchView('view-tools', this)"
+          style="cursor: pointer"
         >
-          <i
-            class="ph-fill ph-toolbox text-2xl group-hover:scale-110 transition-transform"
-          ></i>
-          <span class="text-[8px] font-bold tracking-widest mt-1 opacity-70"
-            >KIT</span
-          >
+          <i class="ph-fill ph-toolbox"></i>
+          <span>KIT</span>
         </button>
       </nav>
     </div>
@@ -944,20 +1899,42 @@
     <!-- PAYWALL MODAL -->
     <div
       id="paywall-modal"
-      class="fixed inset-0 z-[200] bg-black/90 backdrop-blur-xl flex items-center justify-center p-6 hidden opacity-0 transition-opacity duration-300"
+      class="fixed inset-0 z-50 flex items-center justify-center p-6 hidden"
+      style="
+        background: rgba(0, 0, 0, 0.9);
+        backdrop-filter: blur(12px);
+        opacity: 0;
+        transition: opacity 0.3s;
+      "
     >
       <div
-        class="bg-gray-900 border border-gold rounded-2xl p-8 max-w-sm w-full relative shadow-[0_0_50px_rgba(251,191,36,0.2)] transform transition-transform scale-95"
+        class="relative border rounded-2xl p-8 w-full"
+        style="
+          background: var(--c-deep);
+          border-color: var(--c-gold);
+          max-width: 24rem;
+          box-shadow: 0 0 50px rgba(251, 191, 36, 0.2);
+          transform: scale(0.95);
+          transition: transform 0.3s;
+        "
         id="paywall-content"
       >
         <div
-          class="absolute -top-10 left-1/2 -translate-x-1/2 w-20 h-20 bg-gray-900 rounded-full border border-gold flex items-center justify-center shadow-lg"
+          class="absolute left-1/2 rounded-full border border-gold flex items-center justify-center shadow-lg"
+          style="
+            top: -2.5rem;
+            transform: translateX(-50%);
+            width: 5rem;
+            height: 5rem;
+            background: var(--c-deep);
+          "
         >
           <i class="ph-fill ph-crown text-4xl text-gold"></i>
         </div>
         <button
           onclick="closePaywall()"
-          class="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors"
+          class="absolute top-4 right-4 text-gray-500 hover-text-white transition-colors"
+          style="cursor: pointer"
         >
           <i class="ph-bold ph-x text-xl"></i>
         </button>
@@ -990,8 +1967,16 @@
 
         <button
           onclick="processPayment()"
-          class="w-full bg-gradient-to-r from-gold to-orange-500 text-black font-bold py-4 rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-glow-sm tracking-widest text-sm font-mono"
+          class="w-full text-black font-bold py-4 rounded-xl shadow-glow-sm tracking-widest text-sm font-mono transition-all"
           id="pay-btn"
+          style="
+            background: linear-gradient(to right, var(--c-gold), #f97316);
+            cursor: pointer;
+          "
+          onmouseover="this.style.transform = 'scale(1.02)'"
+          onmouseout="this.style.transform = 'scale(1)'"
+          onmousedown="this.style.transform = 'scale(0.98)'"
+          onmouseup="this.style.transform = 'scale(1.02)'"
         >
           SUSCRIBIRSE - $2.99 / MES
         </button>
@@ -999,562 +1984,788 @@
     </div>
 
     <script>
-      // --- UTILS ---
-      const $ = (id) => document.getElementById(id);
-      const safeText = (id, txt) => {
-        const el = $(id);
-        if (el) el.innerText = txt;
-      };
+      document.addEventListener("DOMContentLoaded", () => {
+        // --- GUARD ---
+        let isAppReady = false;
 
-      // --- HELPER: CARDINAL DIRECTION ---
-      function getCardinal(angle) {
-        const directions = [
-          "N",
-          "NNE",
-          "NE",
-          "ENE",
-          "E",
-          "ESE",
-          "SE",
-          "SSE",
-          "S",
-          "SSO",
-          "SO",
-          "OSO",
-          "O",
-          "ONO",
-          "NO",
-          "NNO",
-        ];
-        const normalized = ((angle % 360) + 360) % 360;
-        const index = Math.round(normalized / 22.5) % 16;
-        return directions[index];
-      }
+        // --- UTILS ---
+        const $ = (id) => document.getElementById(id);
 
-      // --- STATE ---
-      const sys = {
-        lat: null,
-        lon: null,
-        heading: 0,
-        accumHeading: 0,
-        lastRawHeading: 0,
-        moonAz: 0,
-        moonAlt: 0,
-        moonDist: 0,
-        isLocked: false,
-        clouds: 0,
-        humidity: 0,
-        isPro: false,
-      };
-
-      // --- PWA & SERVICE WORKER ---
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-          navigator.serviceWorker.register("./sw.js").then(
-            (reg) => console.log("SW Registered"),
-            (err) => console.log("SW Failed", err),
-          );
-        });
-      }
-
-      let deferredPrompt;
-      window.addEventListener("beforeinstallprompt", (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        // Show install trigger in header if available
-        const installBtn = document.getElementById("header-install-btn");
-        if (installBtn) installBtn.classList.remove("hidden");
-      });
-
-      async function installApp() {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        deferredPrompt = null;
-        if (outcome === "accepted") {
-          const b = document.getElementById("header-install-btn");
-          if (b) b.classList.add("hidden");
-        }
-      }
-
-      // --- TICKS & SETUP ---
-      const ticksLayer = $("ticks-layer");
-      if (ticksLayer) {
-        for (let i = 0; i < 360; i += 2) {
-          if (i % 90 === 0) continue;
-          const el = document.createElement("div");
-          el.className = `tick-mark ${i % 10 === 0 ? "tick-major" : "tick-minor"}`;
-          // Ticks positioning
-          el.style.top = "50%";
-          el.style.left = "50%";
-          // The radius needs to match 80% of compass container roughly.
-          // Container is ~400px max on desktop, smaller on mobile.
-          // We use % translation to be responsive inside the lens.
-          el.style.transform = `translate(-50%, -50%) rotate(${i}deg) translateY(-40%)`;
-          // translateY -40% pushes it to the edge of the lens (which is 100% height)
-          ticksLayer.appendChild(el);
-        }
-      }
-
-      // --- INIT ---
-      $("system-start-btn").addEventListener("click", async () => {
-        if (
-          typeof DeviceOrientationEvent !== "undefined" &&
-          typeof DeviceOrientationEvent.requestPermission === "function"
-        ) {
+        // Función SafeText Mejorada (Defensiva)
+        const safeText = (id, txt) => {
+          if (!id) return;
           try {
-            await DeviceOrientationEvent.requestPermission();
-          } catch (e) {}
+            const el = $(id);
+            if (el) el.innerText = txt;
+          } catch (e) {
+            // Fail silently
+          }
+        };
+
+        // --- HELPER: CARDINAL DIRECTION ---
+        function getCardinal(angle) {
+          const directions = [
+            "N",
+            "NNE",
+            "NE",
+            "ENE",
+            "E",
+            "ESE",
+            "SE",
+            "SSE",
+            "S",
+            "SSO",
+            "SO",
+            "OSO",
+            "O",
+            "ONO",
+            "NO",
+            "NNO",
+          ];
+          const normalized = ((angle % 360) + 360) % 360;
+          const index = Math.round(normalized / 22.5) % 16;
+          return directions[index];
         }
-        if (navigator.geolocation) {
-          navigator.geolocation.watchPosition(handleGPS, null, {
-            enableHighAccuracy: true,
+
+        // --- STATE ---
+        const sys = {
+          lat: null,
+          lon: null,
+          heading: 0,
+          accumHeading: 0,
+          lastRawHeading: 0,
+          moonAz: 0,
+          moonAlt: 0,
+          moonDist: 0,
+          isLocked: false,
+          clouds: 0,
+          humidity: 0,
+          isPro: false,
+        };
+
+        // --- PWA & SERVICE WORKER ---
+        if ("serviceWorker" in navigator) {
+          window.addEventListener("load", () => {
+            navigator.serviceWorker.register("./sw.js").then(
+              (reg) => console.log("SW Registered"),
+              (err) => console.log("SW Failed", err),
+            );
           });
         }
 
-        if ("ondeviceorientationabsolute" in window)
-          window.addEventListener(
-            "deviceorientationabsolute",
-            handleOrientation,
-          );
-        else window.addEventListener("deviceorientation", handleOrientation);
+        let deferredPrompt;
+        const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 
-        $("boot-sequence").style.opacity = "0";
-        setTimeout(() => {
-          $("boot-sequence").style.display = "none";
-          $("main-app").style.opacity = "1";
-          startLoops();
-        }, 800);
-      });
+        window.addEventListener("beforeinstallprompt", (e) => {
+          e.preventDefault();
+          deferredPrompt = e;
+          showInstallBtn();
+        });
 
-      function startLoops() {
-        setInterval(() => {
+        if (isIOS) showInstallBtn();
+
+        function showInstallBtn() {
+          const installBtn = document.getElementById("header-install-btn");
+          if (installBtn) installBtn.classList.remove("hidden");
+        }
+
+        window.installApp = async function () {
+          if (isIOS) {
+            let modal = document.getElementById("ios-install-modal");
+            if (modal) modal.classList.remove("hidden");
+            return;
+          }
+          if (!deferredPrompt) return;
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          deferredPrompt = null;
+          if (outcome === "accepted") {
+            const b = document.getElementById("header-install-btn");
+            if (b) b.classList.add("hidden");
+          }
+        };
+
+        // --- TICKS & SETUP ---
+        const ticksLayer = $("ticks-layer");
+        if (ticksLayer) {
+          ticksLayer.innerHTML = ""; // Clear first to be safe
+          for (let i = 0; i < 360; i += 2) {
+            if (i % 90 === 0) continue;
+            const el = document.createElement("div");
+            el.className = `tick-mark ${i % 10 === 0 ? "tick-major" : "tick-minor"}`;
+            el.style.top = "50%";
+            el.style.left = "50%";
+            el.style.transform = `translate(-50%, -50%) rotate(${i}deg) translateY(-40%)`;
+            ticksLayer.appendChild(el);
+          }
+        }
+
+        // --- INIT ---
+        const startBtn = $("system-start-btn");
+        if (startBtn) {
+          startBtn.addEventListener("click", async () => {
+            // Permission request
+            if (
+              typeof DeviceOrientationEvent !== "undefined" &&
+              typeof DeviceOrientationEvent.requestPermission === "function"
+            ) {
+              try {
+                await DeviceOrientationEvent.requestPermission();
+              } catch (e) {
+                console.warn("Orientation permission warning");
+              }
+            }
+
+            // GPS
+            if (navigator.geolocation) {
+              navigator.geolocation.watchPosition(
+                handleGPS,
+                (err) => console.warn("GPS Fail"),
+                { enableHighAccuracy: true },
+              );
+            }
+
+            // Compass
+            if ("ondeviceorientationabsolute" in window)
+              window.addEventListener(
+                "deviceorientationabsolute",
+                handleOrientation,
+              );
+            else
+              window.addEventListener("deviceorientation", handleOrientation);
+
+            // UI Transition
+            const bootSeq = $("boot-sequence");
+            if (bootSeq) bootSeq.style.opacity = "0";
+
+            setTimeout(() => {
+              if (bootSeq) bootSeq.style.display = "none";
+              const mainApp = $("main-app");
+              if (mainApp) mainApp.style.opacity = "1";
+
+              // CRITICAL: Mark app as ready before starting loops
+              isAppReady = true;
+              startLoops();
+
+              // Initial Draw
+              try {
+                drawConeGraph(new Date());
+                if (sys.lat) updateTelemetry();
+              } catch (e) {}
+            }, 800);
+          });
+        }
+
+        function startLoops() {
+          if (!isAppReady) return;
+
+          setInterval(() => {
+            if (!isAppReady) return;
+            try {
+              const now = new Date();
+              safeText(
+                "clock",
+                now.toLocaleTimeString("es-ES", { hour12: false }),
+              );
+              safeText(
+                "date",
+                now
+                  .toLocaleDateString("es-ES", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })
+                  .toUpperCase()
+                  .replace(".", ""),
+              );
+            } catch (e) {}
+          }, 1000);
+
+          setInterval(() => {
+            if (!isAppReady) return;
+            try {
+              if (sys.lat) updateTelemetry();
+            } catch (e) {}
+          }, 1000);
+
           const now = new Date();
-          safeText("clock", now.toLocaleTimeString("es-ES", { hour12: false }));
-          safeText(
-            "date",
-            now
-              .toLocaleDateString("es-ES", {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-              })
-              .toUpperCase()
-              .replace(".", ""),
-          );
-        }, 1000);
+          const pad = (n) => n.toString().padStart(2, "0");
+          const fi = $("f-input");
+          if (fi)
+            fi.value = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
 
-        setInterval(() => {
-          if (sys.lat) updateTelemetry();
-        }, 1000);
-        const now = new Date();
-        const pad = (n) => n.toString().padStart(2, "0");
-        const fi = $("f-input");
-        if (fi)
-          fi.value = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
-
-        setTimeout(() => drawConeGraph(now), 100); // Wait for layout
-        window.addEventListener("resize", () => drawConeGraph(new Date()));
-      }
-
-      function handleGPS(pos) {
-        sys.lat = pos.coords.latitude;
-        sys.lon = pos.coords.longitude;
-        safeText(
-          "gps-coords",
-          `GPS: ${sys.lat.toFixed(4)}, ${sys.lon.toFixed(4)}`,
-        );
-        fetchWeather();
-        drawConeGraph(new Date());
-        updateTelemetry();
-      }
-
-      async function fetchWeather() {
-        if (!sys.lat) return;
-        try {
-          const r = await fetch(
-            `https://api.open-meteo.com/v1/forecast?latitude=${sys.lat}&longitude=${sys.lon}&current=cloud_cover,relative_humidity_2m&timezone=auto`,
-          );
-          const d = await r.json();
-          sys.clouds = d.current.cloud_cover;
-          sys.humidity = d.current.relative_humidity_2m;
-        } catch (e) {}
-      }
-
-      function handleOrientation(e) {
-        let alpha = e.alpha;
-        if (e.webkitCompassHeading) alpha = e.webkitCompassHeading;
-        else alpha = 360 - alpha;
-
-        if (alpha === null || isNaN(alpha)) return;
-
-        let heading = alpha;
-
-        // Initialize lastRawHeading on first run
-        if (sys.lastRawHeading === undefined) sys.lastRawHeading = heading;
-
-        // Smooth rotation logic: calculate shortest path
-        let delta = heading - sys.lastRawHeading;
-        if (delta < -180) delta += 360;
-        else if (delta > 180) delta -= 360;
-
-        sys.accumHeading += delta;
-        sys.lastRawHeading = heading;
-        sys.heading = heading;
-
-        // Display 0-360 for text
-        let displayHeading = ((heading % 360) + 360) % 360;
-
-        safeText("heading-val", `${Math.round(displayHeading)}°`);
-        safeText(
-          "ar-heading",
-          `RUMBO: ${Math.round(displayHeading)}° ${getCardinal(displayHeading)}`,
-        );
-
-        const cd = $("compass-dial");
-        // Apply negative ACCUMULATED heading to rotating dial
-        if (cd) cd.style.transform = `rotate(${-sys.accumHeading}deg)`;
-
-        const mp = $("moon-pointer");
-        if (mp) mp.style.transform = `rotate(${sys.moonAz}deg)`;
-
-        let diff = Math.abs(displayHeading - sys.moonAz);
-        if (diff > 180) diff = 360 - diff;
-        if (diff < 5 && sys.moonAlt > -5) engageLock();
-        else disengageLock();
-      }
-
-      function engageLock() {
-        if (sys.isLocked) return;
-        sys.isLocked = true;
-        if (navigator.vibrate) navigator.vibrate(50);
-        // Visual feedback handled by CSS classes on #lock-alert
-        const la = $("lock-alert");
-        if (la) {
-          la.style.opacity = "1";
-          la.style.transform = "scale(1)";
-        }
-        const cu = $("compass-unit");
-        if (cu) cu.classList.add("locked");
-
-        const mi = $("moon-icon");
-        if (mi) mi.classList.replace("text-gray-300", "text-accent");
-        $("target-val").classList.replace("text-gray-500", "text-accent");
-        $("azimuth-pill").classList.replace("text-gray-400", "text-accent");
-        $("azimuth-pill").classList.replace("border-white/10", "border-accent");
-      }
-
-      function disengageLock() {
-        if (!sys.isLocked) return;
-        sys.isLocked = false;
-        const la = $("lock-alert");
-        if (la) {
-          la.style.opacity = "0";
-          la.style.transform = "scale(0.75)";
-        }
-        const cu = $("compass-unit");
-        if (cu) cu.classList.remove("locked");
-
-        const mi = $("moon-icon");
-        if (mi) mi.classList.replace("text-accent", "text-gray-300");
-        $("target-val").classList.replace("text-accent", "text-gray-500");
-        $("azimuth-pill").classList.replace("text-accent", "text-gray-400");
-        $("azimuth-pill").classList.replace("border-accent", "border-white/10");
-      }
-
-      function updateTelemetry() {
-        if (!sys.lat) return;
-        const now = new Date();
-        const times = SunCalc.getMoonTimes(now, sys.lat, sys.lon);
-        const mp = SunCalc.getMoonPosition(now, sys.lat, sys.lon);
-        const mi = SunCalc.getMoonIllumination(now);
-
-        sys.moonAz = (mp.azimuth * (180 / Math.PI) + 180) % 360;
-        sys.moonAlt = mp.altitude * (180 / Math.PI);
-        sys.moonDist = mp.distance;
-
-        const moonDir = getCardinal(sys.moonAz);
-        const degTxt = `${Math.round(sys.moonAz)}° ${moonDir}`;
-        safeText("target-val", degTxt);
-        safeText("azimuth-pill", degTxt);
-        safeText("az-grid-val", degTxt);
-        safeText("alt-val", `ALT: ${Math.round(sys.moonAlt)}°`);
-        safeText("phase-val", Math.round(mi.fraction * 100) + "%");
-        safeText("illum-val", Math.round(mi.fraction * 100) + "%");
-        safeText("dist-val", (sys.moonDist / 1000).toFixed(1) + "K");
-        safeText("cloud-val", sys.clouds + "%");
-        safeText("humid-val", sys.humidity + "%");
-
-        const fmt = (d) =>
-          d
-            ? d.toLocaleTimeString("es-ES", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })
-            : "--:--";
-        safeText("rise-val", fmt(times.rise));
-        safeText("set-val", fmt(times.set));
-
-        let peakAlt = -90;
-        let peakTime = null;
-        const startDay = new Date(now);
-        startDay.setHours(0, 0, 0, 0);
-        for (let i = 0; i <= 24 * 4; i++) {
-          const t = new Date(startDay.getTime() + i * 15 * 60000);
-          const p = SunCalc.getMoonPosition(t, sys.lat, sys.lon);
-          if (p.altitude > peakAlt) {
-            peakAlt = p.altitude;
-            peakTime = t;
-          }
-        }
-        safeText("peak-val", peakTime ? fmt(peakTime) : "N/A");
-
-        // Vis Verdict
-        const title = $("vis-verdict");
-        const icon = $("vis-icon");
-        const bar = $("status-bar");
-        if (bar && title && icon) {
-          if (sys.moonAlt < 0) {
-            title.innerText = "BAJO HORIZONTE";
-            title.classList.value =
-              "text-2xl font-sans font-bold text-gray-500 leading-none mt-2 tracking-wide";
-            icon.classList.value =
-              "ph-fill ph-eye-closed text-2xl text-gray-500";
-            bar.style.borderLeftColor = "#64748b";
-          } else if (sys.clouds > 70) {
-            title.innerText = "OBSTRUIDO";
-            title.classList.value =
-              "text-2xl font-sans font-bold text-warning leading-none mt-2 tracking-wide";
-            icon.classList.value =
-              "ph-fill ph-cloud-slash text-2xl text-warning";
-            bar.style.borderLeftColor = "#f59e0b";
-          } else {
-            title.innerText = "VISIBILIDAD ÓPTIMA";
-            title.classList.value =
-              "text-2xl font-sans font-bold text-success leading-none mt-2 tracking-wide shadow-glow-primary";
-            icon.classList.value =
-              "ph-fill ph-eye text-2xl text-success animate-pulse";
-            bar.style.borderLeftColor = "#10b981";
-          }
+          window.addEventListener("resize", () => {
+            if (!isAppReady) return;
+            try {
+              drawConeGraph(new Date());
+            } catch (e) {}
+          });
         }
 
-        // Re-draw graph occasionally for "Now" dot
-        if (now.getSeconds() % 10 === 0) drawConeGraph(now);
-      }
-
-      // --- GRAPH ---
-      function drawConeGraph(now) {
-        const cvs = $("graph-canvas");
-        if (!cvs) return;
-        const ctx = cvs.getContext("2d");
-        const parent = cvs.parentElement;
-        // Handle resizing
-        cvs.width = parent.offsetWidth;
-        cvs.height = parent.offsetHeight;
-        const w = cvs.width;
-        const h = cvs.height;
-
-        const start = new Date(now);
-        start.setHours(0, 0, 0, 0);
-
-        ctx.clearRect(0, 0, w, h);
-
-        // Horizon
-        const horizonY = h * 0.8;
-        ctx.beginPath();
-        ctx.strokeStyle = "rgba(255,255,255,0.1)";
-        ctx.lineWidth = 1;
-        ctx.setLineDash([4, 4]);
-        ctx.moveTo(0, horizonY);
-        ctx.lineTo(w, horizonY);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        // Gradient
-        const grad = ctx.createLinearGradient(0, 0, 0, h);
-        grad.addColorStop(0, "rgba(56, 189, 248, 0.2)");
-        grad.addColorStop(1, "rgba(0, 0, 0, 0)");
-
-        let points = [];
-        const pxPerDeg = (horizonY - 20) / 90; // Scale 90deg to fit above horizon
-
-        ctx.beginPath();
-        let first = true;
-        for (let i = 0; i <= 24; i += 0.5) {
-          const t = new Date(start.getTime() + i * 3600000);
-          const pos = SunCalc.getMoonPosition(t, sys.lat, sys.lon);
-          // Simple Y mapping
-          const y = horizonY - pos.altitude * (180 / Math.PI) * pxPerDeg;
-          const x = (i / 24) * w;
-
-          points.push({ x, y });
-          if (first) {
-            ctx.moveTo(x, y);
-            first = false;
-          } else {
-            ctx.lineTo(x, y);
-          }
-        }
-
-        ctx.lineTo(w, h);
-        ctx.lineTo(0, h);
-        ctx.closePath();
-        ctx.fillStyle = grad;
-        ctx.fill();
-
-        // Line
-        ctx.beginPath();
-        first = true;
-        for (let p of points) {
-          if (first) {
-            ctx.moveTo(p.x, p.y);
-            first = false;
-          } else {
-            ctx.lineTo(p.x, p.y);
-          }
-        }
-        ctx.strokeStyle = "#38bdf8";
-        ctx.lineWidth = 3;
-        ctx.stroke(); // Thicker line
-
-        // Now Dot
-        const currHours = now.getHours() + now.getMinutes() / 60;
-        const currPos = SunCalc.getMoonPosition(now, sys.lat, sys.lon);
-        const nowY = horizonY - currPos.altitude * (180 / Math.PI) * pxPerDeg;
-        const nowX = (currHours / 24) * w;
-
-        if (nowX >= 0 && nowX <= w) {
-          const isVisible = currPos.altitude > 0;
-          // Line down
-          ctx.beginPath();
-          ctx.strokeStyle = "rgba(255,255,255,0.3)";
-          ctx.lineWidth = 1;
-          ctx.moveTo(nowX, nowY);
-          ctx.lineTo(nowX, horizonY);
-          ctx.stroke();
-          // Dot
-          ctx.beginPath();
-          ctx.arc(nowX, nowY, 6, 0, Math.PI * 2);
-          ctx.fillStyle = isVisible ? "#d946ef" : "#64748b"; // Accent color for current time
-          ctx.shadowBlur = 10;
-          ctx.shadowColor = isVisible ? "#d946ef" : "transparent";
-          ctx.fill();
-          ctx.shadowBlur = 0;
-        }
-      }
-
-      const futBtn = $("future-btn");
-      if (futBtn)
-        futBtn.addEventListener("click", () => {
-          const p = $("future-panel");
-          if (p) p.classList.toggle("hidden");
-        });
-      const closeFut = $("close-future");
-      if (closeFut)
-        closeFut.addEventListener("click", () => {
-          const p = $("future-panel");
-          if (p) p.classList.add("hidden");
-        });
-
-      const fCalc = $("f-calc");
-      if (fCalc) {
-        fCalc.addEventListener("click", async () => {
-          const val = $("f-input").value;
-          if (!val) return;
-          const t = new Date(val);
-          const res = $("f-result");
-          res.classList.remove("hidden");
-          res.innerHTML =
-            "<span class='text-primary animate-pulse'>PROCESANDO DATOS ORBITALES...</span>";
-          const mp = SunCalc.getMoonPosition(t, sys.lat, sys.lon);
-          const alt = Math.round(mp.altitude * (180 / Math.PI));
-          let c = "--";
+        function handleGPS(pos) {
+          // Allow GPS to update state even if not 'ready' visually,
+          // but guard UI updates
           try {
-            const iso = val.split("T")[0];
+            sys.lat = pos.coords.latitude;
+            sys.lon = pos.coords.longitude;
+
+            if (!isAppReady) return;
+
+            safeText(
+              "gps-coords",
+              `GPS: ${sys.lat.toFixed(4)}, ${sys.lon.toFixed(4)}`,
+            );
+            fetchWeather();
+            drawConeGraph(new Date());
+            updateTelemetry();
+          } catch (e) {}
+        }
+
+        async function fetchWeather() {
+          if (!sys.lat) return;
+          try {
             const r = await fetch(
-              `https://api.open-meteo.com/v1/forecast?latitude=${sys.lat}&longitude=${sys.lon}&hourly=cloud_cover&start_date=${iso}&end_date=${iso}&timezone=auto`,
+              `https://api.open-meteo.com/v1/forecast?latitude=${sys.lat}&longitude=${sys.lon}&current=cloud_cover,relative_humidity_2m&timezone=auto`,
             );
             const d = await r.json();
-            c = d.hourly.cloud_cover[t.getHours()] || "--";
+            if (d && d.current) {
+              sys.clouds = d.current.cloud_cover;
+              sys.humidity = d.current.relative_humidity_2m;
+            }
           } catch (e) {}
-          let status =
-            alt > 0 ? (c < 50 ? "VIABLE" : "OBSTRUIDO") : "BAJO HORIZONTE";
-          let color =
-            alt > 0
-              ? c < 50
-                ? "text-success"
-                : "text-warning"
-              : "text-danger";
-          res.innerHTML = `<div class="grid grid-cols-2 gap-2 mt-4 bg-black/40 p-3 rounded-lg border border-white/5"><div><span class="label-tech block">ELEVACIÓN</span><b class="text-white text-lg">${alt}°</b></div><div><span class="label-tech block">COBERTURA</span><b class="text-white text-lg">${c}%</b></div></div><div class="${color} font-bold font-mono text-center mt-3 border border-current rounded py-2 text-sm tracking-widest bg-white/5">${status}</div>`;
-        });
-      }
-
-      // --- VIEW SWITCHING ---
-      function switchView(viewId, btn) {
-        document.querySelectorAll(".nav-item").forEach((el) => {
-          el.classList.remove("active");
-          if (el.classList.contains("text-gray-500") === false)
-            el.classList.add("text-gray-500");
-        });
-        if (btn) {
-          btn.classList.add("active");
-          btn.classList.remove("text-gray-500");
         }
 
-        document
-          .querySelectorAll(".view-section")
-          .forEach((el) => el.classList.add("hidden"));
-        const v = $(viewId);
-        if (v) v.classList.remove("hidden");
+        function handleOrientation(e) {
+          if (!isAppReady) return;
+          try {
+            let alpha = e.alpha;
+            if (e.webkitCompassHeading) alpha = e.webkitCompassHeading;
+            else alpha = 360 - alpha;
 
-        if (viewId === "view-ar") startAR();
-        else stopAR();
-      }
+            if (alpha === null || isNaN(alpha)) return;
 
-      function startAR() {
-        const v = $("ar-video");
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-          navigator.mediaDevices
-            .getUserMedia({ video: { facingMode: "environment" } })
-            .then((s) => {
-              v.srcObject = s;
-              v.play();
-            });
+            let heading = alpha;
+            if (sys.lastRawHeading === undefined) sys.lastRawHeading = heading;
+
+            let delta = heading - sys.lastRawHeading;
+            if (delta < -180) delta += 360;
+            else if (delta > 180) delta -= 360;
+
+            sys.accumHeading += delta;
+            sys.lastRawHeading = heading;
+            sys.heading = heading;
+
+            let displayHeading = ((heading % 360) + 360) % 360;
+
+            safeText("heading-val", `${Math.round(displayHeading)}°`);
+            safeText(
+              "ar-heading",
+              `RUMBO: ${Math.round(displayHeading)}° ${getCardinal(displayHeading)}`,
+            );
+
+            const cd = $("compass-dial");
+            if (cd) cd.style.transform = `rotate(${-sys.accumHeading}deg)`;
+
+            const mp = $("moon-pointer");
+            if (mp) mp.style.transform = `rotate(${sys.moonAz}deg)`;
+
+            let diff = Math.abs(displayHeading - sys.moonAz);
+            if (diff > 180) diff = 360 - diff;
+
+            const compassUnit = $("compass-unit");
+            if (diff < 5 && sys.moonAlt > -5) {
+              if (compassUnit) engageLock();
+            } else {
+              if (compassUnit) disengageLock();
+            }
+          } catch (e) {}
         }
-      }
-      function stopAR() {
-        const v = $("ar-video");
-        if (v.srcObject) v.srcObject.getTracks().forEach((t) => t.stop());
-      }
 
-      // Paywall Logic
-      window.openPaywall = () => {
-        $("paywall-modal").classList.remove("hidden");
-        setTimeout(() => {
-          $("paywall-modal").classList.remove("opacity-0");
+        function engageLock() {
+          if (sys.isLocked) return;
+          sys.isLocked = true;
+          if (navigator.vibrate) navigator.vibrate(50);
+          const la = $("lock-alert");
+          if (la) {
+            la.style.opacity = "1";
+            la.style.transform = "scale(1)";
+          }
+          const cu = $("compass-unit");
+          if (cu) cu.classList.add("locked");
+          const mi = $("moon-icon");
+          if (mi) mi.classList.replace("text-gray-300", "text-accent");
+          const tVal = $("target-val");
+          if (tVal) tVal.classList.replace("text-gray-500", "text-accent");
+          const azPill = $("azimuth-pill");
+          if (azPill) {
+            azPill.classList.replace("text-gray-400", "text-accent");
+            azPill.classList.replace("border-white/10", "border-accent");
+          }
+        }
+
+        function disengageLock() {
+          if (!sys.isLocked) return;
+          sys.isLocked = false;
+          const la = $("lock-alert");
+          if (la) {
+            la.style.opacity = "0";
+            la.style.transform = "scale(0.75)";
+          }
+          const cu = $("compass-unit");
+          if (cu) cu.classList.remove("locked");
+          const mi = $("moon-icon");
+          if (mi) mi.classList.replace("text-accent", "text-gray-300");
+          const tVal = $("target-val");
+          if (tVal) tVal.classList.replace("text-accent", "text-gray-500");
+          const azPill = $("azimuth-pill");
+          if (azPill) {
+            azPill.classList.replace("text-accent", "text-gray-400");
+            azPill.classList.replace("border-accent", "border-white/10");
+          }
+        }
+
+        function updateTelemetry() {
+          if (!isAppReady) return;
+          try {
+            if (!sys.lat) return;
+            const now = new Date();
+            // Guard against SunCalc missing
+            if (typeof SunCalc === "undefined") return;
+
+            const times = SunCalc.getMoonTimes(now, sys.lat, sys.lon);
+            const mp = SunCalc.getMoonPosition(now, sys.lat, sys.lon);
+            const mi = SunCalc.getMoonIllumination(now);
+
+            sys.moonAz = (mp.azimuth * (180 / Math.PI) + 180) % 360;
+            sys.moonAlt = mp.altitude * (180 / Math.PI);
+            sys.moonDist = mp.distance;
+
+            const moonDir = getCardinal(sys.moonAz);
+            const degTxt = `${Math.round(sys.moonAz)}° ${moonDir}`;
+
+            safeText("target-val", degTxt);
+            safeText("azimuth-pill", degTxt);
+            safeText("az-grid-val", degTxt);
+            safeText("alt-val", `ALT: ${Math.round(sys.moonAlt)}°`);
+
+            const moonCard = $("phase-val")?.closest(".hud-module");
+            if (moonCard) {
+              safeText("phase-val", Math.round(mi.fraction * 100) + "%");
+              safeText("illum-val", Math.round(mi.fraction * 100) + "%");
+              safeText("dist-val", (sys.moonDist / 1000).toFixed(1) + "K");
+            }
+
+            const atmoCard = $("cloud-val")?.closest(".hud-module");
+            if (atmoCard) {
+              safeText("cloud-val", sys.clouds + "%");
+              safeText("humid-val", sys.humidity + "%");
+            }
+
+            const fmt = (d) =>
+              d
+                ? d.toLocaleTimeString("es-ES", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : "--:--";
+
+            const cycleCard = $("rise-val")?.closest(".hud-module");
+            if (cycleCard) {
+              safeText("rise-val", fmt(times.rise));
+              safeText("set-val", fmt(times.set));
+            }
+
+            let peakAlt = -90;
+            let peakTime = null;
+            const startDay = new Date(now);
+            startDay.setHours(0, 0, 0, 0);
+
+            for (let i = 0; i <= 24 * 4; i++) {
+              const t = new Date(startDay.getTime() + i * 15 * 60000);
+              const p = SunCalc.getMoonPosition(t, sys.lat, sys.lon);
+              if (p.altitude > peakAlt) {
+                peakAlt = p.altitude;
+                peakTime = t;
+              }
+            }
+            safeText("peak-val", peakTime ? fmt(peakTime) : "N/A");
+
+            const title = $("vis-verdict");
+            const icon = $("vis-icon");
+            const bar = $("status-bar");
+            if (bar && title && icon) {
+              if (sys.moonAlt < 0) {
+                title.innerText = "BAJO HORIZONTE";
+                title.className =
+                  "text-2xl font-sans font-bold text-gray-500 leading-none mt-2 tracking-wide";
+                icon.className = "ph-fill ph-eye-closed text-2xl text-gray-500";
+                bar.style.borderLeftColor = "#64748b";
+              } else if (sys.clouds > 70) {
+                title.innerText = "OBSTRUIDO";
+                title.className =
+                  "text-2xl font-sans font-bold text-warning leading-none mt-2 tracking-wide";
+                icon.className = "ph-fill ph-cloud-slash text-2xl text-warning";
+                bar.style.borderLeftColor = "#f59e0b";
+              } else {
+                title.innerText = "VISIBILIDAD ÓPTIMA";
+                title.className =
+                  "text-2xl font-sans font-bold text-success leading-none mt-2 tracking-wide shadow-glow-primary";
+                icon.className =
+                  "ph-fill ph-eye text-2xl text-success animate-pulse";
+                bar.style.borderLeftColor = "#10b981";
+              }
+            }
+
+            if (now.getSeconds() % 10 === 0) drawConeGraph(now);
+          } catch (e) {}
+        }
+
+        // --- GRAPH ---
+        function drawConeGraph(now) {
+          if (!isAppReady) return;
+          try {
+            const cvs = $("graph-canvas");
+            if (!cvs) return;
+            const ctx = cvs.getContext("2d");
+            const parent = cvs.parentElement;
+            if (!parent) return;
+
+            cvs.width = parent.offsetWidth;
+            cvs.height = parent.offsetHeight;
+            const w = cvs.width;
+            const h = cvs.height;
+
+            const start = new Date(now);
+            start.setHours(0, 0, 0, 0);
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Horizon
+            const horizonY = h * 0.8;
+            ctx.beginPath();
+            ctx.strokeStyle = "rgba(255,255,255,0.1)";
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 4]);
+            ctx.moveTo(0, horizonY);
+            ctx.lineTo(w, horizonY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Gradient: Onyx & Starlight
+            const grad = ctx.createLinearGradient(0, 0, 0, h);
+            grad.addColorStop(0, "rgba(56, 189, 248, 0.15)");
+            grad.addColorStop(0.8, "rgba(0, 0, 0, 0)");
+
+            let points = [];
+            const pxPerDeg = (horizonY - 20) / 90;
+
+            ctx.beginPath();
+            let first = true;
+            for (let i = 0; i <= 24; i += 0.5) {
+              const t = new Date(start.getTime() + i * 3600000);
+              const pos = SunCalc.getMoonPosition(t, sys.lat, sys.lon);
+              const y = horizonY - pos.altitude * (180 / Math.PI) * pxPerDeg;
+              const x = (i / 24) * w;
+
+              points.push({ x, y });
+              if (first) {
+                ctx.moveTo(x, y);
+                first = false;
+              } else {
+                ctx.lineTo(x, y);
+              }
+            }
+
+            ctx.lineTo(w, h);
+            ctx.lineTo(0, h);
+            ctx.closePath();
+            ctx.fillStyle = grad;
+            ctx.fill();
+
+            // Line
+            ctx.beginPath();
+            first = true;
+            for (let p of points) {
+              if (first) {
+                ctx.moveTo(p.x, p.y);
+                first = false;
+              } else {
+                ctx.lineTo(p.x, p.y);
+              }
+            }
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.6)";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Now Dot
+            const currHours = now.getHours() + now.getMinutes() / 60;
+            const currPos = SunCalc.getMoonPosition(now, sys.lat, sys.lon);
+            const nowY =
+              horizonY - currPos.altitude * (180 / Math.PI) * pxPerDeg;
+            const nowX = (currHours / 24) * w;
+
+            if (nowX >= 0 && nowX <= w) {
+              const isVisible = currPos.altitude > 0;
+              // Line down
+              ctx.beginPath();
+              ctx.strokeStyle = "rgba(255,255,255,0.3)";
+              ctx.lineWidth = 1;
+              ctx.moveTo(nowX, nowY);
+              ctx.lineTo(nowX, horizonY);
+              ctx.stroke();
+              // Dot
+              ctx.beginPath();
+              ctx.arc(nowX, nowY, 6, 0, Math.PI * 2);
+              ctx.fillStyle = isVisible ? "#d946ef" : "#64748b";
+              ctx.shadowBlur = 10;
+              ctx.shadowColor = isVisible ? "#d946ef" : "transparent";
+              ctx.fill();
+              ctx.shadowBlur = 0;
+            }
+          } catch (e) {}
+        }
+
+        const futBtn = $("future-btn");
+        if (futBtn)
+          futBtn.addEventListener("click", () => {
+            const p = $("future-panel");
+            if (p) p.classList.toggle("hidden");
+          });
+        const closeFut = $("close-future");
+        if (closeFut)
+          closeFut.addEventListener("click", () => {
+            const p = $("future-panel");
+            if (p) p.classList.add("hidden");
+          });
+
+        const fCalc = $("f-calc");
+        if (fCalc) {
+          fCalc.addEventListener("click", async () => {
+            const val = $("f-input").value;
+            if (!val) return;
+            const t = new Date(val);
+            const res = $("f-result");
+            res.classList.remove("hidden");
+            res.innerHTML =
+              "<span class='text-primary animate-pulse'>PROCESANDO DATOS ORBITALES...</span>";
+            const mp = SunCalc.getMoonPosition(t, sys.lat, sys.lon);
+            const alt = Math.round(mp.altitude * (180 / Math.PI));
+            let c = "--";
+            try {
+              const iso = val.split("T")[0];
+              const r = await fetch(
+                `https://api.open-meteo.com/v1/forecast?latitude=${sys.lat}&longitude=${sys.lon}&hourly=cloud_cover&start_date=${iso}&end_date=${iso}&timezone=auto`,
+              );
+              const d = await r.json();
+              c = d.hourly.cloud_cover[t.getHours()] || "--";
+            } catch (e) {}
+            let status =
+              alt > 0 ? (c < 50 ? "VIABLE" : "OBSTRUIDO") : "BAJO HORIZONTE";
+            let color =
+              alt > 0
+                ? c < 50
+                  ? "text-success"
+                  : "text-warning"
+                : "text-danger";
+            res.innerHTML = `<div class="grid grid-cols-2 gap-2 mt-4 bg-black/40 p-3 rounded-lg border border-white/5"><div><span class="label-tech block">ELEVACIÓN</span><b class="text-white text-lg">${alt}°</b></div><div><span class="label-tech block">COBERTURA</span><b class="text-white text-lg">${c}%</b></div></div><div class="${color} font-bold font-mono text-center mt-3 border border-current rounded py-2 text-sm tracking-widest bg-white/5">${status}</div>`;
+          });
+        }
+
+        // --- VIEW SWITCHING ---
+        function switchView(viewId, btn) {
+          document.querySelectorAll(".nav-item").forEach((el) => {
+            el.classList.remove("active");
+            if (el.classList.contains("text-gray-500") === false)
+              el.classList.add("text-gray-500");
+          });
+          if (btn) {
+            btn.classList.add("active");
+            btn.classList.remove("text-gray-500");
+          }
+
+          document
+            .querySelectorAll(".view-section")
+            .forEach((el) => el.classList.add("hidden"));
+          const v = $(viewId);
+          if (v) v.classList.remove("hidden");
+
+          if (viewId === "view-ar") startAR();
+          else stopAR();
+        }
+
+        // Define global for HTML onclicks logic
+        window.switchView = switchView;
+
+        function startAR() {
+          const v = $("ar-video");
+          if (
+            v &&
+            navigator.mediaDevices &&
+            navigator.mediaDevices.getUserMedia
+          ) {
+            navigator.mediaDevices
+              .getUserMedia({ video: { facingMode: "environment" } })
+              .then((s) => {
+                v.srcObject = s;
+                v.play();
+              })
+              .catch((e) => console.log("AR Fail", e));
+          }
+        }
+        function stopAR() {
+          const v = $("ar-video");
+          if (v && v.srcObject)
+            v.srcObject.getTracks().forEach((t) => t.stop());
+        }
+
+        // Paywall Logic
+        window.openPaywall = () => {
+          $("paywall-modal").classList.remove("hidden");
+          setTimeout(() => {
+            $("paywall-modal").classList.remove("opacity-0");
+            const content = $("paywall-content");
+            content.classList.remove("scale-95");
+            content.classList.add("scale-100");
+          }, 10);
+        };
+        window.closePaywall = () => {
           const content = $("paywall-content");
-          content.classList.remove("scale-95");
-          content.classList.add("scale-100");
-        }, 10);
-      };
-      window.closePaywall = () => {
-        const content = $("paywall-content");
-        content.classList.remove("scale-100");
-        content.classList.add("scale-95");
-        $("paywall-modal").classList.add("opacity-0");
-        setTimeout(() => $("paywall-modal").classList.add("hidden"), 300);
-      };
-      window.processPayment = () => {
-        const b = $("pay-btn");
-        b.innerText = "VERIFICANDO BIOMETRÍA...";
-        setTimeout(() => {
-          b.innerText = "SUSCRIPCIÓN ACTIVA";
-          b.className =
-            "w-full bg-success text-white font-bold py-4 rounded-xl shadow-glow-primary tracking-widest text-sm font-mono";
-          setTimeout(closePaywall, 1000);
-          sys.isPro = true;
-        }, 1500);
-      };
+          content.classList.remove("scale-100");
+          content.classList.add("scale-95");
+          $("paywall-modal").classList.add("opacity-0");
+          setTimeout(() => $("paywall-modal").classList.add("hidden"), 300);
+        };
+        window.processPayment = () => {
+          const b = $("pay-btn");
+          b.innerText = "VERIFICANDO BIOMETRÍA...";
+          setTimeout(() => {
+            b.innerText = "SUSCRIPCIÓN ACTIVA";
+            b.className =
+              "w-full bg-success text-white font-bold py-4 rounded-xl shadow-glow-primary tracking-widest text-sm font-mono";
+            setTimeout(closePaywall, 1000);
+            sys.isPro = true;
+          }, 1500);
+        };
+      });
     </script>
+    <!-- iOS Install Instructions Modal -->
+    <div
+      id="ios-install-modal"
+      class="hidden fixed inset-0 z-50 flex items-center justify-center pointer-events-auto"
+      style="
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(4px);
+        transition: opacity 0.3s;
+      "
+    >
+      <div
+        class="relative p-6 w-full mx-4 shadow-2xl overflow-hidden"
+        style="
+          background: rgba(10, 10, 10, 0.9);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 1rem;
+          max-width: 24rem;
+        "
+      >
+        <div
+          class="absolute inset-0 bg-primary"
+          style="opacity: 0.05; pointer-events: none"
+        ></div>
+        <button
+          onclick="
+            document.getElementById('ios-install-modal').classList.add('hidden')
+          "
+          class="absolute top-4 right-4 text-gray-400 hover-text-white"
+          style="cursor: pointer"
+        >
+          <i class="ph-bold ph-x text-xl"></i>
+        </button>
+
+        <div class="flex flex-col items-center text-center relative z-10">
+          <div
+            class="w-16 h-16 rounded-full flex items-center justify-center mb-4 shadow-glow-primary"
+            style="
+              background: rgba(56, 189, 248, 0.1);
+              border: 1px solid rgba(56, 189, 248, 0.2);
+            "
+          >
+            <i class="ph-fill ph-download-simple text-3xl text-primary"></i>
+          </div>
+
+          <h3 class="text-xl font-mono font-bold text-white mb-2">
+            INSTALAR EN iOS
+          </h3>
+          <p class="text-sm text-gray-400 mb-6 font-sans">
+            Para instalar esta aplicación en tu iPhone o iPad, sigue estos
+            pasos:
+          </p>
+
+          <div
+            class="w-full text-left space-y-4"
+            style="
+              background: rgba(255, 255, 255, 0.05);
+              border-radius: 0.75rem;
+              padding: 1rem;
+              border: 1px solid rgba(255, 255, 255, 0.05);
+            "
+          >
+            <div class="flex items-start gap-3">
+              <div
+                class="text-primary"
+                style="
+                  background: rgba(255, 255, 255, 0.1);
+                  padding: 0.375rem;
+                  border-radius: 0.25rem;
+                "
+              >
+                <i class="ph-bold ph-export"></i>
+              </div>
+              <div>
+                <p
+                  class="text-xs text-gray-300 font-bold mb-0.5"
+                  style="margin: 0"
+                >
+                  1. Toca el botón Compartir
+                </p>
+                <p class="text-gray-500" style="font-size: 10px; margin: 0">
+                  Busca el icono cuadrado con la flecha hacia arriba.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-3">
+              <div
+                class="text-primary"
+                style="
+                  background: rgba(255, 255, 255, 0.1);
+                  padding: 0.375rem;
+                  border-radius: 0.25rem;
+                "
+              >
+                <i class="ph-bold ph-plus-square"></i>
+              </div>
+              <div>
+                <p
+                  class="text-xs text-gray-300 font-bold mb-0.5"
+                  style="margin: 0"
+                >
+                  2. Agregar a Inicio
+                </p>
+                <p class="text-gray-500" style="font-size: 10px; margin: 0">
+                  Desliza hacia abajo y selecciona "Agregar al Inicio".
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 flex gap-2 items-center">
+            <div class="w-2 h-2 rounded-full bg-success animate-pulse"></div>
+            <span class="font-mono text-primary" style="font-size: 10px"
+              >FUNCIONA OFFLINE</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
