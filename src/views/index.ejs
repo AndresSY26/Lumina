@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <%- include('partials/head') %>
+  </head>
+  <body>
+    <!-- FX Layers -->
+    <div class="noise-overlay"></div>
+    <div class="bg-tech-grid"></div>
+    <div class="bg-scanline"></div>
+
+    <!-- BOOT SCREEN -->
+    <div id="boot-sequence" class="boot-screen">
+      <div class="boot-loader">
+        <div class="loader-ring-1 anim-spin-slow"></div>
+        <div class="loader-ring-2 anim-spin" style="animation-duration: 3s"></div>
+        <div class="loader-ring-3 anim-spin-rev"></div>
+        <div class="absolute z-10 flex flex-col items-center anim-pulse">
+            <i class="ph-duotone ph-planet text-6xl text-white"></i>
+        </div>
+      </div>
+      <h1 class="boot-title">LUMINA</h1>
+      <button id="system-start-btn" class="boot-btn">
+        <span class="text-sm font-mono font-bold tracking-widest flex items-center gap-2">
+            INICIAR SISTEMA <i class="ph-bold ph-caret-right"></i>
+        </span>
+      </button>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="main-app">
+        <!-- HEADER -->
+        <%- include('partials/header') %>
+
+        <!-- VIEWS -->
+        <div id="views-container" class="views-container">
+            <!-- DASHBOARD VIEW -->
+            <section id="view-home" class="view-section h-full w-full">
+                <div class="dashboard-grid h-full">
+                    
+                    <!-- COMPASS -->
+                    <div class="col-compass">
+                        <div class="compass-container">
+                            <div class="compass-decor-ring"></div>
+                            <div class="compass-decor-dashed anim-spin-slow"></div>
+                            
+                            <!-- Main Unit -->
+                            <div class="compass-lens" id="compass-ring">
+                                <div class="north-marker"></div>
+                                <div class="dial-ring">
+                                    <!-- Cardinals -->
+                                    <div class="cardinal-label cardinal-n">N</div>
+                                    <div class="cardinal-label cardinal-e">E</div>
+                                    <div class="cardinal-label cardinal-s">S</div>
+                                    <div class="cardinal-label cardinal-w">O</div>
+                                </div>
+                                
+                                <!-- Pointer stays relative to container, rotated by JS -->
+                                <div id="moon-pointer" class="moon-pointer">
+                                    <div class="pointer-icon">
+                                        <i id="moon-icon" class="ph-fill ph-moon-stars text-silver" style="font-size: 2.25rem;"></i>
+                                        <div id="azimuth-pill" class="azimuth-pill">---</div>
+                                    </div>
+                                </div>
+
+                                <!-- Lock UI -->
+                                <div id="target-reticle" class="target-reticle">
+                                    <div class="lock-badge">LOCKED</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Readouts -->
+                        <div class="heading-readout text-left">
+                            <div>
+                                <div class="readout-label text-primary">RUMBO</div>
+                                <div id="heading-val" class="readout-value text-white">000°</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="readout-label text-accent">OBJETIVO</div>
+                                <div id="azimuth-val" class="readout-value text-silver">---°</div>
+                                <div class="text-xs font-mono text-gray-500 text-right">Δ <span id="delta-val">--</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TELEMETRY -->
+                    <div class="col-telemetry" style="gap: 1rem; display: flex; flex-direction: column;">
+                        <!-- Status -->
+                        <div class="card status-bar" id="status-card">
+                            <div class="flex flex-col">
+                                <span class="card-label">ESTADO DE OBSERVACIÓN</span>
+                                <div id="sensor-status" class="font-sans font-bold text-white text-2xl" style="margin-top:0.5rem">INICIANDO...</div>
+                            </div>
+                            <div class="status-icon-box">
+                                <i class="ph-fill ph-broadcast text-2xl text-gray-500"></i>
+                            </div>
+                        </div>
+
+                        <!-- Grid -->
+                        <div class="data-grid">
+                            <!-- Moon Card -->
+                            <div class="card flex flex-col gap-2">
+                                <div class="card-header">
+                                    <span class="card-label text-accent"><i class="ph-bold ph-planet"></i> LUNA</span>
+                                    <span id="phase-val" class="text-xs font-mono text-white opacity-80">--</span>
+                                </div>
+                                <div class="data-grid">
+                                    <div class="data-point">
+                                        <span>ILUM</span>
+                                        <div id="illum-val" class="data-value">--%</div>
+                                    </div>
+                                    <div class="data-point text-right">
+                                        <span>DIST</span>
+                                        <div id="dist-val" class="data-value text-primary">--K</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Position Card -->
+                            <div class="card flex flex-col gap-2">
+                                <div class="card-header">
+                                    <span class="card-label text-primary"><i class="ph-bold ph-crosshair"></i> POSICIÓN</span>
+                                    <span id="alt-val" class="text-xs font-mono text-white opacity-80">ALT: --°</span>
+                                </div>
+                                <div class="data-grid">
+                                    <div class="data-point">
+                                        <span>ZENIT</span>
+                                        <div id="zenith-time" class="data-value text-warning">--:--</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                         <!-- Cycle -->
+                        <div class="card">
+                            <span class="card-label" style="margin-bottom: 0.75rem;">CICLO DIARIO</span>
+                            <div class="flex justify-between items-center" style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 0.5rem; border: 1px solid rgba(255,255,255,0.05);">
+                                <div class="text-center">
+                                    <i class="ph-bold ph-arrow-up text-primary" style="font-size: 0.75rem; display: block; margin-bottom: 4px;"></i>
+                                    <div id="rise-time" class="text-sm font-mono font-bold text-white">--:--</div>
+                                </div>
+                                <div style="width:1px; height: 2rem; background: rgba(255,255,255,0.1);"></div>
+                                <div class="text-center">
+                                    <i class="ph-bold ph-arrow-down text-accent" style="font-size: 0.75rem; display: block; margin-bottom: 4px;"></i>
+                                    <div id="set-time" class="text-sm font-mono font-bold text-white">--:--</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TOOLS / GRAPH -->
+                    <div class="col-tools" style="gap: 1rem; display: flex; flex-direction: column;">
+                        <div class="card graph-card flex-1">
+                             <div class="graph-overlay">
+                                <span class="card-label text-accent">TRAYECTORIA PICO</span>
+                                <span class="text-gray-500 font-mono text-xs">ELEVACIÓN 24H</span>
+                             </div>
+                             <canvas id="trajectory-canvas" class="w-full h-full absolute inset-0"></canvas>
+                             <button class="sim-btn paywall-action">
+                                <i class="ph-bold ph-lock-key"></i> SIMULAR
+                             </button>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+             <!-- AR VIEW -->
+            <section id="view-ar" class="hidden absolute inset-0 z-50 bg-black">
+                <video id="ar-video" playsinline autoplay muted class="absolute inset-0 w-full h-full object-cover opacity-70"></video>
+                <div class="absolute inset-0 pointer-events-none">
+                     <!-- Corners -->
+                    <div class="absolute top-8 left-8 w-16 h-16 border-t-2 border-l-2 border-primary rounded-tl-lg opacity-50"></div>
+                    <div class="absolute top-8 right-8 w-16 h-16 border-t-2 border-r-2 border-primary rounded-tr-lg opacity-50"></div>
+                    <div class="absolute bottom-32 left-8 w-16 h-16 border-b-2 border-l-2 border-primary rounded-bl-lg opacity-50"></div>
+                    <div class="absolute bottom-32 right-8 w-16 h-16 border-b-2 border-r-2 border-primary rounded-br-lg opacity-50"></div>
+                </div>
+            </section>
+        </div>
+
+        <!-- NAV DOCK -->
+        <%- include('partials/nav') %>
+    </div>
+
+    <!-- MODALS -->
+    <!-- Paywall -->
+    <div id="paywall-modal" class="modal">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold font-mono text-white mb-2">LUMINA <span class="text-gold">PRO</span></h2>
+            <p class="text-silver text-sm mb-6">Desbloquea simulaciones orbitales avanzadas y modo telescopio.</p>
+            <button id="sim-payment-btn" class="boot-btn w-full btn-gold font-bold mb-3 rounded">
+                DESBLOQUEAR - $4.99
+            </button>
+            <button id="close-paywall" class="text-xs text-gray-500 hover:text-white mt-4 underline">CANCELAR</button>
+        </div>
+    </div>
+
+    <!-- Permissions -->
+    <div id="permission-modal" class="modal">
+        <div class="modal-content">
+            <i class="ph-duotone ph-compass text-6xl text-primary mb-4"></i>
+            <h2 class="text-lg font-bold text-white mb-2">Calibración de Sensores</h2>
+            <p class="text-silver text-sm mb-6">Lumina necesita acceso al giroscopio para la navegación estelar precisa.</p>
+            <button id="request-perm-btn" class="boot-btn w-full font-bold rounded bg-primary text-black border-none">
+                ACTIVAR SENSORES
+            </button>
+        </div>
+    </div>
+  </body>
+</html>
