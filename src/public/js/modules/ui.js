@@ -10,6 +10,7 @@ export class UIModule {
             sunRise: document.getElementById('sun-rise'),
             sunSet: document.getElementById('sun-set'),
             clock: document.getElementById('clock-display'),
+            gpsIndicator: document.getElementById('gps-indicator'),
             modals: {
                 perms: document.getElementById('modal-permissions'),
                 paywall: document.getElementById('modal-paywall')
@@ -63,13 +64,27 @@ export class UIModule {
         });
     }
 
-    updateTelemetry(heading, coords, astroData) {
+    updateTelemetry(heading, coords, astroData, isAbsolute) {
         // Compass
         if(this.dom.compassRing) {
              this.dom.compassRing.style.transform = `rotate(${-heading}deg)`;
         }
         if(this.dom.headingVal) {
-             this.dom.headingVal.textContent = `${Math.round(heading).toString().padStart(3, '0')}°`;
+             // Normalise for display 0-360
+             let displayHeading = Math.round(heading % 360);
+             if(displayHeading < 0) displayHeading += 360;
+             this.dom.headingVal.textContent = `${displayHeading.toString().padStart(3, '0')}°`;
+        }
+
+        // GPS/Sensor Status
+        if(this.dom.gpsIndicator) {
+            if(isAbsolute) {
+                this.dom.gpsIndicator.innerHTML = `<i class="ph-bold ph-broadcast"></i> <span class="text-xs">SENSOR: ABSOLUTO</span>`;
+                this.dom.gpsIndicator.style.color = 'var(--primary)'; // Cyan/Green
+            } else {
+                this.dom.gpsIndicator.innerHTML = `<i class="ph-bold ph-warning"></i> <span class="text-xs">SENSOR: RELATIVO</span>`;
+                this.dom.gpsIndicator.style.color = 'var(--gold)'; // Warning color
+            }
         }
 
         // Astro

@@ -25,7 +25,7 @@ class App {
             if(data.coords.latitude !== 0) {
                 astroData = this.astro.update(data.coords.latitude, data.coords.longitude);
             }
-            this.ui.updateTelemetry(data.heading, data.coords, astroData);
+            this.ui.updateTelemetry(data.heading, data.coords, astroData, data.isAbsolute);
         };
 
         // Wire up Permissions
