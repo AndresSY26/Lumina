@@ -1,4 +1,12 @@
 <div class="compass-module">
+    <!-- Target Toggles -->
+    <div class="target-controls">
+        <button id="btn-target-toggle" class="btn-pill-toggle mode-moon">
+            <i class="ph-fill ph-moon-stars icon-mode"></i>
+            <span class="text-mode">LUNA</span>
+        </button>
+    </div>
+
     <div class="compass-container">
         <!-- Fixed Heading Indicator (Forward) -->
         <div class="heading-indicator"></div>
@@ -28,7 +36,14 @@
         <!-- Static Overlay -->
         <div class="reticle-overlay">
             <div class="crosshair"></div>
-            <div class="readout-heading font-mono" id="heading-val">000°</div>
+            
+            <!-- Guidance System -->
+            <div class="guidance-overlay">
+                <div class="guide-arrow left" id="arrow-left"><i class="ph-bold ph-caret-double-left"></i></div>
+                <div class="readout-heading font-mono" id="heading-val">000°</div>
+                <div class="guide-hint font-mono" id="guide-msg">BUSCANDO...</div>
+                <div class="guide-arrow right" id="arrow-right"><i class="ph-bold ph-caret-double-right"></i></div>
+            </div>
         </div>
     </div>
 </div>

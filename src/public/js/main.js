@@ -11,6 +11,9 @@ class App {
         this.astro = new AstronomyModule();
         this.graph = new GraphModule('trajectory-canvas');
         this.ar = new ARModule();
+        
+        // Navigation State
+        this.targetMode = 'moon'; // 'moon' | 'sun'
 
         this.init();
     }
@@ -25,7 +28,8 @@ class App {
             if(data.coords.latitude !== 0) {
                 astroData = this.astro.update(data.coords.latitude, data.coords.longitude);
             }
-            this.ui.updateTelemetry(data.heading, data.coords, astroData, data.isAbsolute);
+            // Pass targetMode to UI for calculation
+            this.ui.updateTelemetry(data.heading, data.coords, astroData, data.isAbsolute, this.targetMode);
         };
 
         // Wire up Permissions
@@ -35,6 +39,28 @@ class App {
                 this.sensors.requestPermissions().then(granted => {
                     if(granted) this.ui.hidePermissionModal();
                 });
+            });
+        }
+
+        // Wire up Target Toggle (Sun/Moon)
+        const btnToggle = document.getElementById('btn-target-toggle');
+        if(btnToggle) {
+            btnToggle.addEventListener('click', () => {
+                this.targetMode = this.targetMode === 'moon' ? 'sun' : 'moon';
+                
+                // Update Button Visuals
+                const icon = btnToggle.querySelector('.icon-mode');
+                const text = btnToggle.querySelector('.text-mode');
+                
+                if(this.targetMode === 'sun') {
+                    btnToggle.classList.replace('mode-moon', 'mode-sun');
+                    icon.classList.replace('ph-moon-stars', 'ph-sun');
+                    text.textContent = 'SOL';
+                } else {
+                    btnToggle.classList.replace('mode-sun', 'mode-moon');
+                    icon.classList.replace('ph-sun', 'ph-moon-stars');
+                    text.textContent = 'LUNA';
+                }
             });
         }
     }

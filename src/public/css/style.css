@@ -176,14 +176,65 @@ main {
     position: absolute;
 }
 
+/* --- TARGET CONTROLS (Sun/Moon Toggle) --- */
+.target-controls {
+    position: absolute; top: -50px; left: 50%; transform: translateX(-50%);
+    z-index: 50;
+}
+.btn-pill-toggle {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 16px; border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(10,10,20,0.8);
+    color: var(--white); cursor: pointer;
+    font-family: var(--font-head); font-size: 0.8rem; letter-spacing: 1px;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+.btn-pill-toggle.mode-moon { border-color: var(--primary); color: var(--primary); }
+.btn-pill-toggle.mode-moon i { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
+
+.btn-pill-toggle.mode-sun { border-color: var(--gold); color: var(--gold); }
+.btn-pill-toggle.mode-sun i { color: var(--gold); text-shadow: 0 0 10px var(--gold); }
+
+/* --- GUIDANCE SYSTEM --- */
+.guidance-overlay {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; 
+    justify-content: center; align-items: center;
+    pointer-events: none;
+}
+
 .readout-heading {
-    position: absolute; top: 110%; /* Push below ring properly */
-    font-size: var(--text-xl); /* FLUID */
+    position: static; /* Reset absolute from previous */
+    margin-top: 240px; /* Push below ring manually */
+    font-size: var(--text-xl); 
     font-family: var(--font-mono);
     color: var(--white);
     text-shadow: 0 0 15px var(--primary);
-    text-align: center; width: 100%;
+    transition: color 0.3s;
 }
+
+.guide-hint {
+    margin-top: 5px;
+    font-size: var(--text-sm);
+    color: var(--silver);
+    opacity: 0.8;
+}
+
+.guide-arrow {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    font-size: 2rem; color: var(--primary);
+    opacity: 0; transition: opacity 0.2s;
+    filter: drop-shadow(0 0 5px var(--primary));
+}
+.guide-arrow.left { left: -20px; animation: pulseLeft 1s infinite alternate; }
+.guide-arrow.right { right: -20px; animation: pulseRight 1s infinite alternate; }
+
+.guide-arrow.active { opacity: 1; }
+
+@keyframes pulseLeft { from { transform: translateY(-50%) translateX(0); } to { transform: translateY(-50%) translateX(-5px); } }
+@keyframes pulseRight { from { transform: translateY(-50%) translateX(0); } to { transform: translateY(-50%) translateX(5px); } }
 
 .celestial-pointer {
     position: absolute;
@@ -196,7 +247,8 @@ main {
     display: flex;
     justify-content: center;
 }
-.celestial-pointer i { margin-top: -85px; font-size: 1.5rem; }
+.celestial-pointer i { margin-top: -85px; font-size: 1.5rem; transition: color 0.3s; }
+.celestial-pointer.sun i { color: var(--gold); text-shadow: 0 0 15px var(--gold); }
 
 /* --- COMPONENTS: DASHBOARD GRID (SMART GRID) --- */
 .dashboard-grid {

@@ -64,8 +64,8 @@ export class UIModule {
         });
     }
 
-    updateTelemetry(heading, coords, astroData, isAbsolute) {
-        // Compass
+    updateTelemetry(heading, coords, astroData, isAbsolute, targetMode = 'moon') {
+        // Compass Rotation
         if(this.dom.compassRing) {
              this.dom.compassRing.style.transform = `rotate(${-heading}deg)`;
         }
@@ -87,12 +87,79 @@ export class UIModule {
             }
         }
 
-        // Astro
+        // Astro Data & Target Logic
         if (astroData) {
             this.dom.moonPhase.textContent = astroData.moon.phase.toFixed(2);
             this.dom.moonIllum.textContent = Math.round(astroData.moon.fraction * 100) + '%';
             this.dom.sunRise.textContent = formatTime(astroData.sun.sunrise);
             this.dom.sunSet.textContent = formatTime(astroData.sun.sunset);
+            
+            // --- ADVANCED NAVIGATION CORE --- 
+            
+            // 1. Select Target & Get Radians
+            // SunCalc: South = 0, West = PI/2 (Positive)
+            let rawAzimuthRad = 0;
+            if(targetMode === 'sun') {
+                rawAzimuthRad = astroData.sun.position.azimuth;
+            } else {
+                rawAzimuthRad = astroData.moon.position.azimuth;
+            }
+
+            // 2. Convert to Compass Degrees (North = 0, East = 90)
+            // Function: (rad * 180/PI) + 180
+            let targetAzimuth = (rawAzimuthRad * (180 / Math.PI)) + 180;
+            targetAzimuth = (targetAzimuth + 360) % 360; // Normalize 0-360
+
+            // 3. Update Visuals
+            this.updateGuidanceSystem(heading, targetAzimuth, targetMode);
+        }
+    }
+
+    updateGuidanceSystem(currentHeading, targetAzimuth, mode) {
+        // Calculate Shortest Delta
+        let delta = targetAzimuth - currentHeading;
+        if (delta > 180) delta -= 360;
+        if (delta < -180) delta += 360;
+        
+        const arrowLeft = document.getElementById('arrow-left');
+        const arrowRight = document.getElementById('arrow-right');
+        const hintMsg = document.getElementById('guide-msg');
+        
+        // Reset Arrows
+        arrowLeft.classList.remove('active');
+        arrowRight.classList.remove('active');
+        
+        // Thresholds
+        const deadZone = 5; // Degrees for lock
+        
+        if (Math.abs(delta) < deadZone) {
+            // LOCKED
+            hintMsg.textContent = "OBJETIVO CENTRADO";
+            hintMsg.style.color = mode === 'sun' ? 'var(--gold)' : 'var(--primary)';
+            hintMsg.style.fontWeight = 'bold';
+        } else {
+            // GUIDANCE NEEDED
+            hintMsg.style.color = 'var(--silver)';
+            hintMsg.style.fontWeight = 'normal';
+            
+            if (delta > 0) {
+                // Target is to the RIGHT
+                arrowRight.classList.add('active');
+                hintMsg.textContent = `GIRA ${Math.round(Math.abs(delta))}° DERECHA`;
+            } else {
+                // Target is to the LEFT
+                arrowLeft.classList.add('active');
+                hintMsg.textContent = `GIRA ${Math.round(Math.abs(delta))}° IZQUIERDA`;
+            }
+        }
+        
+        // Theme Update (Sun vs Moon Colors on UI)
+        if(mode === 'sun') {
+            document.documentElement.style.setProperty('--primary', '#ffd700'); // Gold override
+            document.querySelector('.heading-indicator').style.borderColor = 'var(--gold) transparent transparent transparent';
+        } else {
+            document.documentElement.style.setProperty('--primary', '#00f3ff'); // Cyan Restore
+            document.querySelector('.heading-indicator').style.borderColor = '#00f3ff transparent transparent transparent';
         }
     }
 
