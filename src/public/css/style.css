@@ -108,7 +108,8 @@ main {
 /* Wrapper for content to allow padding for dock */
 .content-wrapper {
     padding: 1rem;
-    padding-bottom: 120px; /* Safe area for mobile dock */
+    /* Mobile Safe Area + Dock Height + Extra Breathing Room */
+    padding-bottom: calc(120px + env(safe-area-inset-bottom)); 
     max-width: 1000px;
     margin: 0 auto;
     width: 100%;
@@ -127,6 +128,22 @@ main {
     height: 100%;
     position: relative;
     display: flex; justify-content: center; align-items: center;
+}
+
+/* Fixed Heading Indicator */
+.heading-indicator {
+    position: absolute;
+    top: -15px; /* Sits just outside the ring */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; 
+    height: 0; 
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 20px solid var(--primary); /* Points DOWN */
+    border-bottom: none;
+    filter: drop-shadow(0 0 5px var(--primary));
+    z-index: 10;
 }
 .compass-lens {
     width: 90%; height: 90%;
