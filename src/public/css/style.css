@@ -163,8 +163,21 @@ main {
 .cardinal.s { bottom: 15px; left: 50%; transform: translateX(-50%); }
 .cardinal.w { left: 15px; top: 50%; transform: translateY(-50%); }
 
+.reticle-overlay {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    display: flex; justify-content: center; align-items: center;
+    z-index: 20;
+}
+.crosshair {
+    width: 40px; height: 40px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 50%;
+    position: absolute;
+}
+
 .readout-heading {
-    position: absolute; bottom: -3rem;
+    position: absolute; top: 110%; /* Push below ring properly */
     font-size: var(--text-xl); /* FLUID */
     font-family: var(--font-mono);
     color: var(--white);
