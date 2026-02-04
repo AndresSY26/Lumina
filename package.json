@@ -1,0 +1,17 @@
+{
+  "name": "lumina-omni-tool",
+  "version": "3.0.0",
+  "description": "Lumina: Celestial Command Center",
+  "main": "src/app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "node --watch src/app.js"
+  },
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.19.2"
+  },
+  "author": "Andres",
+  "license": "ISC"
+}

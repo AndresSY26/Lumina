@@ -1,0 +1,41 @@
+<div class="dashboard-grid">
+    <!-- Row 1: Moon Data -->
+    <div class="data-card">
+        <div class="card-header text-accent">
+            <i class="ph-bold ph-moon"></i> LUNA
+        </div>
+        <div class="card-body">
+            <div class="data-row">
+                <span>FASE</span>
+                <span class="font-mono text-white" id="moon-phase">--</span>
+            </div>
+            <div class="data-row">
+                <span>ILUM</span>
+                <span class="font-mono text-white" id="moon-illum">--%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 2: Sun Data -->
+    <div class="data-card">
+        <div class="card-header text-warn">
+            <i class="ph-bold ph-sun"></i> SOL
+        </div>
+        <div class="card-body">
+            <div class="data-row">
+                <span>ALBA</span>
+                <span class="font-mono text-white" id="sun-rise">--:--</span>
+            </div>
+            <div class="data-row">
+                <span>OCASO</span>
+                <span class="font-mono text-white" id="sun-set">--:--</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 3: Trajectory (Full Width) -->
+    <div class="data-card full-width graph-card">
+        <canvas id="trajectory-canvas"></canvas>
+        <div class="graph-label">TRAYECTORIA ELEVACIÓN</div>
+    </div>
+</div>
