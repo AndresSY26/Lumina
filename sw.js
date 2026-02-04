@@ -1,10 +1,17 @@
-/* SW for Lumina v6 - Offline Robustness */
-const CACHE_NAME = 'lumina-v6-offline';
+/* SW for Lumina Modular v1 - Offline Robustness */
+const CACHE_NAME = 'lumina-mod-v1';
 const STATIC_ASSETS = [
     './',
     './index.html',
     './manifest.json',
-    // Removed External CDNs for offline stability
+    './css/style.css',
+    './js/main.js',
+    './js/utils.js',
+    './js/modules/ui.js',
+    './js/modules/compass.js',
+    './js/modules/telemetry.js',
+    './js/modules/graph.js',
+    './js/modules/ar.js'
 ];
 
 self.addEventListener('install', (e) => {
@@ -32,22 +39,17 @@ self.addEventListener('activate', (e) => {
 self.addEventListener("fetch", (e) => {
   const url = new URL(e.request.url);
 
-  // 1. External Scripts: Network Only (No Cache to avoid CORS Errors)
-  // This includes Google Fonts, Unpkg, etc. if they are still requested.
-  // We prioritize stability over caching external resources we can't control easily.
+  // External Scripts: Network Only (No Cache to avoid CORS Errors)
   if (url.origin !== self.location.origin) {
-     return; // Allow browser default network behavior
+     return; 
   }
 
-  // 2. Local Assets: Cache First, Network Fallback
+  // Local Assets: Cache First, Network Fallback
   e.respondWith(
     caches.match(e.request).then((cached) => {
-      // Return cached if found
       if (cached) return cached;
 
-      // Fallback to Network
       return fetch(e.request).then((resp) => {
-        // Cache valid local responses for future
         if (resp && resp.status === 200 && resp.type === 'basic') {
             const respClone = resp.clone();
             caches.open(CACHE_NAME).then((cache) => {
@@ -56,7 +58,7 @@ self.addEventListener("fetch", (e) => {
         }
         return resp;
       }).catch(() => {
-        // Offline Fallback for Navigation (index.html)
+        // Fallback for Navigation
         if (e.request.mode === 'navigate') {
             return caches.match('./index.html');
         }

@@ -154,8 +154,8 @@ const App = {
 
         this.sensorsPermitted = true;
         this.ui.sensorStatus.innerText = "Sensors Active";
-        this.ui.sensorStatus.classList.remove('text-red-500', 'animate-pulse');
-        this.ui.sensorStatus.classList.add('text-lumina-cyber');
+        this.ui.sensorStatus.classList.remove('status-error', 'status-pulse');
+        this.ui.sensorStatus.classList.add('status-active');
     },
 
     handleOrientation(event) {
@@ -349,8 +349,8 @@ const App = {
         this.ui.simPaymentBtn.innerText = "PROCESSING...";
         setTimeout(() => {
             this.ui.simPaymentBtn.innerText = "ACCESS GRANTED";
-            this.ui.simPaymentBtn.classList.remove('bg-lumina-gold');
-            this.ui.simPaymentBtn.classList.add('bg-green-500', 'text-white');
+            this.ui.simPaymentBtn.classList.remove('btn-gold');
+            this.ui.simPaymentBtn.classList.add('btn-success');
 
             setTimeout(() => {
                 this.enableProMode();
@@ -365,13 +365,17 @@ const App = {
         localStorage.setItem('lumina_pro', 'true');
 
         // Update UI
-        document.getElementById('paywall-trigger-top').innerHTML = '<i class="ph ph-check-circle"></i> UNLOCKED';
-        document.getElementById('paywall-trigger-top').classList.add('bg-green-500/20', 'text-green-400', 'border-green-500');
+        const topTrigger = document.getElementById('paywall-trigger-top');
+        if (topTrigger) {
+             topTrigger.innerHTML = '<i class="ph ph-check-circle"></i> UNLOCKED';
+             topTrigger.classList.add('pro-active');
+        }
+
 
         // Unlock Cards
         this.ui.paywallTriggers.forEach(el => {
-            el.classList.remove('opacity-70', 'border-dashed');
-            el.classList.add('border-solid', 'border-lumina-gold');
+            el.classList.remove('card-locked');
+            el.classList.add('card-unlocked');
             el.innerHTML = el.innerHTML.replace('lock-key', 'lock-open'); // Change Icon
             // Remove click listener (hacky but works for mock)
             let clone = el.cloneNode(true);

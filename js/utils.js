@@ -1,9 +1,15 @@
 // Helper to format degrees
-function formatDeg(deg) {
+export function formatDeg(deg) {
     return `${Math.round(deg)}°`;
 }
 
 // Helper for time formatting
-function formatTime(date) {
-    return date ? date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--';
+export function formatTime(date) {
+    if (!date || isNaN(new Date(date))) return '--:--';
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+export function safeText(elementId, text) {
+    const el = document.getElementById(elementId);
+    if (el) el.innerText = text;
 }
