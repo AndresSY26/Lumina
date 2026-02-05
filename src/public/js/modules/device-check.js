@@ -4,6 +4,11 @@
  * @returns {boolean} true if mobile device is detected
  */
 export function checkIsMobile() {
-    return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-           (navigator.maxTouchPoints > 0 && window.innerWidth < 1024);
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    const isTouch = navigator.maxTouchPoints > 0;
+    const isMobileUA = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+    
+    // Strict check: Must be touch-capable AND have a mobile User Agent
+    // This avoids false positives on touch-enabled laptops
+    return isTouch && isMobileUA;
 }

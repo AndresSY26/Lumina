@@ -3,6 +3,8 @@ import { AstronomyModule } from './modules/astronomy.js';
 import { GraphModule } from './modules/graph.js';
 import { UIModule } from './modules/ui.js';
 import { ARModule } from './modules/ar.js';
+import { checkIsMobile } from './modules/device-check.js';
+
 
 class App {
     constructor() {
@@ -32,10 +34,32 @@ class App {
             this.ui.updateTelemetry(data.heading, data.coords, astroData, data.isAbsolute, this.targetMode);
         };
 
-        // Wire up Permissions
+        // Wire up Permissions (Intercepted by Desktop Gatekeeper)
         const btnPerms = document.getElementById('btn-grant-perms');
         if(btnPerms) {
             btnPerms.addEventListener('click', () => {
+                // 1. GATEKEEPER CHECK
+                if (!checkIsMobile()) {
+                    console.log('🛑 Desktop Environment Detected. Intercepting...');
+                    this.showDesktopOverlay();
+                    return; // Stop flow here
+                }
+
+                // 2. Mobile Flow (Normal)
+                this.sensors.requestPermissions().then(granted => {
+                    if(granted) this.ui.hidePermissionModal();
+                });
+            });
+        }
+
+        // Wire up Bypass Button (For Devs/Simulation)
+        const btnBypass = document.getElementById('btn-bypass');
+        if (btnBypass) {
+            btnBypass.addEventListener('click', () => {
+                console.warn('⚠️ User Bypassed Desktop Restriction');
+                document.getElementById('desktop-overlay').classList.add('hidden');
+                
+                // Resume Permissions Flow
                 this.sensors.requestPermissions().then(granted => {
                     if(granted) this.ui.hidePermissionModal();
                 });
@@ -75,6 +99,21 @@ class App {
         
         if (viewId === 'view-home') {
             this.graph.resize(); // Ensure canvas is sized right
+        }
+    }
+
+    showDesktopOverlay() {
+        const overlay = document.getElementById('desktop-overlay');
+        const qrImage = document.getElementById('qr-code');
+        
+        if (overlay && qrImage) {
+            // Generate QR pointing to current URL
+            const currentUrl = encodeURIComponent(window.location.href);
+            // Colors: Cyan (38bdf8) on Dark (050505)
+            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${currentUrl}&color=38bdf8&bgcolor=050505`;
+            
+            qrImage.src = qrApiUrl;
+            overlay.classList.remove('hidden');
         }
     }
 }
