@@ -1,0 +1,32 @@
+<!-- DESKTOP INTERCEPTION OVERLAY -->
+<div id="desktop-overlay" class="overlay-container hidden">
+    <div class="lock-screen text-center">
+        <!-- Icono de Advertencia / Bloqueo -->
+        <i class="ph-duotone ph-shield-warning text-primary text-6xl mb-4 animate-pulse"></i>
+        
+        <h1 class="orbitron text-xl text-white mb-2 tracking-widest">
+            ENLACE NEURAL REQUERIDO
+        </h1>
+        <p class="text-silver mb-8 text-sm">
+            Sensores no detectados. Transfiere la sesión a un dispositivo móvil.
+        </p>
+
+        <!-- Contenedor QR -->
+        <div class="qr-frame mb-8">
+            <div class="scan-line"></div>
+            <img id="qr-code" src="" alt="QR Móvil" class="qr-image" />
+        </div>
+
+        <!-- Instrucción -->
+        <div class="instruction mb-8">
+            <p class="text-xs text-primary font-mono custom-kerning">
+                ESCANEA PARA SINCRONIZAR
+            </p>
+        </div>
+
+        <!-- Bypass Control -->
+        <button id="btn-bypass" class="btn-text-subtle">
+            CONTINUAR EN MODO SIMULACIÓN
+        </button>
+    </div>
+</div>
