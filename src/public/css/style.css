@@ -693,35 +693,65 @@ canvas { width: 100%; height: 100%; display: block; }
     color: var(--primary);
 }
 
-/* QR Frame */
+/* QR Frame (Premium) */
 .qr-frame {
     position: relative;
-    padding: 10px;
-    border: 1px solid var(--primary);
-    box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
-    background: rgba(0,0,0,0.5);
-    border-radius: 8px;
+    padding: 1rem;
+    background: rgba(10, 10, 22, 0.95); /* Deep dark background */
+    border: 1px solid rgba(0, 243, 255, 0.3);
+    border-radius: 16px;
+    box-shadow: 0 0 30px rgba(0, 243, 255, 0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 260px;
+    height: 260px;
+    margin-bottom: 2rem;
     overflow: hidden;
 }
 
+/* Layer 1: The Code */
 .qr-image {
-    width: 200px; height: 200px;
+    width: 220px; 
+    height: 220px;
     display: block;
-    border-radius: 4px;
-    /* Optional: invert colors if needed or keep standard */
+    image-rendering: pixelated; /* Crisp edges */
+    z-index: 1;
 }
 
-.scan-line {
-    position: absolute; width: 100%; height: 2px;
-    background: var(--primary);
-    box-shadow: 0 0 10px var(--primary);
-    top: 0; left: 0;
-    animation: scanMove 2s infinite linear;
+/* Layer 2: The Logo (Center) */
+.qr-logo-overlay {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px; height: 50px;
+    background-color: #050510; /* Matches void background */
+    border: 2px solid var(--primary);
+    border-radius: 12px;
+    display: flex; justify-content: center; align-items: center;
     z-index: 10;
+    box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
+}
+.qr-logo-overlay i {
+    font-size: 1.8rem;
+    color: var(--primary);
+    filter: drop-shadow(0 0 5px var(--primary));
+}
+
+/* Layer 3: Laser Effect */
+.scan-line {
+    position: absolute; width: 100%; height: 3px;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    box-shadow: 0 0 15px var(--primary);
+    top: 0; left: 0;
+    animation: scanMove 2.5s infinite ease-in-out;
+    z-index: 5;
+    opacity: 0.8;
 }
 
 @keyframes scanMove {
     0% { top: 0; opacity: 0; }
-    50% { opacity: 1; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
     100% { top: 100%; opacity: 0; }
 }

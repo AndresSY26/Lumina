@@ -11,10 +11,18 @@
             Sensores no detectados. Transfiere la sesión a un dispositivo móvil.
         </p>
 
-        <!-- Contenedor QR -->
-        <div class="qr-frame mb-8">
+        <!-- Contenedor QR (Layered Architecture) -->
+        <div class="qr-frame">
+            <!-- Layer 1: Code -->
+            <img id="qr-code" src="<%= qrCodeData %>" alt="QR Móvil" class="qr-image" />
+            
+            <!-- Layer 2: Logo -->
+            <div class="qr-logo-overlay">
+                <i class="ph-duotone ph-planet"></i>
+            </div>
+
+            <!-- Layer 3: Laser -->
             <div class="scan-line"></div>
-            <img id="qr-code" src="" alt="QR Móvil" class="qr-image" />
         </div>
 
         <!-- Instrucción -->
