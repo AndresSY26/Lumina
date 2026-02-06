@@ -27,11 +27,10 @@ class App {
         this.targetMode = 'moon'; // 'moon' | 'sun'
 
         // Check Device & Init
+        // Check Device & Init
         const isMobile = checkIsMobile();
-        if (!isMobile) {
-            console.log('🛑 Desktop Environment Detected.');
-            this.showDesktopOverlay();
-        }
+        // [MODIFIED] We delay the check. We allow Desktop on Landing/Auth.
+        // The check will happen in onViewChange for 'setup' or 'mission'.
 
         this.init();
     }
@@ -149,6 +148,20 @@ class App {
     onViewChange(viewId) {
         // Lifecycle management
         
+        // [NEW] Desktop Gatekeeper for Protected Routes
+        // If we are navigating to SETUP or MISSION, we enforce Mobile.
+        if (viewId === 'setup' || viewId === 'mission' || viewId === 'view-home' || viewId === 'view-ar') {
+             const isMobile = checkIsMobile();
+             if (!isMobile) {
+                 console.log('🛑 Protective Layer: Desktop Detected on Protected Route.');
+                 this.showDesktopOverlay();
+                 return; // Stop other logic if needed? 
+                 // Actually showDesktopOverlay doesn't stop execution, it just covers screen.
+                 // But typically we might want to pause things.
+                 // For now, overlay is enough.
+             }
+        }
+
         // 1. Landing 3D Moon
         if (viewId === 'landing' || viewId === 'view-landing' || !viewId) { // Check both ID naming conventions
             // Try to init if not exists
