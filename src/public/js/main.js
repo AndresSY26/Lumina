@@ -5,6 +5,7 @@ import { UIModule } from './modules/ui.js';
 import { ARModule } from './modules/ar.js';
 import { Router } from './modules/router.js';
 import { Moon3DModule } from './modules/moon-3d.js'; 
+import { LandingSceneModule } from './modules/landing-scene.js'; // [NEW]
 import { checkIsMobile } from './modules/device-check.js';
 
 
@@ -19,7 +20,7 @@ class App {
         
         // 3D Moon (Visual only, safe to instantiate, but wait to init)
         this.moon3D = new Moon3DModule('moon-3d-container');
-        this.landingMoon = null; // Will be init on Landing View
+        this.landingScene = null; // Dedicated Landing Scene
 
         this.router = new Router(this);
         
@@ -163,24 +164,17 @@ class App {
         }
 
         // 1. Landing 3D Moon
-        if (viewId === 'landing' || viewId === 'view-landing' || !viewId) { // Check both ID naming conventions
-            // Try to init if not exists
-            if (!this.landingMoon) {
-                // Instantiating here ensures DOM exists if partials are loaded
-                // But we are SPA, so elements exist.
-                // We reused 'Moon3DModule'.
+        if (viewId === 'landing' || viewId === 'view-landing' || !viewId) { 
+            if (!this.landingScene) {
                 const container = document.getElementById('landing-moon-container');
                 if (container) {
-                    this.landingMoon = new Moon3DModule('landing-moon-container', { 
-                        cinematic: true 
-                    });
-                    this.landingMoon.init();
+                    this.landingScene = new LandingSceneModule('landing-moon-container');
+                    this.landingScene.init();
                 }
             }
-            if (this.landingMoon) this.landingMoon.start();
+            if (this.landingScene) this.landingScene.start();
         } else {
-            // Stop Landing Moon to save battery
-            if (this.landingMoon) this.landingMoon.stop();
+            if (this.landingScene) this.landingScene.stop();
         }
 
         // 2. Mission 3D Moon

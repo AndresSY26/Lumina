@@ -121,6 +121,12 @@ export class Router {
     }
 
     onPageChanged(pageId) {
+        // 1. Notify Main Controller (Critical for Lifecycle)
+        if (this.app && this.app.onViewChange) {
+            this.app.onViewChange(pageId);
+        }
+
+        // 2. Legacy/Specific Hooks
         if (pageId === 'mission') {
             // Start Heavy Sensors
             if (this.app && this.app.startMissionParams) {

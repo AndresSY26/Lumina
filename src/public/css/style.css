@@ -1378,6 +1378,23 @@ canvas {
     flex-direction: column;
     justify-content: flex-end;
 }
+
+/* FIX: LANDING MOON CONTAINER */
+#landing-moon-container {
+    width: 100%;
+    height: 400px; /* Explicit height is crucial for Canvas */
+    max-width: 600px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+}
+@media (max-width: 640px) {
+    #landing-moon-container {
+        height: 300px;
+    }
+}
 .moon-3d-visual {
     position: absolute;
     top: -20px;

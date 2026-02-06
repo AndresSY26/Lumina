@@ -14,12 +14,17 @@
         <div class="hero-section text-center mb-16">
             
             <!-- HOLOGRAPHIC ORB (3D CANVAS) -->
-            <div id="landing-moon-container" class="orb-container mb-10 relative inline-flex justify-center items-center">
+            <!-- HOLOGRAPHIC ORB (3D CANVAS) -->
+            <div id="landing-moon-container" class="mb-10 relative">
+                <!-- FALLBACK IMAGE (Round & Centered) -->
+                <img src="https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/moon_1024.jpg" 
+                     style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; height: 80%; border-radius: 50%; object-fit: cover; z-index: -10; opacity: 0.8;"
+                     alt="Moon Fallback">
+                     
                 <!-- 3D Canvas will be injected here by main.js -->
                  
-                <!-- Retain some CSS effects for fallback/decoration if needed, or clear them -->
                 <!-- Core Glow Behind -->
-                <div class="absolute inset-0 bg-cyan-500/10 blur-3xl rounded-full pointer-events-none"></div>
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-cyan-500/10 blur-3xl rounded-full pointer-events-none -z-20"></div>
             </div>
 
             <!-- GLITCH TITLE -->
