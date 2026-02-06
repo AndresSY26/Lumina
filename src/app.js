@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import mainRouter from './routes/index.js';
+import expressLayouts from 'express-ejs-layouts';
 
 // ESM Boilerplate for __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -13,6 +14,8 @@ const PORT = process.env.PORT || 3000;
 // View Engine Setup
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
+app.use(expressLayouts);
+app.set('layout', 'layout'); // Default layout: views/layout.ejs
 
 // Static Files Middleware
 app.use(express.static(path.join(__dirname, 'public')));

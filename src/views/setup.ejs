@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<%- include('layout') %>
+<body class="setup-body flex justify-center items-center h-screen bg-void text-center">
+    <div class="stars-bg"></div>
+    
+    <div class="setup-container max-w-lg px-6">
+        <div class="icon-stack relative mb-8 inline-block">
+            <div class="absolute inset-0 bg-primary/20 blur-xl rounded-full"></div>
+            <i class="ph-duotone ph-compass text-primary text-7xl relative z-10 animate-pulse-slow"></i>
+        </div>
+
+        <h1 class="orbitron text-xl text-white mb-4 tracking-widest">
+            CALIBRACIÓN DE SENSORES
+        </h1>
+        
+        <p class="text-silver text-base font-data leading-relaxed mb-8">
+            Para alinear la <span class="text-primary">brújula táctica</span> y proyectar el <span class="text-primary">HUD de realidad aumentada</span>, el sistema Lumina requiere acceso preciso a los sensores de su dispositivo (Giroscopio y GPS).
+        </p>
+
+        <div class="permission-grid grid grid-cols-2 gap-4 mb-8">
+            <div class="perm-item p-4 border border-white/10 rounded bg-surface/50">
+                <i class="ph-duotone ph-arrows-out-cardinal text-accent text-2xl mb-2"></i>
+                <p class="text-xs text-white">ORIENTACIÓN</p>
+            </div>
+            <div class="perm-item p-4 border border-white/10 rounded bg-surface/50">
+                <i class="ph-duotone ph-map-pin text-gold text-2xl mb-2"></i>
+                <p class="text-xs text-white">UBICACIÓN</p>
+            </div>
+        </div>
+
+        <a href="/mission" class="btn-primary w-full max-w-xs mx-auto block py-4 no-underline">
+            INICIALIZAR SENSORES
+        </a>
+        
+        <p class="text-xs text-silver/50 mt-6">
+            Los datos de telemetría se procesan localmente.
+        </p>
+    </div>
+</body>
+</html>

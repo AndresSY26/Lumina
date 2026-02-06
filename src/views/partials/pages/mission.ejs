@@ -1,0 +1,48 @@
+<section id="page-mission" class="page-section hidden">
+    <div class="app-container">
+        <!-- Background FX (Specific to Mission) -->
+        <div class="bg-stars"></div>
+        <div class="bg-grid"></div>
+
+        <!-- Header -->
+        <%- include('../header') %>
+
+        <!-- MAIN CONTENT -->
+        <main id="main-content">
+            
+            <!-- VIEW: HOME (Compass & Dashboard) -->
+            <section id="view-home" class="view-panel active">
+                <div class="content-wrapper">
+                    <%- include('../compass') %>
+                    <%- include('../dashboard') %>
+                </div>
+            </section>
+
+            <!-- VIEW: AR (Camera) -->
+            <section id="view-ar" class="view-panel hidden">
+                <div class="ar-container">
+                    <video id="camera-feed" autoplay playsinline muted></video>
+                    <div class="ar-overlay">
+                        <div class="ar-reticle"></div>
+                        <div class="ar-status">BÚSQUEDA VISUAL ACTIVA</div>
+                    </div>
+                </div>
+            </section>
+
+             <!-- VIEW: MAP (Placeholder) -->
+             <section id="view-map" class="view-panel hidden">
+                <div class="center-message">
+                    <i class="ph-duotone ph-map-trifold text-4xl text-gray"></i>
+                    <p>SISTEMA DE MAPADO OFFLINE</p>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Navigation -->
+        <%- include('../navigation') %>
+
+        <!-- Modals -->
+        <%- include('../modals') %>
+    </div>
+</section>

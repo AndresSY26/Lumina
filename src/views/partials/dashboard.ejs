@@ -1,10 +1,14 @@
 <div class="dashboard-grid">
     <!-- Row 1: Moon Data -->
-    <div class="data-card">
-        <div class="card-header text-accent">
-            <i class="ph-bold ph-moon"></i> LUNA
+    <!-- Row 1: Moon Data -->
+    <div class="data-card moon-card relative overflow-hidden">
+        <!-- 3D MOON CONTAINER (Absolute Background or Header replacement) -->
+        <div id="moon-3d-container" class="moon-3d-visual"></div>
+        
+        <div class="card-header text-accent z-10 relative">
+             LUNA LIVE
         </div>
-        <div class="card-body">
+        <div class="card-body z-10 relative bg-black/20 backdrop-blur-sm rounded-lg p-2 mt-20">
             <div class="data-row">
                 <span>FASE</span>
                 <span class="data-value" id="moon-phase">--</span>

@@ -1,56 +1,10 @@
-<!DOCTYPE html>
-<html lang="es">
-<%- include('layout') %>
-<body>
-    <div class="app-container">
-        <!-- Background FX -->
-        <div class="bg-stars"></div>
-        <div class="bg-grid"></div>
+<!-- SPA PAGE ASSEMBLER -->
+<div id="spa-container">
+    <%- include('partials/pages/landing') %>
+    <%- include('partials/pages/auth') %>
+    <%- include('partials/pages/setup') %>
+    <%- include('partials/pages/mission') %>
+</div>
 
-        <!-- Header -->
-        <%- include('partials/header') %>
-
-        <!-- MAIN VIEWS (SPA Container) -->
-        <main id="main-content">
-            
-            <!-- VIEW: HOME (Compass & Dashboard) -->
-            <section id="view-home" class="view-panel active">
-                <div class="content-wrapper">
-                    <%- include('partials/compass') %>
-                    <%- include('partials/dashboard') %>
-                </div>
-            </section>
-
-            <!-- VIEW: AR (Camera) -->
-            <section id="view-ar" class="view-panel hidden">
-                <div class="ar-container">
-                    <video id="camera-feed" autoplay playsinline muted></video>
-                    <div class="ar-overlay">
-                        <div class="ar-reticle"></div>
-                        <div class="ar-status">BÚSQUEDA VISUAL ACTIVA</div>
-                    </div>
-                </div>
-            </section>
-
-             <!-- VIEW: MAP (Placeholder) -->
-             <section id="view-map" class="view-panel hidden">
-                <div class="center-message">
-                    <i class="ph-duotone ph-map-trifold text-4xl text-gray"></i>
-                    <p>SISTEMA DE MAPADO OFFLINE</p>
-                </div>
-            </section>
-
-        </main>
-
-        <!-- Navigation -->
-        <%- include('partials/navigation') %>
-
-        <!-- Modals -->
-        <%- include('partials/modals') %>
-        <%- include('partials/desktop_overlay') %>
-    </div>
-
-    <!-- Client Logic (ES Modules) -->
-    <script type="module" src="/js/main.js"></script>
-</body>
-</html>
+<!-- GLOBAL OVERLAYS -->
+<%- include('partials/overlays/desktop-blocker') %>
