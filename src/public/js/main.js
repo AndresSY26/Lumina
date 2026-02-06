@@ -5,7 +5,7 @@ import { UIModule } from './modules/ui.js';
 import { ARModule } from './modules/ar.js';
 import { Router } from './modules/router.js';
 import { Moon3DModule } from './modules/moon-3d.js'; 
-import { LandingSceneModule } from './modules/landing-scene.js'; // [NEW]
+import { LandingMoonModule } from './modules/landing-moon.js'; // [NEW]
 import { checkIsMobile } from './modules/device-check.js';
 
 
@@ -166,9 +166,9 @@ class App {
         // 1. Landing 3D Moon
         if (viewId === 'landing' || viewId === 'view-landing' || !viewId) { 
             if (!this.landingScene) {
-                const container = document.getElementById('landing-moon-container');
+                const container = document.getElementById('hero-moon-canvas');
                 if (container) {
-                    this.landingScene = new LandingSceneModule('landing-moon-container');
+                    this.landingScene = new LandingMoonModule('hero-moon-canvas');
                     this.landingScene.init();
                 }
             }
