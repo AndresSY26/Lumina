@@ -1,22 +1,35 @@
-<section id="page-auth" class="page-section hidden center-content bg-space-deep">
-    <div class="glass-panel p-8 w-full max-w-sm mx-4">
-        <div class="text-center mb-6">
-            <i class="ph-duotone ph-fingerprint text-4xl text-primary mb-2"></i>
-            <h2 class="orbitron text-xl text-white">IDENTIFICACIÓN</h2>
+<section id="page-auth" class="page-section hidden center-content relative">
+    <!-- Background Elements -->
+    <div class="absolute inset-0 z-0 bg-space-deep flex items-center justify-center overflow-hidden">
+        <div class="w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] animate-pulse-slow"></div>
+    </div>
+
+    <!-- HUD MODULE -->
+    <div class="hud-module p-10 w-full max-w-sm mx-4 relative z-10 text-center">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 border border-primary/30 shadow-[0_0_20px_rgba(0,243,255,0.2)]">
+                <i class="ph-duotone ph-fingerprint text-4xl text-primary animate-pulse"></i>
+            </div>
+            <h2 class="orbitron text-2xl text-white tracking-widest">IDENTIFICACIÓN</h2>
+            <p class="text-xs text-primary/60 font-mono tracking-widest mt-1">ACCESO RESTRINGIDO</p>
         </div>
 
-        <form id="auth-form" class="space-y-4">
-            <div class="input-group">
-                <input type="text" placeholder="ID DE OPERADOR" class="input-neon w-full" value="CMDR-001" readonly />
+        <form id="auth-form" class="space-y-6">
+            <div class="input-group text-left">
+                <label class="text-xs text-gray-500 font-mono ml-1 mb-1 block">ID OPERADOR</label>
+                <input type="text" placeholder="CMDR-001" class="input-deep w-full" value="CMDR-001" readonly />
             </div>
             
-            <div class="input-group">
-                <input type="password" placeholder="CÓDIGO DE ACCESO" class="input-neon w-full" value="******" readonly />
+            <div class="input-group text-left">
+                <label class="text-xs text-gray-500 font-mono ml-1 mb-1 block">CLAVE DE SEGURIDAD</label>
+                <input type="password" placeholder="******" class="input-deep w-full" value="******" readonly />
             </div>
 
-            <button type="submit" class="btn-primary w-full mt-4">
-                <span class="mr-2">AUTORIZAR</span>
-                <i class="ph-bold ph-arrow-right"></i>
+            <button type="submit" class="btn-cta w-full mt-6 group">
+                <span class="relative z-10 flex items-center justify-center gap-2">
+                    AUTORIZAR <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                </span>
             </button>
         </form>
     </div>
