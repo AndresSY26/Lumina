@@ -2206,78 +2206,400 @@ canvas {
 }
 
 
+
+/* =========================================
+   ULTRA-PREMIUM PRICING & FOOTER (SCI-FI)
+   ========================================= */
+
 /* 3. NIVELES DE ACCESO (Pricing) */
-.pricing-card {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+.pricing-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem; /* Tighter gap on mobile */
+}
+@media (min-width: 768px) {
+    .pricing-grid {
+        grid-template-columns: repeat(2, 1fr);
+        align-items: stretch; /* Stretch to same height */
+        gap: 3rem;
+    }
+}
+
+/* FREE TIER (Cold Glass) */
+.card-tier-free {
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
-    padding: 2.5rem;
-    transition: all 0.4s ease;
+    padding: 3rem 2rem;
     position: relative;
+    clip-path: polygon(0 0, 100% 0, 100% 90%, 90% 100%, 0 100%);
+    transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
 }
 
-.pricing-card.gold {
-    background: linear-gradient(to bottom, rgba(251, 191, 36, 0.05), transparent);
-    border: 1px solid rgba(251, 191, 36, 0.4);
-    box-shadow: 0 0 40px rgba(251, 191, 36, 0.08);
+.card-tier-free:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* PRO TIER (Obsidian & Gold - POLISHED) */
+.card-tier-pro {
+    background: radial-gradient(120% 120% at 50% 0%, #1a1005 0%, #050505 100%);
+    border: 1px solid transparent; /* Prepare for gradient border */
+    border-image: linear-gradient(to bottom, #fbbf24, #92400e) 1;
+    padding: 3.5rem 2.5rem;
+    position: relative;
+    box-shadow: 
+        0 0 60px rgba(251, 191, 36, 0.1),
+        inset 0 0 0 1px rgba(251, 191, 36, 0.1); 
+    transform: scale(1.02);
+    z-index: 10;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 15% 100%, 0 92%);
+    display: flex;
+    flex-direction: column;
+    animation: pulseGlow 4s infinite alternate;
+}
+
+@keyframes pulseGlow {
+    0% { box-shadow: 0 0 60px rgba(251, 191, 36, 0.1); }
+    100% { box-shadow: 0 0 80px rgba(251, 191, 36, 0.2); }
+}
+
+/* Gold Badge */
+.badge-gold-tech {
+    position: absolute;
+    top: -1px; /* Align with border */
+    right: -1px;
+    background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+    color: black;
+    font-weight: 800;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    padding: 0.35rem 1.2rem;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 15% 100%);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    z-index: 20;
+}
+
+/* Feature Lists - ALIGNMENT FIX */
+.feature-list-tech {
+    list-style: none;
+    padding: 0;
+    margin: 2.5rem 0;
+    flex-grow: 1; /* Push button down */
+}
+
+.feature-list-tech li {
+    display: flex;
+    align-items: flex-start; /* Align icon with top of multi-line text */
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.feature-list-tech li i {
+    flex-shrink: 0; /* Prevent icon shrinking */
+    width: 1.25rem; /* Fixed width for alignment */
+    text-align: center;
+    margin-top: 0.1rem; /* Optical adjustment */
+    font-size: 1.1rem;
+}
+
+.card-tier-pro .feature-list-tech li {
+    color: rgba(255, 255, 255, 0.85); /* Brighter text for Pro */
+    border-bottom-color: rgba(251, 191, 36, 0.1);
+}
+
+.card-tier-pro .feature-list-tech li:last-child {
+    border-bottom: none;
+}
+
+
+/* CTA Pro Button */
+.btn-gold-tech {
+    width: 100%;
+    padding: 1.2rem;
+    background: linear-gradient(90deg, #f59e0b, #daa520);
+    color: black;
+    font-weight: 900;
+    font-family: 'Orbitron', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    border: none;
+    clip-path: polygon(15px 0, 100% 0, 100% 100%, 0 100%, 0 15px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    font-size: 0.85rem;
+}
+
+.btn-gold-tech::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: 0.5s;
+}
+
+.btn-gold-tech:hover::before {
+    left: 100%;
+}
+
+.btn-gold-tech:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 25px rgba(251, 191, 36, 0.4);
+}
+
+/* CTA Glass Tech Button (Free Tier) */
+.btn-glass-tech {
+    width: 100%;
+    padding: 1.2rem;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    font-weight: 700;
+    font-family: 'Orbitron', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    clip-path: polygon(0 0, 100% 0, 100% 85%, 95% 100%, 0 100%);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    font-size: 0.75rem;
+}
+
+.btn-glass-tech:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(6, 182, 212, 0.5); /* Cyan border on hover */
+    color: #06b6d4; /* Cyan text */
+    box-shadow: 0 0 15px rgba(6, 182, 212, 0.1);
+}
+
+
+/* 4. FOOTER TECHNICAL (COMMAND CENTER) */
+.footer-premium {
+    margin-top: 10rem;
+    background: radial-gradient(circle at top, #0a0a0f, #000000);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    padding-top: 0;
+    overflow: hidden;
+}
+
+/* Tech Ruler Top */
+.footer-ruler {
+    height: 24px;
+    width: 100%;
+    background-image: repeating-linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.15) 0px,
+        rgba(255, 255, 255, 0.15) 1px,
+        transparent 1px,
+        transparent 20px
+    );
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    position: relative;
+    opacity: 0.6;
+}
+
+.footer-ruler::after {
+    content: '0 1 0 2 0 3 0 4 0 5 0 6';
+    position: absolute;
+    top: 6px;
+    left: 10px;
+    font-family: 'Rajdhani', monospace;
+    font-size: 10px;
+    letter-spacing: 18px;
+    color: rgba(255, 255, 255, 0.2);
+}
+
+/* Grid Layout */
+.footer-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 5rem 2rem;
 }
 
 @media (min-width: 1024px) {
-    .pricing-card.gold {
-        transform: scale(1.05);
-        z-index: 10;
+    .footer-grid {
+        grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
     }
 }
 
-.feature-list {
+/* Columns */
+.footer-col h4 {
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.15em;
+    margin-bottom: 1.5rem;
+    position: relative;
+    display: inline-block;
+}
+
+.footer-col h4::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 30px;
+    height: 2px;
+    background: #fbbf24; /* Gold Tech Accent */
+}
+
+.footer-links {
     list-style: none;
     padding: 0;
-    margin: 2rem 0;
-    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
 }
 
-.feature-list li {
+.footer-links a {
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-    font-size: 0.95rem;
-    color: rgba(255, 255, 255, 0.7);
-    font-family: 'Rajdhani', sans-serif;
-    font-weight: 500;
+    gap: 0.5rem;
 }
 
-.feature-list li i {
+.footer-links a::before {
+    content: '›';
+    opacity: 0;
+    transform: translateX(-5px);
+    transition: all 0.3s ease;
+    color: #06b6d4;
+}
+
+.footer-links a:hover {
+    color: #fff;
+    padding-left: 5px;
+}
+
+.footer-links a:hover::before {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Social Hexagon Pressed */
+.social-hex {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+    transition: all 0.3s ease;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.social-hex:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fbbf24;
+    transform: scale(1.1);
+}
+
+/* 5. PREMIUM INPUT (COMMAND CENTER) */
+.input-group-tech {
+    position: relative;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.input-tech {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 4px; /* Slight rounded corners */
+    padding: 1rem 3.5rem 1rem 1.5rem; /* Space for button */
+    font-family: 'Rajdhani', monospace;
+    font-size: 0.9rem;
+    color: #fff;
+    transition: all 0.3s ease;
+    clip-path: polygon(0 0, 100% 0, 100% 85%, 95% 100%, 0 100%); /* Tech cut */
+}
+
+.input-tech:focus {
+    outline: none;
+    border-color: #fbbf24;
+    background: rgba(0, 0, 0, 0.9);
+    box-shadow: 0 0 15px rgba(251, 191, 36, 0.15);
+}
+
+.input-tech::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.btn-submit-tech {
+    position: absolute;
+    top: 50%;
+    right: 5px;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: #fbbf24;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    /* Tech hexagon shape background on hover */
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0), rgba(251, 191, 36, 0));
+}
+
+.btn-submit-tech:hover {
+    color: #fff;
+    text-shadow: 0 0 8px #fbbf24;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.btn-submit-tech i {
     font-size: 1.2rem;
 }
 
-/* 4. FOOTER TERMINAL */
-.footer-terminal {
-    margin-top: 8rem;
+/* Bottom Bar */
+.footer-bottom {
+    background: #000;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-    background: #05050a;
-    padding: 4rem 1.5rem;
-}
-
-.term-link {
-    font-family: 'Courier New', Courier, monospace;
-    color: #888;
+    padding: 1.5rem 2rem;
+    font-family: 'Rajdhani', monospace;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
     text-transform: uppercase;
-    font-size: 0.85rem;
     letter-spacing: 0.1em;
-    transition: color 0.3s ease;
 }
 
-.term-link:hover {
-    color: cyan;
-    text-shadow: 0 0 8px cyan;
+@media (min-width: 768px) {
+    .footer-bottom {
+        flex-direction: row;
+        justify-content: center; /* CENTERED */
+        gap: 4rem; /* Spacing between centered items */
+    }
 }
-
-
-
-
-

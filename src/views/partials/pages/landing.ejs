@@ -128,56 +128,59 @@
             </div>
         </section>
 
-        <!-- 4. NIVELES DE ACCESO (PRICING) -->
-        <section class="py-24 px-6 relative z-10 bg-gradient-to-b from-transparent to-black/80">
+        <!-- 4. NIVELES DE ACCESO (PRICING - ULTRA PREMIUM) -->
+        <section class="py-24 px-6 relative z-10 bg-gradient-to-b from-transparent to-black/90">
             <div class="max-w-5xl mx-auto">
-                <div class="text-center mb-16">
-                    <h2 class="orbitron text-3xl md:text-4xl text-white mb-4 tracking-widest text-gold drop-shadow-md">NIVELES DE ACCESO</h2>
-                    <p class="text-amber-200/60 font-mono text-sm tracking-wider">SELECCIONA TU RANGO</p>
+                <div class="text-center mb-28"> <!-- Increased margin bottom -->
+                    <h2 class="orbitron text-3xl md:text-5xl text-white mb-10 tracking-widest text-gold drop-shadow-md">NIVELES DE ACCESO</h2> <!-- Increased margin bottom -->
+                    <div class="flex items-center justify-center gap-6 text-amber-500/60 font-mono text-xs tracking-[0.3em]"> <!-- Increased gap -->
+                        <span class="w-16 h-[1px] bg-amber-500/40"></span> <!-- Longer line -->
+                        AUTHORIZATION REQUIRED
+                        <span class="w-16 h-[1px] bg-amber-500/40"></span>
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto items-stretch">
-                    <!-- FREE TIER -->
-                    <div class="pricing-card">
-                        <h3 class="orbitron text-xl text-gray-400 mb-2">ACCESO ESTÁNDAR</h3>
-                        <div class="text-4xl font-bold text-white mb-6 font-mono">0.00 <span class="text-sm text-gray-500">/ MES</span></div>
+                <div class="pricing-grid">
+                    <!-- FREE TIER (Cold Glass) -->
+                    <div class="card-tier-free">
+                        <h3 class="orbitron text-gray-400 text-lg mb-2 tracking-widest">EXPLORER</h3>
+                        <div class="text-3xl font-bold text-white mb-6 font-mono">GRATIS</div>
                         
-                        <ul class="feature-list">
+                        <ul class="feature-list-tech">
                             <li><i class="ph-bold ph-check text-gray-500"></i> Brújula de Navegación Básica</li>
                             <li><i class="ph-bold ph-check text-gray-500"></i> Fase Lunar en Tiempo Real</li>
                             <li><i class="ph-bold ph-check text-gray-500"></i> Cálculo de Salida y Puesta</li>
                             <li><i class="ph-bold ph-check text-gray-500"></i> Interfaz de Comando Estándar</li>
                         </ul>
                         
-                        <div class="mt-auto">
-                            <button onclick="Router.navigate('auth')" class="w-full py-3 rounded border border-white/20 text-white font-bold hover:bg-white/5 transition-colors uppercase tracking-widest text-sm">
+                        <div class="mt-8">
+                            <button onclick="Router.navigate('auth')" class="btn-glass-tech">
                                 INICIAR MISIÓN
                             </button>
                         </div>
                     </div>
 
-                    <!-- PRO TIER -->
-                    <div class="pricing-card gold">
-                        <!-- Badge -->
-                        <div class="absolute top-4 right-4 bg-gold text-black text-xs font-bold px-2 py-1 rounded orbitron">
-                            RECOMENDADO
-                        </div>
+                    <!-- PRO TIER (Obsidian & Gold) -->
+                    <div class="card-tier-pro">
+                        <!-- Tech Badge -->
+                        <div class="badge-gold-tech">RECOMENDADO</div>
 
-                        <h3 class="orbitron text-2xl text-gold mb-2 tracking-wide">ACCESO CLASIFICADO</h3>
-                        <div class="text-5xl font-bold text-gold mb-6 font-mono">$2.99 <span class="text-sm text-amber-500/60">/ MES</span></div>
+                        <h3 class="orbitron text-2xl text-gold mb-2 tracking-wider">COMMANDER</h3>
+                        <div class="text-5xl font-bold text-white mb-1 font-mono text-shadow-gold">$2.99</div>
+                        <div class="text-amber-500/60 text-xs mb-8 uppercase tracking-widest font-mono">/ MENSUAL</div>
 
-                        <ul class="feature-list">
-                            <li class="text-white"><i class="ph-fill ph-check-circle text-gold"></i> Todo lo de Explorer +</li>
-                            <li class="text-white"><i class="ph-fill ph-check-circle text-gold"></i> Mapa de Contaminación Lumínica</li>
-                            <li class="text-white"><i class="ph-fill ph-check-circle text-gold"></i> Calculadora de Exposición Fotográfica</li>
-                            <li class="text-white"><i class="ph-fill ph-check-circle text-gold"></i> Simulador de Trayectoria Futura</li>
-                            <li class="text-white"><i class="ph-fill ph-check-circle text-gold"></i> Escáner AR de Alta Precisión</li>
-                            <li class="text-white"><i class="ph-fill ph-check-circle text-gold"></i> Sin Publicidad / Interrupciones</li>
+                        <ul class="feature-list-tech">
+                            <li><i class="ph-fill ph-check-circle text-gold"></i> Todo lo de Explorer +</li>
+                            <li><i class="ph-fill ph-check-circle text-gold"></i> Mapa de Contaminación Lumínica</li>
+                            <li><i class="ph-fill ph-check-circle text-gold"></i> Calculadora de Exposición Fotográfica</li>
+                            <li><i class="ph-fill ph-check-circle text-gold"></i> Simulador de Trayectoria Futura</li>
+                            <li><i class="ph-fill ph-check-circle text-gold"></i> Escáner AR de Alta Precisión</li>
+                            <li><i class="ph-fill ph-check-circle text-gold"></i> Sin Publicidad / Interrupciones</li>
                         </ul>
                         
-                        <div class="mt-auto">
-                            <button onclick="Router.navigate('auth')" class="w-full py-4 rounded bg-gold text-black font-black hover:bg-yellow-400 transition-all uppercase tracking-widest shadow-lg shadow-amber-900/40 relative overflow-hidden group">
-                               <span class="relative z-10 flex items-center justify-center gap-2">SOLICITAR ACCESO PRO <i class="ph-bold ph-arrow-right"></i></span>
+                        <div class="mt-8">
+                            <button onclick="Router.navigate('auth')" class="btn-gold-tech text-sm">
+                               SOLICITAR ACCESO PRO
                             </button>
                         </div>
                     </div>
@@ -185,28 +188,68 @@
             </div>
         </section>
 
-        <!-- 5. FOOTER -->
-        <footer class="footer-terminal relative z-10">
-            <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-12">
-                <!-- Identity -->
-                <div class="flex flex-col gap-2">
-                    <div class="orbitron text-2xl text-white font-bold tracking-widest">LUMINA</div>
-                    <p class="text-gray-500 text-xs font-mono uppercase tracking-wider">© 2024 Orbital Systems Inc.</p>
+        <!-- 5. FOOTER PREMIUM (COMMAND CENTER) -->
+        <footer class="footer-premium">
+            <div class="footer-ruler"></div>
+
+            <div class="footer-grid">
+                <!-- Col 1: System Info -->
+                <div class="footer-col">
+                    <div class="orbitron text-2xl text-white font-bold tracking-widest mb-4">LUMINA</div>
+                    <p class="text-gray-500 font-mono text-sm leading-relaxed mb-6 max-w-xs">
+                        Plataforma avanzada de análisis astronómico y predicción de condiciones de observación.
+                    </p>
+                    <div class="flex items-center text-xs font-mono text-emerald-500 tracking-wider">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-2 box-shadow-glow"></span>
+                        SYSTEM: ONLINE // V.3.0.1
+                    </div>
                 </div>
 
-                <!-- Commands -->
-                <div class="flex flex-wrap gap-6 md:gap-8">
-                    <a href="#" class="term-link">[ ESTADO DEL SISTEMA ]</a>
-                    <a href="#" class="term-link">[ PRIVACIDAD ]</a>
-                    <a href="#" class="term-link">[ CONTACTO ]</a>
+                <!-- Col 2: Navigation -->
+                <div class="footer-col">
+                    <h4>MÓDULOS</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Artemis Tracker</a></li>
+                        <li><a href="#">Deep Sky Map</a></li>
+                        <li><a href="#">Solar Analysis</a></li>
+                        <li><a href="#">Community Uplink</a></li>
+                    </ul>
                 </div>
 
-                <!-- Social -->
-                <div class="flex gap-6">
-                    <a href="#" class="text-gray-500 hover:text-white transition-colors hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]"><i class="ph-fill ph-instagram-logo text-2xl"></i></a>
-                    <a href="#" class="text-gray-500 hover:text-white transition-colors hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]"><i class="ph-fill ph-twitter-logo text-2xl"></i></a>
-                    <a href="#" class="text-gray-500 hover:text-white transition-colors hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]"><i class="ph-fill ph-youtube-logo text-2xl"></i></a>
+                <!-- Col 3: Protocols -->
+                <div class="footer-col">
+                    <h4>PROTOCOLOS</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Privacidad de Datos</a></li>
+                        <li><a href="#">Términos de Servicio</a></li>
+                        <li><a href="#">Calibración de Cookies</a></li>
+                        <li><a href="#">Soporte de Misión</a></li>
+                    </ul>
                 </div>
+
+                <!-- Col 4: Comms -->
+                <div class="footer-col">
+                    <h4>FRECUENCIA</h4>
+                    <div class="flex gap-4 mb-6">
+                        <a href="#" class="social-hex"><i class="ph-fill ph-instagram-logo"></i></a>
+                        <a href="#" class="social-hex"><i class="ph-fill ph-twitter-logo"></i></a>
+                        <a href="#" class="social-hex"><i class="ph-fill ph-github-logo"></i></a>
+                    </div>
+                    <!-- Tech Newsletter Input -->
+                    <div class="input-group-tech">
+                        <input type="text" placeholder="ENLACE DE COMANDO..." class="input-tech">
+                        <button class="btn-submit-tech">
+                            <i class="ph-bold ph-paper-plane-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Bar -->
+            <div class="footer-bottom">
+                <div>ORBITAL SYSTEMS INC. © 2026</div>
+                <div class="hidden md:block">SECURE CONNECTION ESTABLISHED</div>
+                <div>ALL RIGHTS RESERVED</div>
             </div>
         </footer>
 
