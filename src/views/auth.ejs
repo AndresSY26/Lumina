@@ -1,45 +1,31 @@
 <!DOCTYPE html>
 <html lang="es">
 <%- include('layout') %>
-<body class="auth-body flex justify-center items-center h-screen bg-void">
-    <div class="stars-bg"></div>
+<body class="auth-container">
+    <div class="auth-bg-grid"></div>
     
-    <div class="auth-card glass-panel p-8 rounded-2xl w-full max-w-md relative overflow-hidden">
-        <!-- Decorator Line -->
-        <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent"></div>
-
-        <div class="text-center mb-8">
-            <i class="ph-duotone ph-fingerprint text-primary text-5xl mb-4"></i>
-            <h2 class="orbitron text-xl text-white tracking-wider">IDENTIFICACIÓN</h2>
-            <p class="text-silver text-sm font-mono mt-2">Credenciales de Acceso Requeridas</p>
+    <div class="auth-card">
+        <div class="auth-header">
+            <i class="ph-duotone ph-fingerprint auth-icon"></i>
+            <h2 class="auth-title">IDENTIFICACIÓN</h2>
+            <p class="auth-subtitle">ACCESO RESTRINGIDO // NIVEL 5</p>
         </div>
 
-        <form action="/setup" class="flex flex-col gap-6">
-            <div class="input-group">
-                <label class="text-xs text-primary font-mono mb-1 block">ID DE USUARIO</label>
-                <div class="relative">
-                    <i class="ph-duotone ph-user absolute left-3 top-1/2 -translate-y-1/2 text-silver"></i>
-                    <input type="email" placeholder="operador@lumina.sys" class="input-terminal w-full pl-10 pr-4 py-3 bg-surface border border-white/10 rounded focus:border-primary text-white font-mono outline-none transition-colors" required>
-                </div>
+        <form action="/setup" class="auth-form">
+            <div class="auth-input-wrapper">
+                <label class="auth-label">[ ID OPERADOR ]</label>
+                <input type="text" placeholder="CMDR-001" class="auth-input" required>
             </div>
 
-            <div class="input-group">
-                <label class="text-xs text-primary font-mono mb-1 block">CÓDIGO DE ACCESO</label>
-                <div class="relative">
-                    <i class="ph-duotone ph-key absolute left-3 top-1/2 -translate-y-1/2 text-silver"></i>
-                    <input type="password" placeholder="••••••••" class="input-terminal w-full pl-10 pr-4 py-3 bg-surface border border-white/10 rounded focus:border-primary text-white font-mono outline-none transition-colors" required>
-                </div>
+            <div class="auth-input-wrapper">
+                <label class="auth-label">[ CLAVE DE SEGURIDAD ]</label>
+                <input type="password" placeholder="••••••" class="auth-input" required>
             </div>
 
-            <button type="submit" class="btn-primary mt-4 w-full flex justify-center items-center gap-2">
-                <span>INICIAR SESIÓN</span>
-                <i class="ph-bold ph-caret-right"></i>
+            <button type="submit" class="btn-auth">
+                AUTORIZAR <i class="ph-bold ph-arrow-right"></i>
             </button>
         </form>
-
-        <div class="mt-6 text-center">
-            <a href="#" class="text-xs text-silver hover:text-primary transition-colors">¿Solicitar acceso?</a>
-        </div>
     </div>
 </body>
 </html>

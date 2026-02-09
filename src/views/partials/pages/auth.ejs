@@ -1,36 +1,111 @@
 <section id="page-auth" class="page-section hidden center-content relative">
     <!-- Background Elements -->
     <div class="absolute inset-0 z-0 bg-space-deep flex items-center justify-center overflow-hidden">
-        <div class="w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] animate-pulse-slow"></div>
+        <div class="w-[800px] h-[800px] bg-primary/5 rounded-full blur-[120px] animate-pulse-slow pointer-events-none"></div>
+        <div class="scan-line"></div>
     </div>
 
-    <!-- HUD MODULE -->
-    <div class="hud-module p-10 w-full max-w-sm mx-4 relative z-10 text-center">
-        <!-- Header -->
-        <div class="mb-8">
-            <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4 border border-primary/30 shadow-[0_0_20px_rgba(0,243,255,0.2)]">
-                <i class="ph-duotone ph-fingerprint text-4xl text-primary animate-pulse"></i>
+    <!-- AUTH CONTAINER -->
+    <div class="auth-container relative z-10 w-full flex items-center justify-center p-4 min-h-screen">
+
+        <!-- OBSIDIAN CARD -->
+        <div class="auth-card-premium">
+            
+            <!-- HEADER -->
+            <div class="text-center mb-12">
+                <i class="ph-duotone ph-shield-check text-7xl text-primary animate-pulse mb-6 block mx-auto drop-shadow-[0_0_20px_rgba(0,243,255,0.4)]"></i>
+                <h2 class="text-3xl font-bold tracking-[0.2em] text-white orbitron drop-shadow-md">IDENTIFICACIÓN</h2>
+                <p class="text-xs text-primary/70 font-mono tracking-widest mt-3 uppercase">Protocolo de Seguridad Nivel 5</p>
             </div>
-            <h2 class="orbitron text-2xl text-white tracking-widest">IDENTIFICACIÓN</h2>
-            <p class="text-xs text-primary/60 font-mono tracking-widest mt-1">ACCESO RESTRINGIDO</p>
+
+            <!-- FORM -->
+            <form id="auth-terminal-form" class="space-y-8">
+                
+                <!-- INPUT 1 -->
+                <div class="input-hyper-group">
+                    <input type="text" id="operator-id" class="input-hyper" placeholder="ID DE OPERADOR" required autocomplete="off">
+                    <div class="input-bar"></div>
+                </div>
+
+                <!-- INPUT 2 -->
+                <div class="input-hyper-group">
+                    <input type="password" id="access-code" class="input-hyper" placeholder="CÓDIGO DE ACCESO" required>
+                    <div class="input-bar"></div>
+                </div>
+
+                <!-- ACTION ZONE -->
+                <div class="flex items-center mt-12 gap-6">
+                    
+                    <!-- BIO RADAR -->
+                    <div id="bio-radar" class="bio-radar flex-shrink-0">
+                        <div class="radar-ring"></div>
+                        <i class="ph-duotone ph-fingerprint fingerprint-icon"></i>
+                        <div class="laser-beam"></div>
+                    </div>
+
+                    <!-- BUTTON -->
+                    <button type="submit" id="btn-login" class="btn-hyper">
+                        INICIAR ENLACE
+                    </button>
+                </div>
+
+            </form>
         </div>
 
-        <form id="auth-form" class="space-y-6">
-            <div class="input-group text-left">
-                <label class="text-xs text-gray-500 font-mono ml-1 mb-1 block">ID OPERADOR</label>
-                <input type="text" placeholder="CMDR-001" class="input-deep w-full" value="CMDR-001" readonly />
-            </div>
-            
-            <div class="input-group text-left">
-                <label class="text-xs text-gray-500 font-mono ml-1 mb-1 block">CLAVE DE SEGURIDAD</label>
-                <input type="password" placeholder="******" class="input-deep w-full" value="******" readonly />
-            </div>
-
-            <button type="submit" class="btn-cta w-full mt-6 group">
-                <span class="relative z-10 flex items-center justify-center gap-2">
-                    AUTORIZAR <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                </span>
-            </button>
-        </form>
     </div>
+
+    <!-- SIMULATION SCRIPT -->
+    <script>
+        document.getElementById('auth-terminal-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('btn-login');
+            const radar = document.getElementById('bio-radar');
+            const icon = radar.querySelector('.fingerprint-icon');
+            
+            // 1. Disable & Change Text
+            btn.disabled = true;
+            btn.innerHTML = 'VERIFICANDO...';
+            btn.style.opacity = '0.7';
+            btn.style.cursor = 'wait';
+            
+            // 2. Activate Scanner Animation
+            radar.classList.add('scanning');
+            
+            // 3. Wait 2500ms
+            setTimeout(() => {
+                // 4. Success State
+                radar.classList.remove('scanning');
+                radar.classList.add('success');
+                
+                icon.classList.remove('ph-fingerprint');
+                icon.classList.remove('ph-duotone');
+                icon.className = 'ph-bold ph-check-circle fingerprint-icon'; // Check icon
+                
+                btn.innerHTML = 'ENLACE ESTABLECIDO';
+                btn.style.borderColor = 'var(--c-success)';
+                btn.style.color = 'var(--c-success)';
+                btn.style.boxShadow = '0 0 20px var(--c-success)';
+                btn.style.textShadow = '0 0 10px var(--c-success)';
+                btn.style.background = 'rgba(16, 185, 129, 0.1)';
+                
+                // 5. Execute Logic
+                localStorage.setItem('lumina_auth', 'true');
+                
+                // 6. Redirect
+                setTimeout(() => {
+                    if (window.app && window.app.router) {
+                        console.log('🔗 Establishing Secure Uplink: /setup');
+                        window.app.router.navigate('/setup');
+                    } else {
+                        console.error('❌ Router Uplink Failed: System not initialized.');
+                        // Fallback only if absolutely critical, but requested to remove hash.
+                        // window.location.href = '/setup'; // Force reload if SPA fails?
+                        // For now, logging error as per instructions to be "clean".
+                    }
+                }, 1000);
+                
+            }, 2500);
+        });
+    </script>
 </section>
